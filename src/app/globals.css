@@ -2,7 +2,7 @@
 
 /* Tailwind v4: opt out of OS-preference dark mode and follow the
    `.dark` class that next-themes toggles on <html>. */
-@variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* =====================================================================
    Industrial Engineering Baseline

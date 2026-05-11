@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../api/catalog_models.dart';
 import '../api/rrm_api_client.dart';
+import 'scanner_screen.dart';
 
 // =====================================================================
 // Catalog Screen
@@ -75,6 +76,24 @@ class _CatalogScreenState extends State<CatalogScreen> {
     await _future;
   }
 
+  // ------------------------------------------------------------------
+  // Hardware barcode scan flow
+  // Push the scanner route, await its single-shot result, then inject
+  // the scanned value into the search field. The existing controller
+  // listener already triggers the filter — no extra wiring needed.
+  // ------------------------------------------------------------------
+  Future<void> _openScanner() async {
+    final scanned = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const ScannerScreen()),
+    );
+    if (!mounted) return;
+    if (scanned == null || scanned.isEmpty) return;
+    _searchController.text = scanned;
+    _searchController.selection = TextSelection.fromPosition(
+      TextPosition(offset: scanned.length),
+    );
+  }
+
   List<_Row> _flattenAndFilter(List<Product> products) {
     final q = _query.toLowerCase();
     final out = <_Row>[];
@@ -112,6 +131,11 @@ class _CatalogScreenState extends State<CatalogScreen> {
           ),
         ),
         actions: [
+          IconButton(
+            tooltip: 'Scan barcode',
+            icon: const Icon(Icons.qr_code_scanner, color: _slate700),
+            onPressed: _openScanner,
+          ),
           IconButton(
             tooltip: 'Refresh',
             icon: const Icon(Icons.refresh, color: _slate700),
