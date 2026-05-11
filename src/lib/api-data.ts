@@ -20,7 +20,7 @@ import {
   type Product,
   type ProductVariant,
 } from "@/lib/site-data";
-import { getLiveRfqDashboardData } from "@/lib/rfqs/service";
+import { getLiveOwnerDashboardData } from "@/lib/owner-dashboard/service";
 
 function formatMinimumOrderRange(product: Product) {
   const quantities = product.variants.map((variant) => variant.minimumOrderQuantity);
@@ -103,6 +103,26 @@ export function getProductDetailPayload(slug: string) {
 }
 
 export async function getOwnerDashboardPayload() {
+  const fallbackSummary = {
+    productFamilies: products.length,
+    totalVariants: products.reduce((sum, product) => sum + product.variants.length, 0),
+    totalRawMaterialLines: ownerProductRecords.reduce(
+      (sum, record) => sum + record.rawMaterials.length,
+      0,
+    ),
+    totalCompetitorBenchmarks: ownerProductRecords.reduce(
+      (sum, record) => sum + record.competitorBenchmarks.length,
+      0,
+    ),
+    monthlyInternalCosts: internalCostBuckets.reduce((sum, bucket) => sum + bucket.monthlyUsd, 0),
+    catalogMode: "seeded",
+    costMode: "seeded",
+    importMode: "seeded",
+    latestImportTitle: "Extended CSV import template ready",
+    latestImportDetail:
+      "The import helper now supports owner-only columns for sourcing, process records, QA, and competitor benchmarks.",
+  };
+
   const fallbackPayload = {
     dashboard: ownerDashboard,
     recentRfqs,
@@ -110,22 +130,70 @@ export async function getOwnerDashboardPayload() {
     internalCostBuckets,
     products: products.map(serializeProductDetail),
     ownerProductRecords,
+    summary: fallbackSummary,
   };
 
   try {
-    const liveRfqData = await getLiveRfqDashboardData(recentRfqs.length);
+    const liveDashboardData = await getLiveOwnerDashboardData(
+      recentRfqs.length,
+      keyCustomers.length,
+    );
 
-    if (liveRfqData.pendingRfqs === 0 && liveRfqData.recentRfqs.length === 0) {
+    if (!liveDashboardData) {
       return fallbackPayload;
     }
 
     return {
       ...fallbackPayload,
       dashboard: {
-        ...ownerDashboard,
-        pendingRfqs: ownerDashboard.pendingRfqs + liveRfqData.pendingRfqs,
+        pendingRfqs: liveDashboardData.hasCommercialData
+          ? liveDashboardData.dashboard.pendingRfqs
+          : ownerDashboard.pendingRfqs,
+        activeCustomers: liveDashboardData.hasCommercialData
+          ? liveDashboardData.dashboard.activeCustomers
+          : ownerDashboard.activeCustomers,
+        catalogedVariants: liveDashboardData.hasCatalogData
+          ? liveDashboardData.dashboard.catalogedVariants
+          : ownerDashboard.catalogedVariants,
+        protectedManufacturingRecords: liveDashboardData.hasCatalogData
+          ? liveDashboardData.dashboard.protectedManufacturingRecords
+          : ownerDashboard.protectedManufacturingRecords,
       },
-      recentRfqs: [...liveRfqData.recentRfqs, ...recentRfqs].slice(0, recentRfqs.length),
+      recentRfqs: liveDashboardData.hasCommercialData
+        ? liveDashboardData.recentRfqs
+        : recentRfqs,
+      keyCustomers: liveDashboardData.hasCommercialData
+        ? liveDashboardData.keyCustomers
+        : keyCustomers,
+      internalCostBuckets: liveDashboardData.hasCostData
+        ? liveDashboardData.internalCostBuckets
+        : internalCostBuckets,
+      summary: {
+        productFamilies: liveDashboardData.hasCatalogData
+          ? liveDashboardData.summary.productFamilies
+          : fallbackSummary.productFamilies,
+        totalVariants: liveDashboardData.hasCatalogData
+          ? liveDashboardData.summary.totalVariants
+          : fallbackSummary.totalVariants,
+        totalRawMaterialLines: liveDashboardData.hasCatalogData
+          ? liveDashboardData.summary.totalRawMaterialLines
+          : fallbackSummary.totalRawMaterialLines,
+        totalCompetitorBenchmarks: liveDashboardData.hasCatalogData
+          ? liveDashboardData.summary.totalCompetitorBenchmarks
+          : fallbackSummary.totalCompetitorBenchmarks,
+        monthlyInternalCosts: liveDashboardData.hasCostData
+          ? liveDashboardData.summary.monthlyInternalCosts
+          : fallbackSummary.monthlyInternalCosts,
+        catalogMode: liveDashboardData.hasCatalogData ? "live" : "seeded",
+        costMode: liveDashboardData.hasCostData ? "live" : "seeded",
+        importMode: liveDashboardData.hasImportData ? "live" : "seeded",
+        latestImportTitle: liveDashboardData.hasImportData
+          ? liveDashboardData.summary.latestImportTitle
+          : fallbackSummary.latestImportTitle,
+        latestImportDetail: liveDashboardData.hasImportData
+          ? liveDashboardData.summary.latestImportDetail
+          : fallbackSummary.latestImportDetail,
+      },
     };
   } catch {
     return fallbackPayload;

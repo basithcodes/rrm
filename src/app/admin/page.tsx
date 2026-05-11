@@ -4,20 +4,11 @@ import { getOwnerDashboardPayload } from "@/lib/api-data";
 
 export default async function AdminDashboardPage() {
   const payload = await getOwnerDashboardPayload();
-  const { dashboard: ownerDashboard, internalCostBuckets, keyCustomers, ownerProductRecords, products, recentRfqs } = payload;
-  const totalInternalCosts = internalCostBuckets.reduce(
-    (sum, bucket) => sum + Number(bucket.monthlyUsd),
-    0,
-  );
-  const totalVariantCount = products.reduce((total, product) => total + product.variants.length, 0);
-  const totalRawMaterials = ownerProductRecords.reduce(
-    (total, record) => total + record.rawMaterials.length,
-    0,
-  );
-  const totalCompetitorBenchmarks = ownerProductRecords.reduce(
-    (total, record) => total + record.competitorBenchmarks.length,
-    0,
-  );
+  const { dashboard: ownerDashboard, keyCustomers, recentRfqs, summary } = payload;
+  const totalInternalCosts = Number(summary.monthlyInternalCosts);
+  const totalVariantCount = Number(summary.totalVariants);
+  const totalRawMaterials = Number(summary.totalRawMaterialLines);
+  const totalCompetitorBenchmarks = Number(summary.totalCompetitorBenchmarks);
 
   const adminModules = [
     {
@@ -54,7 +45,7 @@ export default async function AdminDashboardPage() {
       href: "/admin/imports",
       title: "Imports",
       detail: "CSV template, owner-only columns, and normalized import preview for the expanded dataset.",
-      stat: "Extended CSV template",
+      stat: summary.importMode === "live" ? "Latest live batch" : "Extended CSV template",
     },
   ];
 
@@ -127,9 +118,13 @@ export default async function AdminDashboardPage() {
           <div className="mt-6 grid gap-4">
             <article className="admin-deep-card rounded-[1.8rem] p-5">
               <p className="text-xs uppercase tracking-[0.18em] text-white/45">Catalog overview</p>
-              <h3 className="mt-3 text-xl font-semibold text-white">{products.length} products in dummy catalog</h3>
+              <h3 className="mt-3 text-xl font-semibold text-white">
+                {summary.productFamilies} products in {summary.catalogMode === "live" ? "owner catalog" : "seeded catalog"}
+              </h3>
               <p className="mt-3 text-sm leading-7 text-white/65">
-                The product seed layer now includes dimensions, supply formats, technical profiles, and 3D preview metadata.
+                {summary.catalogMode === "live"
+                  ? "Catalog counts now come from Prisma product, variant, manufacturing, and benchmark records."
+                  : "The seeded product layer still backs this workspace until live catalog imports land."}
               </p>
             </article>
             <article className="admin-deep-card rounded-[1.8rem] p-5">
@@ -138,14 +133,16 @@ export default async function AdminDashboardPage() {
                 {formatCurrency(totalInternalCosts, "USD")} monthly owner-only overhead
               </h3>
               <p className="mt-3 text-sm leading-7 text-white/65">
-                Rent, electricity, labor, maintenance, and equipment reserve are now split out into their own cost page.
+                {summary.costMode === "live"
+                  ? "Shown from the latest live internal cost entries grouped by bucket."
+                  : "Using seeded owner cost buckets until live internal cost entries are added."}
               </p>
             </article>
             <article className="admin-deep-card rounded-[1.8rem] p-5">
               <p className="text-xs uppercase tracking-[0.18em] text-white/45">Import status</p>
-              <h3 className="mt-3 text-xl font-semibold text-white">Extended CSV import template ready</h3>
+              <h3 className="mt-3 text-xl font-semibold text-white">{summary.latestImportTitle}</h3>
               <p className="mt-3 text-sm leading-7 text-white/65">
-                The import helper now supports owner-only columns for sourcing, process records, QA, and competitor benchmarks.
+                {summary.latestImportDetail}
               </p>
             </article>
           </div>
@@ -158,33 +155,42 @@ export default async function AdminDashboardPage() {
             Recent RFQ queue
           </p>
           <div className="mt-6 grid gap-4">
-            {recentRfqs.map((rfq, index) => (
-              <article key={rfq.reference} className="admin-deep-card rounded-[1.8rem] p-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
-                      Queue item {index + 1} · {rfq.reference}
-                    </p>
-                    <h3 className="mt-2 text-lg font-semibold text-white">{rfq.company}</h3>
-                    <p className="mt-2 text-sm leading-7 text-white/65">{rfq.requestedProduct}</p>
-                  </div>
-                  <span className="admin-chip">
-                    {rfq.status}
-                  </span>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white/65">
-                    {rfq.market}
-                  </span>
-                  <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white/65">
-                    {rfq.quantity}
-                  </span>
-                  <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white/65">
-                    {rfq.source}
-                  </span>
-                </div>
+            {recentRfqs.length === 0 ? (
+              <article className="admin-deep-card rounded-[1.8rem] p-5">
+                <h3 className="text-lg font-semibold text-white">No live RFQs yet</h3>
+                <p className="mt-3 text-sm leading-7 text-white/65">
+                  The public RFQ channel is live. New submissions will appear here once they reach Prisma.
+                </p>
               </article>
-            ))}
+            ) : (
+              recentRfqs.map((rfq, index) => (
+                <article key={rfq.reference} className="admin-deep-card rounded-[1.8rem] p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
+                        Queue item {index + 1} · {rfq.reference}
+                      </p>
+                      <h3 className="mt-2 text-lg font-semibold text-white">{rfq.company}</h3>
+                      <p className="mt-2 text-sm leading-7 text-white/65">{rfq.requestedProduct}</p>
+                    </div>
+                    <span className="admin-chip">
+                      {rfq.status}
+                    </span>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white/65">
+                      {rfq.market}
+                    </span>
+                    <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white/65">
+                      {rfq.quantity}
+                    </span>
+                    <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white/65">
+                      {rfq.source}
+                    </span>
+                  </div>
+                </article>
+              ))
+            )}
           </div>
         </div>
 
@@ -193,27 +199,36 @@ export default async function AdminDashboardPage() {
             Customer pipeline snapshot
           </p>
           <div className="mt-6 grid gap-4">
-            {keyCustomers.map((customer) => (
-              <article key={customer.company} className="admin-deep-card rounded-[1.8rem] p-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">{customer.company}</h3>
-                    <p className="mt-2 text-sm leading-7 text-white/65">{customer.demand}</p>
-                  </div>
-                  <span className="admin-chip">
-                    {customer.relationship}
-                  </span>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white/65">
-                    {customer.segment}
-                  </span>
-                  <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white/65">
-                    {customer.market}
-                  </span>
-                </div>
+            {keyCustomers.length === 0 ? (
+              <article className="admin-deep-card rounded-[1.8rem] p-5">
+                <h3 className="text-lg font-semibold text-white">No live customers yet</h3>
+                <p className="mt-3 text-sm leading-7 text-white/65">
+                  Customer records will show here once RFQs or owner-side entries create them in Prisma.
+                </p>
               </article>
-            ))}
+            ) : (
+              keyCustomers.map((customer) => (
+                <article key={customer.company} className="admin-deep-card rounded-[1.8rem] p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-white">{customer.company}</h3>
+                      <p className="mt-2 text-sm leading-7 text-white/65">{customer.demand}</p>
+                    </div>
+                    <span className="admin-chip">
+                      {customer.relationship}
+                    </span>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white/65">
+                      {customer.segment}
+                    </span>
+                    <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white/65">
+                      {customer.market}
+                    </span>
+                  </div>
+                </article>
+              ))
+            )}
           </div>
         </div>
       </section>

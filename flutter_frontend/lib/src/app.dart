@@ -4093,22 +4093,44 @@ class AdminDashboardBody extends StatelessWidget {
     final products = asJsonMapList(workspace['products']);
     final internalCostBuckets = asJsonMapList(workspace['internalCostBuckets']);
     final ownerRecords = asJsonMapList(workspace['ownerProductRecords']);
-    final totalCosts = _sumField(internalCostBuckets, 'monthlyUsd');
-    final totalBenchmarks = ownerRecords.fold<int>(
-      0,
-      (sum, record) => sum + asJsonMapList(record['competitorBenchmarks']).length,
+    final summary = asJsonMap(workspace['summary']);
+    final totalCosts = readDouble(
+      summary,
+      'monthlyInternalCosts',
+      fallback: _sumField(internalCostBuckets, 'monthlyUsd'),
     );
-    final totalRawMaterials = ownerRecords.fold<int>(
-      0,
-      (sum, record) => sum + asJsonMapList(record['rawMaterials']).length,
+    final totalBenchmarks = readInt(
+      summary,
+      'totalCompetitorBenchmarks',
+      fallback: ownerRecords.fold<int>(
+        0,
+        (sum, record) => sum + asJsonMapList(record['competitorBenchmarks']).length,
+      ),
     );
+    final totalRawMaterials = readInt(
+      summary,
+      'totalRawMaterialLines',
+      fallback: ownerRecords.fold<int>(
+        0,
+        (sum, record) => sum + asJsonMapList(record['rawMaterials']).length,
+      ),
+    );
+    final totalVariants = readInt(
+      summary,
+      'totalVariants',
+      fallback: products.fold<int>(0, (sum, product) => sum + asJsonMapList(product['variants']).length),
+    );
+    final productFamilies = readInt(summary, 'productFamilies', fallback: products.length);
+    final catalogMode = readString(summary, 'catalogMode', fallback: 'seeded');
+    final costMode = readString(summary, 'costMode', fallback: 'seeded');
+    final importMode = readString(summary, 'importMode', fallback: 'seeded');
 
     final modules = <JsonMap>[
       <String, dynamic>{
         'route': '/admin/pricing',
         'title': 'Pricing',
         'detail': 'Owner-only regional prices, variant matrices, and price-book notes.',
-        'stat': '${products.fold<int>(0, (sum, product) => sum + asJsonMapList(product['variants']).length)} variant prices',
+        'stat': '$totalVariants variant prices',
       },
       <String, dynamic>{
         'route': '/admin/costs',
@@ -4138,7 +4160,7 @@ class AdminDashboardBody extends StatelessWidget {
         'route': '/admin/imports',
         'title': 'Imports',
         'detail': 'CSV template, validation preview, and Prisma-backed import actions.',
-        'stat': 'Extended CSV template',
+        'stat': importMode == 'live' ? 'Latest live batch' : 'Extended CSV template',
       },
     ];
 
@@ -4276,22 +4298,30 @@ class AdminDashboardBody extends StatelessWidget {
                 children: <Widget>[
                   const SectionHeading(
                     eyebrow: 'Workspace summary',
-                    title: 'Dummy data depth carried into the migrated admin surface.',
+                    title: 'The owner dashboard now switches between seeded and live workspace signals.',
                     dark: true,
                   ),
                   const SizedBox(height: 18),
                   ...<JsonMap>[
                     <String, dynamic>{
-                      'title': '${products.length} products in dummy catalog',
-                      'detail': 'The product seed layer now includes dimensions, supply formats, technical profiles, and 3D preview metadata.',
+                      'title': '$productFamilies products in ${catalogMode == 'live' ? 'owner catalog' : 'seeded catalog'}',
+                      'detail': catalogMode == 'live'
+                          ? 'Catalog counts now come from Prisma product, variant, manufacturing, and benchmark records.'
+                          : 'The seeded product layer still backs this workspace until live catalog imports land.',
                     },
                     <String, dynamic>{
                       'title': '${_formatCurrency(totalCosts, 'USD')} monthly owner-only overhead',
-                      'detail': 'Rent, electricity, labor, maintenance, and equipment reserve stay split out into dedicated owner views.',
+                      'detail': costMode == 'live'
+                          ? 'Shown from the latest live internal cost entries grouped by bucket.'
+                          : 'Using seeded owner cost buckets until live internal cost entries are added.',
                     },
                     <String, dynamic>{
-                      'title': 'Extended CSV import template ready',
-                      'detail': 'The import workflow supports owner-only columns for sourcing, process records, QA, and competitor benchmarks.',
+                      'title': readString(summary, 'latestImportTitle', fallback: 'Extended CSV import template ready'),
+                      'detail': readString(
+                        summary,
+                        'latestImportDetail',
+                        fallback: 'The import workflow supports owner-only columns for sourcing, process records, QA, and competitor benchmarks.',
+                      ),
                     },
                   ].map(
                     (item) => Padding(
@@ -4356,40 +4386,60 @@ class AdminDashboardBody extends StatelessWidget {
                     dark: true,
                   ),
                   const SizedBox(height: 16),
-                  ...recentRfqs.map(
-                    (rfq) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: SurfacePanel(
-                        dark: true,
-                        padding: const EdgeInsets.all(18),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              '${readString(rfq, 'reference')} · ${readString(rfq, 'company')}',
-                              style: const TextStyle(color: _inkInverse, fontWeight: FontWeight.w800),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              readString(rfq, 'requestedProduct'),
-                              style: TextStyle(color: Colors.white.withOpacity(0.72), height: 1.5),
-                            ),
-                            const SizedBox(height: 12),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: <Widget>[
-                                PillChip(label: readString(rfq, 'market'), dark: true),
-                                PillChip(label: readString(rfq, 'quantity'), dark: true),
-                                PillChip(label: readString(rfq, 'source'), dark: true),
-                                PillChip(label: readString(rfq, 'status'), dark: true),
-                              ],
-                            ),
-                          ],
+                  if (recentRfqs.isEmpty)
+                    SurfacePanel(
+                      dark: true,
+                      padding: const EdgeInsets.all(18),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            'No live RFQs yet',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(color: _inkInverse),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            'The public RFQ channel is live. New submissions will appear here once they reach Prisma.',
+                            style: TextStyle(color: Colors.white.withOpacity(0.72), height: 1.5),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    ...recentRfqs.map(
+                      (rfq) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: SurfacePanel(
+                          dark: true,
+                          padding: const EdgeInsets.all(18),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                '${readString(rfq, 'reference')} · ${readString(rfq, 'company')}',
+                                style: const TextStyle(color: _inkInverse, fontWeight: FontWeight.w800),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                readString(rfq, 'requestedProduct'),
+                                style: TextStyle(color: Colors.white.withOpacity(0.72), height: 1.5),
+                              ),
+                              const SizedBox(height: 12),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: <Widget>[
+                                  PillChip(label: readString(rfq, 'market'), dark: true),
+                                  PillChip(label: readString(rfq, 'quantity'), dark: true),
+                                  PillChip(label: readString(rfq, 'source'), dark: true),
+                                  PillChip(label: readString(rfq, 'status'), dark: true),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
                 ],
               ),
             );
@@ -4405,39 +4455,59 @@ class AdminDashboardBody extends StatelessWidget {
                     dark: true,
                   ),
                   const SizedBox(height: 16),
-                  ...keyCustomers.map(
-                    (customer) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: SurfacePanel(
-                        dark: true,
-                        padding: const EdgeInsets.all(18),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              readString(customer, 'company'),
-                              style: const TextStyle(color: _inkInverse, fontWeight: FontWeight.w800),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              readString(customer, 'demand'),
-                              style: TextStyle(color: Colors.white.withOpacity(0.72), height: 1.5),
-                            ),
-                            const SizedBox(height: 12),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: <Widget>[
-                                PillChip(label: readString(customer, 'segment'), dark: true),
-                                PillChip(label: readString(customer, 'market'), dark: true),
-                                PillChip(label: readString(customer, 'relationship'), dark: true),
-                              ],
-                            ),
-                          ],
+                  if (keyCustomers.isEmpty)
+                    SurfacePanel(
+                      dark: true,
+                      padding: const EdgeInsets.all(18),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            'No live customers yet',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(color: _inkInverse),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            'Customer records will show here once RFQs or owner-side entries create them in Prisma.',
+                            style: TextStyle(color: Colors.white.withOpacity(0.72), height: 1.5),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    ...keyCustomers.map(
+                      (customer) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: SurfacePanel(
+                          dark: true,
+                          padding: const EdgeInsets.all(18),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                readString(customer, 'company'),
+                                style: const TextStyle(color: _inkInverse, fontWeight: FontWeight.w800),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                readString(customer, 'demand'),
+                                style: TextStyle(color: Colors.white.withOpacity(0.72), height: 1.5),
+                              ),
+                              const SizedBox(height: 12),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: <Widget>[
+                                  PillChip(label: readString(customer, 'segment'), dark: true),
+                                  PillChip(label: readString(customer, 'market'), dark: true),
+                                  PillChip(label: readString(customer, 'relationship'), dark: true),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
                 ],
               ),
             );
