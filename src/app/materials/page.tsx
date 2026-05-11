@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MarketingLayout } from "@/components/marketing-layout";
+import { PublicRouteSupport } from "@/components/public-route-support";
 import { formatCountLabel, getMaterialSummaries } from "@/lib/public-site";
 
 const selectionRules = [
@@ -37,17 +38,15 @@ export default function MaterialsPage() {
               exact product code. Review the material family first, then jump into the filtered
               catalog once the compound direction is clear.
             </p>
-            <div className="mt-5 flex flex-wrap gap-2 text-sm font-semibold text-accent-deep">
-              <Link href="/products" className="rounded-full border border-line bg-white/75 px-4 py-2">
-                Open catalog
-              </Link>
-              <Link href="/industries" className="rounded-full border border-line bg-white/75 px-4 py-2">
-                Browse industries
-              </Link>
-              <Link href="/rfq" className="rounded-full border border-line bg-white/75 px-4 py-2">
-                Send RFQ
-              </Link>
-            </div>
+            <PublicRouteSupport
+              currentHref="/materials"
+              title="Next route options"
+              description="Once the compound family is clear, move to the route that narrows by product family, application, or buying handoff."
+              actions={[
+                { href: "/products", label: "Open catalog" },
+                { href: "/rfq", label: "Send material-based RFQ", variant: "primary" },
+              ]}
+            />
           </div>
 
           <div className="market-card-dark rounded-[2.8rem] p-6 md:p-8">

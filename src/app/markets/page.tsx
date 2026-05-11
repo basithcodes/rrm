@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MarketingLayout } from "@/components/marketing-layout";
+import { PublicRouteSupport } from "@/components/public-route-support";
 import { marketProfiles } from "@/lib/public-site";
 
 const commercialRules = [
@@ -22,17 +23,15 @@ export default function MarketsPage() {
               This route is for buyers who need to understand GCC service coverage, buying rhythm,
               and the right entry path for their market before they send a structured request.
             </p>
-            <div className="mt-5 flex flex-wrap gap-2 text-sm font-semibold text-accent-deep">
-              <Link href="/products" className="rounded-full border border-line bg-white/75 px-4 py-2">
-                Browse catalog
-              </Link>
-              <Link href="/industries" className="rounded-full border border-line bg-white/75 px-4 py-2">
-                Review industries
-              </Link>
-              <Link href="/rfq" className="rounded-full border border-line bg-white/75 px-4 py-2">
-                Start RFQ
-              </Link>
-            </div>
+            <PublicRouteSupport
+              currentHref="/markets"
+              title="Market handoff routes"
+              description="Once the country context is clear, move to the route that resolves technical fit or starts the quote conversation."
+              actions={[
+                { href: "/products", label: "Browse catalog" },
+                { href: "/rfq", label: "Start RFQ", variant: "primary" },
+              ]}
+            />
           </div>
 
           <div className="market-card-dark rounded-[2.8rem] p-6 md:p-8">

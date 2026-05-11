@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { MarketingLayout } from "@/components/marketing-layout";
+import { PublicRouteSupport } from "@/components/public-route-support";
 import { capabilityTracks } from "@/lib/public-site";
 import { qualityPillars } from "@/lib/site-data";
 
@@ -33,17 +33,15 @@ export default function CapabilitiesPage() {
               line between public discovery, owner-only controls, and the data workflows that keep a
               large catalog readable over time.
             </p>
-            <div className="mt-5 flex flex-wrap gap-2 text-sm font-semibold text-accent-deep">
-              <Link href="/products" className="rounded-full border border-line bg-white/75 px-4 py-2">
-                Catalog
-              </Link>
-              <Link href="/markets" className="rounded-full border border-line bg-white/75 px-4 py-2">
-                Markets
-              </Link>
-              <Link href="/owner-access" className="rounded-full border border-line bg-white/75 px-4 py-2">
-                Owner access
-              </Link>
-            </div>
+            <PublicRouteSupport
+              currentHref="/capabilities"
+              title="Follow the right branch"
+              description="This page explains the platform. The next move should be the route that actually solves the buyer or operator task in front of you."
+              actions={[
+                { href: "/products", label: "Open catalog" },
+                { href: "/owner-access", label: "Owner access", variant: "primary" },
+              ]}
+            />
           </div>
 
           <div className="market-card-dark rounded-[2.8rem] p-6 md:p-8">

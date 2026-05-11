@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MarketingLayout } from "@/components/marketing-layout";
+import { PublicRouteSupport } from "@/components/public-route-support";
 import { customerSegments, industrySolutions } from "@/lib/site-data";
 
 export default function IndustriesPage() {
@@ -17,20 +18,15 @@ export default function IndustriesPage() {
               environment, challenge, and likely product families so buyers can move from problem
               context to the right product page or RFQ without scanning unrelated details.
             </p>
-            <div className="mt-5 flex flex-wrap gap-2 text-sm font-semibold text-accent-deep">
-              <Link href="/products" className="rounded-full border border-line bg-white/75 px-4 py-2">
-                Open catalog
-              </Link>
-              <Link href="/materials" className="rounded-full border border-line bg-white/75 px-4 py-2">
-                Compare materials
-              </Link>
-              <Link href="/markets" className="rounded-full border border-line bg-white/75 px-4 py-2">
-                Review markets
-              </Link>
-              <Link href="/rfq" className="rounded-full border border-line bg-white/75 px-4 py-2">
-                Send RFQ
-              </Link>
-            </div>
+            <PublicRouteSupport
+              currentHref="/industries"
+              title="Route options"
+              description="If the operating environment is only part of the answer, jump to the route that resolves the next decision more directly."
+              actions={[
+                { href: "/products", label: "Browse matching products" },
+                { href: "/rfq", label: "Request application support", variant: "primary" },
+              ]}
+            />
           </div>
 
           <div className="market-card-dark rounded-[2.8rem] p-6 md:p-8">
