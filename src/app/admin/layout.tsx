@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { signOutAction } from "@/app/owner-access/actions";
 import { requireOwnerSession } from "@/lib/auth";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 // =====================================================================
 // Industrial Admin Shell
@@ -68,12 +69,12 @@ export default async function AdminLayout({
   await requireOwnerSession();
 
   return (
-    <div className="min-h-screen w-full bg-[#F7FAFC] text-[#1A202C]">
+    <div className="min-h-screen w-full bg-[var(--color-bg)] text-[var(--color-fg)]">
       {/* ============================================================
           FIXED SIDEBAR — h-screen, never scrolls the body. The inner
           <nav> handles its own overflow if section content grows.
           ============================================================ */}
-      <aside className="fixed left-0 top-0 z-40 flex h-screen w-60 flex-col border-r border-[#CBD5E0] bg-white">
+      <aside className="fixed left-0 top-0 z-40 flex h-screen w-60 flex-col border-r border-[#CBD5E0] bg-white dark:border-slate-800 dark:bg-slate-950">
         <div className="flex items-center gap-2 border-b border-[#CBD5E0] px-3 py-2">
           <span className="inline-flex h-7 w-7 items-center justify-center rounded bg-[#1A202C] text-[10px] font-bold tracking-wider text-white">
             RRM
@@ -113,13 +114,14 @@ export default async function AdminLayout({
           ))}
         </nav>
 
-        <form action={signOutAction} className="border-t border-[#CBD5E0] p-2">
+        <form action={signOutAction} className="flex items-center gap-2 border-t border-[#CBD5E0] p-2 dark:border-slate-800">
           <button
             type="submit"
-            className="block w-full rounded border border-[#CBD5E0] bg-white px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-[#1A202C] hover:bg-[#EDF2F7]"
+            className="block flex-1 rounded border border-[#CBD5E0] bg-white px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-[#1A202C] hover:bg-[#EDF2F7] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
           >
             Sign out
           </button>
+          <ThemeToggle />
         </form>
       </aside>
 

@@ -21,6 +21,10 @@ export type QuoteItem = {
   variantId: string; // Prisma ProductVariant.id (or local slug fallback)
   sku: string;
   name: string;
+  // Compound / material the variant is made of. Optional because some
+  // older add() call sites don't supply it (the cart still works
+  // without it; the field renders as "—").
+  material?: string | null;
   basePriceUsd: number | null;
   quantity: number;
 };
@@ -79,6 +83,7 @@ export function QuoteCartProvider({ children }: { children: React.ReactNode }) {
           variantId: incoming.variantId,
           sku: incoming.sku,
           name: incoming.name,
+          material: incoming.material ?? null,
           basePriceUsd: incoming.basePriceUsd,
           quantity: incoming.quantity ?? 1,
         },

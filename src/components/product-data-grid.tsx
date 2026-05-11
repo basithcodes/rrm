@@ -252,6 +252,7 @@ export function ProductDataGrid({
                               variantId: firstVariant?.code ?? p.slug,
                               sku,
                               name: p.name,
+                              material: p.material,
                               basePriceUsd: firstVariant?.priceBook?.USD ?? null,
                             })
                       }

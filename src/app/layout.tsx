@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, IBM_Plex_Mono, Sora } from "next/font/google";
 import { QuoteCartProvider } from "@/lib/quote-cart";
+import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 const sora = Sora({
@@ -34,10 +35,15 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
+      suppressHydrationWarning
       className={`${sora.variable} ${fraunces.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-white text-slate-900">
-        <QuoteCartProvider>{children}</QuoteCartProvider>
+      {/* `bg-[var(...)]` + `text-[var(...)]` keeps the body in sync with
+          the active theme via the CSS variables defined in globals.css. */}
+      <body className="min-h-full flex flex-col bg-[var(--color-bg)] text-[var(--color-fg)]">
+        <ThemeProvider>
+          <QuoteCartProvider>{children}</QuoteCartProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

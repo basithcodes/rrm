@@ -11,6 +11,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { publicNavigation } from "@/lib/public-site";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 function isRouteActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
@@ -25,7 +26,7 @@ export function SiteHeader() {
   ];
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-2">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-2">
@@ -66,7 +67,7 @@ export function SiteHeader() {
         <div className="flex items-center gap-2">
           <Link
             href="/owner-access"
-            className="rounded-sm border border-slate-300 bg-white px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-900 transition-colors hover:border-slate-900"
+            className="rounded-sm border border-slate-300 bg-white px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-900 transition-colors hover:border-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-slate-100"
           >
             Owner
           </Link>
@@ -76,6 +77,7 @@ export function SiteHeader() {
           >
             Request Quote
           </Link>
+          <ThemeToggle />
         </div>
       </div>
 

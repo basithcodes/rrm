@@ -144,17 +144,17 @@ export function PimCatalog({ products }: { products: Product[] }) {
   const pageRows = filtered.slice(startIndex, endIndex);
 
   return (
-    <div className="flex h-screen w-full bg-[#F7FAFC] text-[#1A202C]">
+    <div className="flex h-screen w-full bg-[var(--color-surface)] text-[var(--color-fg)]">
       {/* ---------------- Left sidebar: accordion facets ---------------- */}
-      <aside className="flex h-full w-72 shrink-0 flex-col border-r border-[#CBD5E0] bg-white">
-        <div className="flex items-center justify-between border-b border-[#CBD5E0] px-4 py-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#1A202C]">
+      <aside className="flex h-full w-72 shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-bg)]">
+        <div className="flex items-center justify-between border-b border-[var(--color-border)] px-4 py-3">
+          <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-fg)]">
             Filters
           </span>
           <button
             type="button"
             onClick={clearFilters}
-            className="text-xs font-bold uppercase tracking-wide text-[#2F855A] hover:underline"
+            className="text-xs font-bold uppercase tracking-wide text-[var(--color-accent)] hover:underline"
           >
             Clear
           </button>
@@ -214,7 +214,7 @@ export function PimCatalog({ products }: { products: Product[] }) {
 
       {/* ---------------- Main: dense data grid ---------------- */}
       <main className="flex h-full flex-1 flex-col overflow-hidden">
-        <div className="flex items-center gap-3 border-b border-[#CBD5E0] bg-white px-4 py-3">
+        <div className="flex items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3">
           <input
             type="search"
             value={search}
@@ -223,12 +223,12 @@ export function PimCatalog({ products }: { products: Product[] }) {
               setPage(1);
             }}
             placeholder="Search by Part #, Material, ID/OD, application…"
-            className="h-9 flex-1 rounded border border-[#CBD5E0] px-3 text-sm placeholder-[#4A5568] focus:border-[#2F855A] focus:outline-none focus:ring-1 focus:ring-[#2F855A]"
+            className="h-9 flex-1 rounded border border-[var(--color-border)] px-3 text-sm placeholder-[var(--color-text-muted)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
           />
           <select
             value={currency}
             onChange={(e) => setCurrency(e.target.value as Currency)}
-            className="h-9 rounded border border-[#CBD5E0] bg-white px-2 text-sm font-bold"
+            className="h-9 rounded border border-[var(--color-border)] bg-[var(--color-bg)] px-2 text-sm font-bold"
           >
             {CURRENCIES.map((c) => (
               <option key={c} value={c}>
@@ -236,40 +236,40 @@ export function PimCatalog({ products }: { products: Product[] }) {
               </option>
             ))}
           </select>
-          <span className="text-xs font-semibold text-[#4A5568]">
+          <span className="text-xs font-semibold text-[var(--color-text-muted)]">
             {filtered.length} of {products.length}
           </span>
           {cart.count > 0 && (
             <Link
               href="/quote"
-              className="rounded bg-[#2F855A] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white hover:bg-[#276749]"
+              className="rounded bg-[var(--color-accent)] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white hover:bg-[var(--color-accent-deep)]"
             >
               Quote ({cart.count}) →
             </Link>
           )}
         </div>
 
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 min-h-0 overflow-auto">
           <table className="w-full border-collapse text-sm">
-            <thead className="sticky top-0 z-10 bg-[#EDF2F7] text-[11px] font-bold uppercase tracking-wide text-[#1A202C]">
+            <thead className="sticky top-0 z-10 bg-[var(--color-surface)] text-[11px] font-bold uppercase tracking-wide text-[var(--color-fg)]">
               <tr>
-                <th className="border-b border-[#CBD5E0] p-2 text-left">SKU</th>
-                <th className="border-b border-[#CBD5E0] p-2 text-left">Thumb</th>
-                <th className="border-b border-[#CBD5E0] p-2 text-left">Name</th>
-                <th className="border-b border-[#CBD5E0] p-2 text-left">Material</th>
-                <th className="border-b border-[#CBD5E0] p-2 text-left">Hardness</th>
-                <th className="border-b border-[#CBD5E0] p-2 text-left">Temp Range</th>
-                <th className="border-b border-[#CBD5E0] p-2 text-left">Pressure</th>
-                <th className="border-b border-[#CBD5E0] p-2 text-left">Dimensions</th>
-                <th className="border-b border-[#CBD5E0] p-2 text-left">Variants</th>
-                <th className="border-b border-[#CBD5E0] p-2 text-right">Price</th>
-                <th className="border-b border-[#CBD5E0] p-2 text-left">Action</th>
+                <th className="border-b border-[var(--color-border)] p-2 text-left">SKU</th>
+                <th className="border-b border-[var(--color-border)] p-2 text-left">Thumb</th>
+                <th className="border-b border-[var(--color-border)] p-2 text-left">Name</th>
+                <th className="border-b border-[var(--color-border)] p-2 text-left">Material</th>
+                <th className="border-b border-[var(--color-border)] p-2 text-left">Hardness</th>
+                <th className="border-b border-[var(--color-border)] p-2 text-left">Temp Range</th>
+                <th className="border-b border-[var(--color-border)] p-2 text-left">Pressure</th>
+                <th className="border-b border-[var(--color-border)] p-2 text-left">Dimensions</th>
+                <th className="border-b border-[var(--color-border)] p-2 text-left">Variants</th>
+                <th className="border-b border-[var(--color-border)] p-2 text-right">Price</th>
+                <th className="border-b border-[var(--color-border)] p-2 text-left">Action</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={11} className="p-6 text-center text-sm text-[#4A5568]">
+                  <td colSpan={11} className="p-6 text-center text-sm text-[var(--color-text-muted)]">
                     No products match the current filters.
                   </td>
                 </tr>
@@ -282,13 +282,13 @@ export function PimCatalog({ products }: { products: Product[] }) {
                 return (
                   <tr
                     key={p.slug}
-                    className="border-b border-[#CBD5E0] odd:bg-white even:bg-[#F7FAFC] hover:bg-[#EDF2F7]"
+                    className="border-b border-[var(--color-border)] odd:bg-[var(--color-bg)] even:bg-[var(--color-surface)] hover:bg-[var(--color-surface)]"
                   >
                     <td className="p-2 font-bold">{sku}</td>
                     <td className="p-2">
                       <Link
                         href={`/products/${p.slug}`}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded border border-[#CBD5E0] bg-[#EDF2F7] text-[#1A202C]"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-fg)]"
                         title="View 3D"
                         aria-label={`View 3D model for ${p.name}`}
                       >
@@ -298,21 +298,21 @@ export function PimCatalog({ products }: { products: Product[] }) {
                     <td className="p-2">
                       <Link
                         href={`/products/${p.slug}`}
-                        className="font-semibold text-[#276749] underline-offset-2 hover:underline"
+                        className="font-semibold text-[var(--color-accent-deep)] underline-offset-2 hover:underline"
                       >
                         {p.name}
                       </Link>
-                      <div className="text-xs text-[#4A5568]">{p.category}</div>
+                      <div className="text-xs text-[var(--color-text-muted)]">{p.category}</div>
                     </td>
                     <td className="p-2">{p.material}</td>
                     <td className="p-2">{pickKeySpec(p, ["hardness", "shore", "durometer"])}</td>
                     <td className="p-2">{pickKeySpec(p, ["temp"])}</td>
                     <td className="p-2">{pickKeySpec(p, ["pressure"])}</td>
-                    <td className="p-2 text-[#4A5568]">{dimensionSummary(p)}</td>
+                    <td className="p-2 text-[var(--color-text-muted)]">{dimensionSummary(p)}</td>
                     <td className="p-2">
                       <Link
                         href={`/products/${p.slug}`}
-                        className="font-semibold text-[#276749] underline-offset-2 hover:underline"
+                        className="font-semibold text-[var(--color-accent-deep)] underline-offset-2 hover:underline"
                       >
                         See Variants [{p.variants.length}]
                       </Link>
@@ -330,13 +330,14 @@ export function PimCatalog({ products }: { products: Product[] }) {
                                 variantId: firstVariant?.code ?? p.slug,
                                 sku,
                                 name: p.name,
+                                material: p.material,
                                 basePriceUsd: firstVariant?.priceBook?.USD ?? null,
                               })
                         }
                         className={
                           inQuote
-                            ? "rounded border border-[#2F855A] px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-[#2F855A]"
-                            : "rounded bg-[#2F855A] px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-white hover:bg-[#276749]"
+                            ? "rounded border border-[var(--color-accent)] px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-[var(--color-accent)]"
+                            : "rounded bg-[var(--color-accent)] px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-white hover:bg-[var(--color-accent-deep)]"
                         }
                       >
                         {inQuote ? "✓ In Quote" : "Add to Quote"}
@@ -350,12 +351,12 @@ export function PimCatalog({ products }: { products: Product[] }) {
         </div>
 
         {/* ---------------- Pagination footer ---------------- */}
-        <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200 bg-white">
+        <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--color-border)] bg-[var(--color-bg)]">
           {/* Left — row density */}
           <div className="flex items-center gap-2">
             <label
               htmlFor="pim-page-size"
-              className="font-mono text-xs text-slate-500 uppercase tracking-wider"
+              className="font-mono text-xs text-[var(--color-text-muted)] uppercase tracking-wider"
             >
               Rows per page:
             </label>
@@ -366,7 +367,7 @@ export function PimCatalog({ products }: { products: Product[] }) {
                 setPageSize(Number(e.target.value) as PageSize);
                 setPage(1);
               }}
-              className="border border-slate-200 rounded-sm text-xs font-mono px-2 py-1 bg-white text-slate-700"
+              className="border border-[var(--color-border)] rounded-sm text-xs font-mono px-2 py-1 bg-[var(--color-bg)] text-[var(--color-fg)]"
             >
               {PAGE_SIZE_OPTIONS.map((size) => (
                 <option key={size} value={size}>
@@ -377,7 +378,7 @@ export function PimCatalog({ products }: { products: Product[] }) {
           </div>
 
           {/* Center — data state */}
-          <p className="font-mono text-xs text-slate-700 uppercase tracking-wider">
+          <p className="font-mono text-xs text-[var(--color-fg)] uppercase tracking-wider">
             {totalCount === 0
               ? "No products match"
               : `Showing ${startIndex + 1} – ${endIndex} of ${totalCount} products`}
@@ -385,14 +386,14 @@ export function PimCatalog({ products }: { products: Product[] }) {
 
           {/* Right — nav */}
           <div className="flex items-center gap-2">
-            <span className="font-mono text-xs text-slate-500 uppercase tracking-wider">
+            <span className="font-mono text-xs text-[var(--color-text-muted)] uppercase tracking-wider">
               Page {currentPage} / {pageCount}
             </span>
             <button
               type="button"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={currentPage <= 1}
-              className="px-3 py-1 text-xs font-mono uppercase tracking-wider border border-slate-200 rounded-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1 text-xs font-mono uppercase tracking-wider border border-[var(--color-border)] rounded-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-fg)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ← Prev
             </button>
@@ -400,7 +401,7 @@ export function PimCatalog({ products }: { products: Product[] }) {
               type="button"
               onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
               disabled={currentPage >= pageCount}
-              className="px-3 py-1 text-xs font-mono uppercase tracking-wider border border-slate-200 rounded-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1 text-xs font-mono uppercase tracking-wider border border-[var(--color-border)] rounded-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-fg)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next →
             </button>
@@ -425,13 +426,13 @@ function FacetAccordion({
   return (
     <details
       open={defaultOpen}
-      className="group border-b border-[#CBD5E0] open:bg-white"
+      className="group border-b border-[var(--color-border)] open:bg-[var(--color-bg)]"
     >
-      <summary className="flex cursor-pointer items-center justify-between px-4 py-3 text-xs font-bold uppercase tracking-wide text-[#1A202C] hover:bg-[#F7FAFC]">
+      <summary className="flex cursor-pointer items-center justify-between px-4 py-3 text-xs font-bold uppercase tracking-wide text-[var(--color-fg)] hover:bg-[var(--color-surface)]">
         <span>
-          {title} <span className="ml-1 font-normal text-[#4A5568]">({count})</span>
+          {title} <span className="ml-1 font-normal text-[var(--color-text-muted)]">({count})</span>
         </span>
-        <span className="text-[#4A5568] transition-transform group-open:rotate-90">›</span>
+        <span className="text-[var(--color-text-muted)] transition-transform group-open:rotate-90">›</span>
       </summary>
       <div className="px-4 pb-3 pt-1">{children}</div>
     </details>
@@ -448,14 +449,14 @@ function FacetRadio({
   onChange: () => void;
 }) {
   return (
-    <label className="flex cursor-pointer items-center gap-2 py-1 text-sm hover:text-[#1A202C]">
+    <label className="flex cursor-pointer items-center gap-2 py-1 text-sm hover:text-[var(--color-fg)]">
       <input
         type="radio"
         checked={checked}
         onChange={onChange}
-        className="h-3.5 w-3.5 accent-[#2F855A]"
+        className="h-3.5 w-3.5 accent-[var(--color-accent)]"
       />
-      <span className={checked ? "font-semibold text-[#1A202C]" : "text-[#4A5568]"}>{label}</span>
+      <span className={checked ? "font-semibold text-[var(--color-fg)]" : "text-[var(--color-text-muted)]"}>{label}</span>
     </label>
   );
 }
@@ -470,14 +471,14 @@ function FacetCheckbox({
   onChange: () => void;
 }) {
   return (
-    <label className="flex cursor-pointer items-center gap-2 py-1 text-sm hover:text-[#1A202C]">
+    <label className="flex cursor-pointer items-center gap-2 py-1 text-sm hover:text-[var(--color-fg)]">
       <input
         type="checkbox"
         checked={checked}
         onChange={onChange}
-        className="h-3.5 w-3.5 accent-[#2F855A]"
+        className="h-3.5 w-3.5 accent-[var(--color-accent)]"
       />
-      <span className={checked ? "font-semibold text-[#1A202C]" : "text-[#4A5568]"}>{label}</span>
+      <span className={checked ? "font-semibold text-[var(--color-fg)]" : "text-[var(--color-text-muted)]"}>{label}</span>
     </label>
   );
 }

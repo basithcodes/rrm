@@ -1,5 +1,15 @@
 "use client";
 
+// =====================================================================
+// /quote — RFQ Cart + Buyer Form
+// ---------------------------------------------------------------------
+// Industrial checkout for a factory, not a contact form for a startup.
+//   * Top half  → dense Quote Cart data table (SKU / Name / Material /
+//                  Qty input / Remove).
+//   * Bottom    → strict 2-col mono form with the buyer's details.
+//   * CTA       → single sharp emerald "SUBMIT OFFICIAL RFQ" bar.
+// =====================================================================
+
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState, useTransition } from "react";
@@ -14,9 +24,11 @@ const MARKETS = [
   { value: "QATAR", label: "Qatar" },
 ] as const;
 
+const INPUT_CLASS =
+  "w-full p-2 text-sm font-mono border border-slate-300 rounded-sm bg-white text-slate-900 focus:border-emerald-600 focus:outline-none";
+
 export default function QuotePage() {
-  // useSearchParams() requires a Suspense boundary during static export
-  // (Next.js bails out of CSR otherwise). Wrap the real client form here.
+  // useSearchParams() requires a Suspense boundary during static export.
   return (
     <Suspense fallback={null}>
       <QuotePageInner />
@@ -32,8 +44,7 @@ function QuotePageInner() {
   const [error, setError] = useState<string | null>(null);
 
   // Optional URL prefill — e.g. /quote?note=Custom%20engineering%20drawing
-  // attached. Lets other pages (Capabilities, Materials, etc.) deep-link
-  // into the RFQ flow with operational context already filled in.
+  // from the Capabilities page deep-link.
   const prefilledNote = searchParams.get("note") ?? "";
 
   const subtotal = cart.items.reduce(
@@ -81,55 +92,56 @@ function QuotePageInner() {
   }
 
   return (
-    <main className="min-h-screen w-full bg-[#F7FAFC]">
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <header className="mb-6 flex items-center justify-between">
+    <main className="min-h-screen w-full bg-white text-slate-900">
+      <div className="mx-auto max-w-6xl px-4 py-4">
+        {/* ── Header strip ────────────────────────────────────── */}
+        <header className="mb-3 flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-2">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#4A5568]">
-              Step 1 of 2
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-700">
+              Request for Quote
             </p>
-            <h1 className="mt-1 text-2xl font-bold text-[#1A202C]">Review your quote</h1>
-            <p className="text-sm text-[#4A5568]">
-              {cart.count} variant{cart.count === 1 ? "" : "s"} · Estimated subtotal{" "}
-              {subtotal > 0 ? `USD ${subtotal.toFixed(2)}` : "—"}
-            </p>
+            <h1 className="mt-1 text-xl font-bold tracking-tight text-slate-900 md:text-2xl">
+              Quote Cart
+            </h1>
           </div>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-slate-500">
+            {cart.count} variant{cart.count === 1 ? "" : "s"} ·
+            {subtotal > 0 ? ` est USD ${subtotal.toFixed(2)}` : " est —"}
+          </p>
           <Link
             href="/products"
-            className="rounded border border-[#CBD5E0] px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-[#1A202C] hover:bg-[#EDF2F7]"
+            className="rounded-sm border border-slate-200 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-slate-900"
           >
-            ← Back to catalog
+            ← Catalog
           </Link>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* ---------- Cart table ---------- */}
-          <section className="lg:col-span-2 overflow-hidden rounded border border-[#CBD5E0] bg-white">
-            <div className="border-b border-[#CBD5E0] px-4 py-3">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-[#1A202C]">
-                Selected variants
-              </p>
-            </div>
-            <table className="w-full border-collapse text-sm">
-              <thead className="bg-[#EDF2F7] text-[11px] font-bold uppercase tracking-wide text-[#1A202C]">
+        {/* ── Cart table ──────────────────────────────────────── */}
+        <section className="border border-slate-200 bg-white">
+          <div className="overflow-auto">
+            <table className="w-full border-collapse text-[12px]">
+              <thead className="bg-slate-100 text-[10px] font-bold uppercase tracking-widest text-slate-900">
                 <tr>
-                  <th className="border-b border-[#CBD5E0] p-2 text-left">SKU</th>
-                  <th className="border-b border-[#CBD5E0] p-2 text-left">Product</th>
-                  <th className="border-b border-[#CBD5E0] p-2 text-right">Qty</th>
-                  <th className="border-b border-[#CBD5E0] p-2 text-right">Unit USD</th>
-                  <th className="border-b border-[#CBD5E0] p-2 text-right">Line</th>
-                  <th className="border-b border-[#CBD5E0] p-2"></th>
+                  <th className="border-b border-slate-200 p-1 text-left">SKU</th>
+                  <th className="border-b border-slate-200 p-1 text-left">Name</th>
+                  <th className="border-b border-slate-200 p-1 text-left">Material</th>
+                  <th className="border-b border-slate-200 p-1 text-right">Requested Qty</th>
+                  <th className="border-b border-slate-200 p-1 text-right">Unit USD</th>
+                  <th className="border-b border-slate-200 p-1 text-right">Line</th>
+                  <th className="border-b border-slate-200 p-1 text-left">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {cart.items.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="p-8 text-center text-sm text-[#4A5568]">
-                      Your quote cart is empty.{" "}
-                      <Link href="/products" className="text-[#2F855A] underline">
-                        Browse the catalog
+                    <td
+                      colSpan={7}
+                      className="p-3 text-center font-mono text-[11px] uppercase tracking-wider text-slate-500"
+                    >
+                      Cart is empty ·{" "}
+                      <Link href="/products" className="text-emerald-700 underline">
+                        browse the catalog
                       </Link>
-                      .
                     </td>
                   </tr>
                 )}
@@ -137,10 +149,16 @@ function QuotePageInner() {
                   const line =
                     item.basePriceUsd != null ? item.basePriceUsd * item.quantity : null;
                   return (
-                    <tr key={item.sku} className="border-b border-[#CBD5E0]">
-                      <td className="p-2 font-bold">{item.sku}</td>
-                      <td className="p-2">{item.name}</td>
-                      <td className="p-2 text-right">
+                    <tr
+                      key={item.sku}
+                      className="border-b border-slate-100 odd:bg-white even:bg-slate-50 hover:bg-emerald-50"
+                    >
+                      <td className="p-1 font-mono font-bold text-slate-900">{item.sku}</td>
+                      <td className="p-1 text-slate-900">{item.name}</td>
+                      <td className="p-1 font-mono text-slate-600">
+                        {item.material ?? "—"}
+                      </td>
+                      <td className="p-1 text-right">
                         <input
                           type="number"
                           min={1}
@@ -148,22 +166,22 @@ function QuotePageInner() {
                           onChange={(e) =>
                             cart.setQuantity(item.sku, Number(e.target.value) || 1)
                           }
-                          className="h-8 w-20 rounded border border-[#CBD5E0] px-2 text-right text-sm"
+                          className="h-7 w-20 rounded-sm border border-slate-300 bg-white px-2 text-right font-mono text-[12px] focus:border-emerald-600 focus:outline-none"
                         />
                       </td>
-                      <td className="p-2 text-right">
+                      <td className="p-1 text-right font-mono text-slate-700">
                         {item.basePriceUsd != null
-                          ? `USD ${item.basePriceUsd.toFixed(2)}`
+                          ? `${item.basePriceUsd.toFixed(2)}`
                           : "—"}
                       </td>
-                      <td className="p-2 text-right font-bold">
-                        {line != null ? `USD ${line.toFixed(2)}` : "—"}
+                      <td className="p-1 text-right font-mono font-bold text-slate-900">
+                        {line != null ? `${line.toFixed(2)}` : "—"}
                       </td>
-                      <td className="p-2 text-right">
+                      <td className="p-1">
                         <button
                           type="button"
                           onClick={() => cart.remove(item.sku)}
-                          className="text-xs font-bold uppercase tracking-wide text-red-700 hover:underline"
+                          className="rounded-sm border border-slate-200 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-rose-700 hover:bg-rose-50"
                         >
                           Remove
                         </button>
@@ -173,66 +191,77 @@ function QuotePageInner() {
                 })}
               </tbody>
             </table>
-          </section>
+          </div>
+        </section>
 
-          {/* ---------- Customer form ---------- */}
-          <aside className="lg:col-span-1 rounded border border-[#CBD5E0] bg-white p-5">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#1A202C]">
-              Your details
+        {/* ── Buyer details form ──────────────────────────────── */}
+        <form action={handleSubmit} className="mt-4">
+          <div className="mb-2 flex items-center justify-between border-b border-slate-200 pb-1">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-900">
+              Buyer details
             </p>
-            <form
-              action={handleSubmit}
-              className="mt-3 flex flex-col gap-3 text-sm"
-            >
-              <Field name="companyName" label="Company name" required />
-              <Field name="contactName" label="Contact person" required />
-              <Field name="email" label="Email" type="email" required />
-              <Field name="phone" label="Phone" />
-              <Field name="deliveryPort" label="Target delivery port" required />
-              <label className="flex flex-col gap-1">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-[#4A5568]">
-                  Market
-                </span>
-                <select
-                  name="market"
-                  defaultValue="GLOBAL"
-                  className="h-9 rounded border border-[#CBD5E0] bg-white px-2 text-sm"
-                >
-                  {MARKETS.map((m) => (
-                    <option key={m.value} value={m.value}>
-                      {m.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="flex flex-col gap-1">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-[#4A5568]">
-                  Notes
-                </span>
-                <textarea
-                  name="notes"
-                  rows={3}
-                  defaultValue={prefilledNote}
-                  className="rounded border border-[#CBD5E0] px-2 py-1.5 text-sm"
-                />
-              </label>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-slate-500">
+              Required for a binding quotation
+            </p>
+          </div>
 
-              {error && (
-                <p className="rounded border border-red-300 bg-red-50 p-2 text-xs text-red-700">
-                  {error}
-                </p>
-              )}
-
-              <button
-                type="submit"
-                disabled={pending || cart.items.length === 0}
-                className="rounded bg-[#2F855A] px-3 py-2.5 text-xs font-bold uppercase tracking-wide text-white hover:bg-[#276749] disabled:opacity-50"
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <Field name="companyName" label="Company Name" required />
+            <Field name="contactName" label="Contact Person" required />
+            <Field name="email" label="Email" type="email" required />
+            <Field name="phone" label="Phone" required />
+            <Field name="deliveryPort" label="Country / Delivery City" required />
+            <label className="flex flex-col gap-1">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                Market
+              </span>
+              <select
+                name="market"
+                defaultValue="GLOBAL"
+                className={INPUT_CLASS}
               >
-                {pending ? "Submitting…" : "Submit Request for Quote"}
-              </button>
-            </form>
-          </aside>
-        </div>
+                {MARKETS.map((m) => (
+                  <option key={m.value} value={m.value}>
+                    {m.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 md:col-span-2">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                Application Notes
+              </span>
+              <textarea
+                name="notes"
+                rows={3}
+                defaultValue={prefilledNote}
+                placeholder="Service medium, temperature, pressure, expected duty cycle, drawing reference…"
+                className={INPUT_CLASS}
+              />
+            </label>
+          </div>
+
+          {error && (
+            <p className="mt-3 border border-rose-300 bg-rose-50 p-2 font-mono text-[11px] font-bold text-rose-800">
+              {error}
+            </p>
+          )}
+
+          {/* ── CTA bar ──────────────────────────────────────── */}
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-3">
+            <p className="font-mono text-[11px] uppercase tracking-wider text-slate-500">
+              {cart.count} line item{cart.count === 1 ? "" : "s"} ·
+              {subtotal > 0 ? ` est USD ${subtotal.toFixed(2)}` : " est —"}
+            </p>
+            <button
+              type="submit"
+              disabled={pending || cart.items.length === 0}
+              className="rounded-sm bg-emerald-700 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {pending ? "Submitting…" : "Submit Official RFQ →"}
+            </button>
+          </div>
+        </form>
       </div>
     </main>
   );
@@ -251,7 +280,7 @@ function Field({
 }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-[11px] font-bold uppercase tracking-wide text-[#4A5568]">
+      <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-500">
         {label}
         {required ? " *" : ""}
       </span>
@@ -259,7 +288,7 @@ function Field({
         name={name}
         type={type}
         required={required}
-        className="h-9 rounded border border-[#CBD5E0] px-2 text-sm"
+        className={INPUT_CLASS}
       />
     </label>
   );
