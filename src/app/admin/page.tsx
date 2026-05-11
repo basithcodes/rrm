@@ -2,298 +2,274 @@ import Link from "next/link";
 import { formatCurrency } from "@/lib/site-data";
 import { getOwnerDashboardPayload } from "@/lib/api-data";
 
+// =====================================================================
+// Industrial Owner Dashboard
+// ---------------------------------------------------------------------
+// Aesthetic per spec:
+//   * No floating cards, no shadows, no gradients.
+//   * Information density first — KPIs render as a single-line list,
+//     RFQs/customers render as native HTML <table>s with p-1/p-2 cells.
+//   * Header strip is a status bar, not a hero block.
+// =====================================================================
+
 export default async function AdminDashboardPage() {
   const payload = await getOwnerDashboardPayload();
-  const { dashboard: ownerDashboard, keyCustomers, recentRfqs, summary } = payload;
-  const totalInternalCosts = Number(summary.monthlyInternalCosts);
-  const totalVariantCount = Number(summary.totalVariants);
-  const totalRawMaterials = Number(summary.totalRawMaterialLines);
-  const totalCompetitorBenchmarks = Number(summary.totalCompetitorBenchmarks);
-  const pulseCards = [
+  const { dashboard, keyCustomers, recentRfqs, summary } = payload;
+
+  const monthlyInternalCosts = Number(summary.monthlyInternalCosts);
+
+  // Single-line KPI readouts — label / value / detail. Rendered as a
+  // bordered <table> so columns line up vertically across the whole list.
+  const kpis: Array<{ label: string; value: string; detail: string }> = [
     {
-      label: "Open RFQs",
-      value: String(ownerDashboard.pendingRfqs),
-      detail: "Need owner follow-up",
+      label: "Server status",
+      value: "ONLINE",
+      detail: `Catalog ${summary.catalogMode} · Cost ${summary.costMode} · Import ${summary.importMode}`,
+    },
+    {
+      label: "Active RFQs",
+      value: String(dashboard.pendingRfqs),
+      detail: "Awaiting owner follow-up",
     },
     {
       label: "Active customers",
-      value: String(ownerDashboard.activeCustomers),
+      value: String(dashboard.activeCustomers),
       detail: "Live customer entities",
     },
     {
       label: "Cataloged variants",
-      value: String(ownerDashboard.catalogedVariants),
-      detail: "Visible in the current catalog layer",
+      value: String(dashboard.catalogedVariants),
+      detail: `${summary.productFamilies} parent products`,
     },
     {
       label: "Protected records",
-      value: String(ownerDashboard.protectedManufacturingRecords),
-      detail: "Internal process data behind the owner gate",
-    },
-  ];
-  const quickActions = [
-    {
-      href: "/admin/imports",
-      eyebrow: "Imports",
-      title: "Bring in a fresh catalog batch",
-      detail: "Preview and commit product rows without leaving the control room.",
+      value: String(dashboard.protectedManufacturingRecords),
+      detail: "Behind owner gate",
     },
     {
-      href: "/rfq",
-      eyebrow: "RFQ",
-      title: "Inspect the public quote handoff",
-      detail: "Open the customer-facing request flow and validate the structured form.",
+      label: "Monthly owner overhead",
+      value: formatCurrency(monthlyInternalCosts, "USD"),
+      detail: "Sum of internal cost buckets",
     },
     {
-      href: "/products",
-      eyebrow: "Catalog",
-      title: "Review the buyer-facing product browse",
-      detail: "Check how the public catalog looks before RFQs and import updates land.",
-    },
-  ];
-
-  const adminModules = [
-    {
-      href: "/admin/pricing",
-      title: "Pricing",
-      detail: "Owner-only regional prices, variant price matrices, and internal price-book notes.",
-      stat: `${totalVariantCount} variant prices`,
+      label: "Raw material lines",
+      value: String(summary.totalRawMaterialLines),
+      detail: "Sourcing entries on file",
     },
     {
-      href: "/admin/costs",
-      title: "Costs",
-      detail: "Monthly overhead for rent, labor, electricity, maintenance, and equipment reserve.",
-      stat: formatCurrency(totalInternalCosts, "USD"),
+      label: "Competitor benchmarks",
+      value: String(summary.totalCompetitorBenchmarks),
+      detail: "Internal-only price comparisons",
     },
     {
-      href: "/admin/sourcing",
-      title: "Sourcing",
-      detail: "Raw materials, suppliers, origin countries, landed costs, and sourcing notes.",
-      stat: `${totalRawMaterials} raw material lines`,
-    },
-    {
-      href: "/admin/manufacturing",
-      title: "Manufacturing",
-      detail: "Compound codes, cure systems, batch sizes, output, scrap, and QA checks.",
-      stat: `${ownerDashboard.protectedManufacturingRecords} protected records`,
-    },
-    {
-      href: "/admin/competitors",
-      title: "Competitors",
-      detail: "Dummy benchmark pricing by market for comparable products.",
-      stat: `${totalCompetitorBenchmarks} benchmark entries`,
-    },
-    {
-      href: "/admin/imports",
-      title: "Imports",
-      detail: "CSV template, owner-only columns, and normalized import preview for the expanded dataset.",
-      stat: summary.importMode === "live" ? "Latest live batch" : "Extended CSV template",
+      label: "Latest import",
+      value: summary.importMode === "live" ? "Live batch" : "Template",
+      detail: summary.latestImportTitle,
     },
   ];
 
   return (
-    <div className="grid gap-8">
-      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <div className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
-            Daily pulse
+    <div className="space-y-2">
+      {/* ============================================================
+          STATUS BAR — single tight strip, replaces the previous hero.
+          ============================================================ */}
+      <header className="flex items-center justify-between border border-[#CBD5E0] bg-white px-3 py-1.5">
+        <div className="flex items-center gap-3">
+          <span className="inline-flex h-2 w-2 rounded-full bg-[#2F855A]" aria-hidden />
+          <p className="text-[11px] font-bold uppercase tracking-wider text-[#1A202C]">
+            Owner Dashboard
           </p>
-          <h2 className="mt-4 display-title text-5xl font-semibold text-white">
-            Keep RFQs, imports, price books, and customer signals on one board.
-          </h2>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-white/72">
-            This dashboard follows the same operator-first pattern as wp: fast context at the top, shortcut cards for the critical flows, and detailed owner modules below.
+          <p className="text-[11px] text-[#4A5568]">
+            Catalog: <span className="font-bold text-[#1A202C]">{summary.catalogMode}</span>
+            {" · "}Cost: <span className="font-bold text-[#1A202C]">{summary.costMode}</span>
+            {" · "}Import: <span className="font-bold text-[#1A202C]">{summary.importMode}</span>
           </p>
-          <div className="mt-6 flex flex-wrap gap-2">
-            <span className="admin-chip">Private price books</span>
-            <span className="admin-chip">Protected manufacturing</span>
-            <span className="admin-chip">RFQ queue</span>
-          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/rfqs"
+            className="rounded border border-[#CBD5E0] bg-white px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-[#1A202C] hover:bg-[#EDF2F7]"
+          >
+            RFQ Pipeline
+          </Link>
+          <Link
+            href="/admin/imports"
+            className="rounded bg-[#2F855A] px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-white hover:bg-[#276749]"
+          >
+            Import Catalog
+          </Link>
+        </div>
+      </header>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            {quickActions.map((action) => (
-              <Link
-                key={action.href}
-                href={action.href}
-                className="admin-shortcut-card rounded-[1.8rem] p-5"
-              >
-                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-white/45">
-                  {action.eyebrow}
-                </p>
-                <h3 className="mt-3 text-lg font-semibold text-white">{action.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-white/65">{action.detail}</p>
-              </Link>
+      {/* ============================================================
+          KPI READOUT — dense single-line list. No card padding, no
+          floating boxes. Values right-aligned for fast scanning.
+          ============================================================ */}
+      <section className="border border-[#CBD5E0] bg-white">
+        <div className="border-b border-[#CBD5E0] bg-[#EDF2F7] px-2 py-1">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[#1A202C]">
+            Key performance indicators
+          </p>
+        </div>
+        <table className="w-full border-collapse text-[12px]">
+          <tbody>
+            {kpis.map((row) => (
+              <tr key={row.label} className="border-b border-[#EDF2F7] last:border-b-0">
+                <th
+                  scope="row"
+                  className="w-56 p-1 text-left text-[11px] font-semibold uppercase tracking-wider text-[#4A5568]"
+                >
+                  {row.label}
+                </th>
+                <td className="w-44 p-1 text-right font-mono font-bold text-[#1A202C]">
+                  {row.value}
+                </td>
+                <td className="p-1 text-[#4A5568]">{row.detail}</td>
+              </tr>
             ))}
-          </div>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-2">
-          {pulseCards.map((card) => (
-            <article key={card.label} className="admin-deep-card rounded-[1.8rem] p-5">
-              <p className="text-xs uppercase tracking-[0.18em] text-white/55">{card.label}</p>
-              <p className="admin-metric-value mt-3 text-4xl font-semibold">{card.value}</p>
-              <p className="mt-2 text-sm leading-6 text-white/62">{card.detail}</p>
-            </article>
-          ))}
-          <article className="admin-deep-card rounded-[1.8rem] p-5 md:col-span-2">
-            <p className="text-xs uppercase tracking-[0.18em] text-white/45">Workspace mode</p>
-            <h3 className="mt-3 text-xl font-semibold text-white">{summary.latestImportTitle}</h3>
-            <p className="mt-3 text-sm leading-7 text-white/65">{summary.latestImportDetail}</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="admin-chip">
-                {summary.importMode === "live" ? "Live import data" : "Sample import template"}
-              </span>
-              <span className="admin-chip">
-                {summary.catalogMode === "live" ? "Live catalog counts" : "Seed catalog fallback"}
-              </span>
-              <span className="admin-chip">
-                {summary.costMode === "live" ? "Live owner costs" : "Seed cost fallback"}
-              </span>
-            </div>
-          </article>
-        </div>
+          </tbody>
+        </table>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <div className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
-            Operator modules
-          </p>
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {adminModules.map((module) => (
-              <Link
-                key={module.href}
-                href={module.href}
-                className="admin-deep-card rounded-[1.8rem] p-5 transition hover:border-[rgba(239,139,83,0.28)] hover:bg-[rgba(15,118,110,0.06)]"
-              >
-                <p className="text-xs uppercase tracking-[0.18em] text-white/45">{module.stat}</p>
-                <h3 className="mt-3 text-xl font-semibold text-white">{module.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-white/65">{module.detail}</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        <div className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
-            Control room status
-          </p>
-          <div className="mt-6 grid gap-4">
-            <article className="admin-deep-card rounded-[1.8rem] p-5">
-              <p className="text-xs uppercase tracking-[0.18em] text-white/45">Catalog overview</p>
-              <h3 className="mt-3 text-xl font-semibold text-white">
-                {summary.productFamilies} products in {summary.catalogMode === "live" ? "owner catalog" : "seeded catalog"}
-              </h3>
-              <p className="mt-3 text-sm leading-7 text-white/65">
-                {summary.catalogMode === "live"
-                  ? "Catalog counts now come from Prisma product, variant, manufacturing, and benchmark records."
-                  : "The seeded product layer still backs this workspace until live catalog imports land."}
-              </p>
-            </article>
-            <article className="admin-deep-card rounded-[1.8rem] p-5">
-              <p className="text-xs uppercase tracking-[0.18em] text-white/45">Cost summary</p>
-              <h3 className="mt-3 text-xl font-semibold text-white">
-                {formatCurrency(totalInternalCosts, "USD")} monthly owner-only overhead
-              </h3>
-              <p className="mt-3 text-sm leading-7 text-white/65">
-                {summary.costMode === "live"
-                  ? "Shown from the latest live internal cost entries grouped by bucket."
-                  : "Using seeded owner cost buckets until live internal cost entries are added."}
-              </p>
-            </article>
-            <article className="admin-deep-card rounded-[1.8rem] p-5">
-              <p className="text-xs uppercase tracking-[0.18em] text-white/45">Import status</p>
-              <h3 className="mt-3 text-xl font-semibold text-white">{summary.latestImportTitle}</h3>
-              <p className="mt-3 text-sm leading-7 text-white/65">
-                {summary.latestImportDetail}
-              </p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <div className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
+      {/* ============================================================
+          RECENT RFQ QUEUE — compact data table (no scrolling cards).
+          ============================================================ */}
+      <section className="border border-[#CBD5E0] bg-white">
+        <div className="flex items-center justify-between border-b border-[#CBD5E0] bg-[#EDF2F7] px-2 py-1">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[#1A202C]">
             Recent RFQ queue
           </p>
-          <div className="mt-6 grid gap-4">
-            {recentRfqs.length === 0 ? (
-              <article className="admin-deep-card rounded-[1.8rem] p-5">
-                <h3 className="text-lg font-semibold text-white">No live RFQs yet</h3>
-                <p className="mt-3 text-sm leading-7 text-white/65">
-                  The public RFQ channel is live. New submissions will appear here once they reach Prisma.
-                </p>
-              </article>
-            ) : (
-              recentRfqs.map((rfq, index) => (
-                <article key={rfq.reference} className="admin-deep-card rounded-[1.8rem] p-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
-                        Queue item {index + 1} · {rfq.reference}
-                      </p>
-                      <h3 className="mt-2 text-lg font-semibold text-white">{rfq.company}</h3>
-                      <p className="mt-2 text-sm leading-7 text-white/65">{rfq.requestedProduct}</p>
-                    </div>
-                    <span className="admin-chip">
-                      {rfq.status}
-                    </span>
-                  </div>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white/65">
-                      {rfq.market}
-                    </span>
-                    <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white/65">
-                      {rfq.quantity}
-                    </span>
-                    <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white/65">
-                      {rfq.source}
-                    </span>
-                  </div>
-                </article>
-              ))
-            )}
-          </div>
+          <Link
+            href="/admin/rfqs"
+            className="text-[11px] font-bold uppercase tracking-wider text-[#2F855A] hover:underline"
+          >
+            Open pipeline →
+          </Link>
         </div>
+        <table className="w-full border-collapse text-[12px]">
+          <thead className="bg-[#F7FAFC] text-[10px] font-bold uppercase tracking-wider text-[#1A202C]">
+            <tr>
+              <th className="border-b border-[#CBD5E0] p-1 text-left">Reference</th>
+              <th className="border-b border-[#CBD5E0] p-1 text-left">Company</th>
+              <th className="border-b border-[#CBD5E0] p-1 text-left">Product</th>
+              <th className="border-b border-[#CBD5E0] p-1 text-left">Market</th>
+              <th className="border-b border-[#CBD5E0] p-1 text-left">Quantity</th>
+              <th className="border-b border-[#CBD5E0] p-1 text-left">Source</th>
+              <th className="border-b border-[#CBD5E0] p-1 text-left">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {recentRfqs.length === 0 && (
+              <tr>
+                <td colSpan={7} className="p-2 text-center text-[#4A5568]">
+                  No live RFQs yet — new submissions land here automatically.
+                </td>
+              </tr>
+            )}
+            {recentRfqs.map((rfq) => (
+              <tr key={rfq.reference} className="border-b border-[#EDF2F7] hover:bg-[#F7FAFC]">
+                <td className="p-1 font-mono font-bold">{rfq.reference}</td>
+                <td className="p-1">{rfq.company}</td>
+                <td className="p-1">{rfq.requestedProduct}</td>
+                <td className="p-1">{rfq.market}</td>
+                <td className="p-1">{rfq.quantity}</td>
+                <td className="p-1 text-[#4A5568]">{rfq.source}</td>
+                <td className="p-1">
+                  <span className="inline-block rounded border border-[#CBD5E0] bg-[#EDF2F7] px-1 text-[10px] font-bold uppercase tracking-wider text-[#1A202C]">
+                    {rfq.status}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
 
-        <div className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
+      {/* ============================================================
+          CUSTOMER PIPELINE — compact data table.
+          ============================================================ */}
+      <section className="border border-[#CBD5E0] bg-white">
+        <div className="border-b border-[#CBD5E0] bg-[#EDF2F7] px-2 py-1">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[#1A202C]">
             Customer pipeline snapshot
           </p>
-          <div className="mt-6 grid gap-4">
-            {keyCustomers.length === 0 ? (
-              <article className="admin-deep-card rounded-[1.8rem] p-5">
-                <h3 className="text-lg font-semibold text-white">No live customers yet</h3>
-                <p className="mt-3 text-sm leading-7 text-white/65">
-                  Customer records will show here once RFQs or owner-side entries create them in Prisma.
-                </p>
-              </article>
-            ) : (
-              keyCustomers.map((customer) => (
-                <article key={customer.company} className="admin-deep-card rounded-[1.8rem] p-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h3 className="text-lg font-semibold text-white">{customer.company}</h3>
-                      <p className="mt-2 text-sm leading-7 text-white/65">{customer.demand}</p>
-                    </div>
-                    <span className="admin-chip">
-                      {customer.relationship}
-                    </span>
-                  </div>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white/65">
-                      {customer.segment}
-                    </span>
-                    <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white/65">
-                      {customer.market}
-                    </span>
-                  </div>
-                </article>
-              ))
-            )}
-          </div>
         </div>
+        <table className="w-full border-collapse text-[12px]">
+          <thead className="bg-[#F7FAFC] text-[10px] font-bold uppercase tracking-wider text-[#1A202C]">
+            <tr>
+              <th className="border-b border-[#CBD5E0] p-1 text-left">Company</th>
+              <th className="border-b border-[#CBD5E0] p-1 text-left">Segment</th>
+              <th className="border-b border-[#CBD5E0] p-1 text-left">Market</th>
+              <th className="border-b border-[#CBD5E0] p-1 text-left">Demand</th>
+              <th className="border-b border-[#CBD5E0] p-1 text-left">Relationship</th>
+            </tr>
+          </thead>
+          <tbody>
+            {keyCustomers.length === 0 && (
+              <tr>
+                <td colSpan={5} className="p-2 text-center text-[#4A5568]">
+                  No live customers yet.
+                </td>
+              </tr>
+            )}
+            {keyCustomers.map((customer) => (
+              <tr key={customer.company} className="border-b border-[#EDF2F7] hover:bg-[#F7FAFC]">
+                <td className="p-1 font-bold">{customer.company}</td>
+                <td className="p-1 text-[#4A5568]">{customer.segment}</td>
+                <td className="p-1 text-[#4A5568]">{customer.market}</td>
+                <td className="p-1">{customer.demand}</td>
+                <td className="p-1">
+                  <span className="inline-block rounded border border-[#CBD5E0] bg-[#EDF2F7] px-1 text-[10px] font-bold uppercase tracking-wider text-[#1A202C]">
+                    {customer.relationship}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      {/* ============================================================
+          AUDIT / SYSTEM NOTES — compact data table, never a scrolling
+          card. Currently sourced from summary metadata; swap for a
+          real audit log table when the data shape lands.
+          ============================================================ */}
+      <section className="border border-[#CBD5E0] bg-white">
+        <div className="border-b border-[#CBD5E0] bg-[#EDF2F7] px-2 py-1">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-[#1A202C]">
+            Audit log (system events)
+          </p>
+        </div>
+        <table className="w-full border-collapse text-[12px]">
+          <thead className="bg-[#F7FAFC] text-[10px] font-bold uppercase tracking-wider text-[#1A202C]">
+            <tr>
+              <th className="border-b border-[#CBD5E0] p-1 text-left">Event</th>
+              <th className="border-b border-[#CBD5E0] p-1 text-left">Detail</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="border-b border-[#EDF2F7]">
+              <td className="p-1 font-mono">catalog.mode</td>
+              <td className="p-1">{summary.catalogMode}</td>
+            </tr>
+            <tr className="border-b border-[#EDF2F7]">
+              <td className="p-1 font-mono">cost.mode</td>
+              <td className="p-1">{summary.costMode}</td>
+            </tr>
+            <tr className="border-b border-[#EDF2F7]">
+              <td className="p-1 font-mono">import.mode</td>
+              <td className="p-1">{summary.importMode}</td>
+            </tr>
+            <tr className="border-b border-[#EDF2F7]">
+              <td className="p-1 font-mono">import.latest</td>
+              <td className="p-1">{summary.latestImportTitle}</td>
+            </tr>
+            <tr>
+              <td className="p-1 font-mono">import.detail</td>
+              <td className="p-1 text-[#4A5568]">{summary.latestImportDetail}</td>
+            </tr>
+          </tbody>
+        </table>
       </section>
     </div>
   );

@@ -119,7 +119,8 @@ export function ParametricProductDetail({ product }: { product: Product }) {
   const [selectedVariantId, setSelectedVariantId] = useState<string>(
     product.variants[0]?.code ?? "",
   );
-  const [currency, setCurrency] = useState<Currency>("USD");
+  // B2B buyers in our region work in AED first; toggle still available.
+  const [currency, setCurrency] = useState<Currency>("AED");
   const [filter, setFilter] = useState("");
   const cart = useQuoteCart();
 
@@ -226,12 +227,19 @@ export function ParametricProductDetail({ product }: { product: Product }) {
           <p className="text-sm text-[#4A5568]">{product.summary}</p>
 
           <div className="mt-auto flex flex-col gap-2">
-            <Link
-              href={`/api/catalog/${product.slug}`}
-              className="block w-full rounded bg-[#1A202C] px-3 py-2.5 text-center text-xs font-bold uppercase tracking-wide text-white hover:bg-[#2D3748]"
+            {/* Secondary CTA — engineering asset download. Renders as a
+                bordered, mono-typed download button so it reads as a
+                standard TDS hand-off rather than a marketing CTA. */}
+            <a
+              href={`/api/products/${product.slug}/tds`}
+              download={`RRM-TDS-${product.slug}.pdf`}
+              className="flex w-full items-center justify-between rounded border border-[#1A202C] bg-white px-3 py-2.5 font-mono text-[11px] font-bold uppercase tracking-wider text-[#1A202C] hover:bg-[#EDF2F7]"
             >
-              ↓ Download Technical Data Sheet (TDS)
-            </Link>
+              <span>↓ Technical Data Sheet</span>
+              <span className="rounded border border-[#CBD5E0] bg-[#F7FAFC] px-1.5 py-0.5 text-[10px] text-[#4A5568]">
+                PDF · A4
+              </span>
+            </a>
             <Link
               href="/rfq"
               className="block w-full rounded bg-[#2F855A] px-3 py-2.5 text-center text-xs font-bold uppercase tracking-wide text-white hover:bg-[#276749]"
@@ -280,23 +288,23 @@ export function ParametricProductDetail({ product }: { product: Product }) {
 
         <div className="max-h-[60vh] overflow-auto">
           <table className="w-full border-collapse text-sm">
+            {/* Engineering spec sheet columns (per B2B brief):
+                SKU | Dimensions (ID/OD/Thickness) | Material | Shore Hardness | Price | Action. */}
             <thead className="sticky top-0 z-10 bg-[#EDF2F7] text-[11px] font-bold uppercase tracking-wide text-[#1A202C]">
               <tr>
-                <th className="border-b border-[#CBD5E0] p-2 text-left">SKU</th>
-                <th className="border-b border-[#CBD5E0] p-2 text-left">Inner ⌀</th>
-                <th className="border-b border-[#CBD5E0] p-2 text-left">Outer ⌀</th>
-                <th className="border-b border-[#CBD5E0] p-2 text-left">Thickness</th>
-                <th className="border-b border-[#CBD5E0] p-2 text-left">Hardness</th>
-                <th className="border-b border-[#CBD5E0] p-2 text-right">MOQ</th>
-                <th className="border-b border-[#CBD5E0] p-2 text-right">Base Price (USD)</th>
-                <th className="border-b border-[#CBD5E0] p-2 text-right">Price ({currency})</th>
-                <th className="border-b border-[#CBD5E0] p-2 text-left">Action</th>
+                <th className="border-b border-[#CBD5E0] p-1 text-left">SKU</th>
+                <th className="border-b border-[#CBD5E0] p-1 text-left">Dimensions (ID / OD / Thickness)</th>
+                <th className="border-b border-[#CBD5E0] p-1 text-left">Material</th>
+                <th className="border-b border-[#CBD5E0] p-1 text-left">Shore hardness</th>
+                <th className="border-b border-[#CBD5E0] p-1 text-right">MOQ</th>
+                <th className="border-b border-[#CBD5E0] p-1 text-right">Price ({currency})</th>
+                <th className="border-b border-[#CBD5E0] p-1 text-left">Action</th>
               </tr>
             </thead>
             <tbody>
               {filteredVariants.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="p-6 text-center text-sm text-[#4A5568]">
+                  <td colSpan={7} className="p-2 text-center text-sm text-[#4A5568]">
                     No variants match this filter.
                   </td>
                 </tr>
@@ -305,6 +313,9 @@ export function ParametricProductDetail({ product }: { product: Product }) {
                 const selected = v.code === selectedVariantId;
                 const usd = v.priceBook?.USD ?? 0;
                 const inQuote = cart.has(v.code);
+                const id = readDimension(v, ["inner", "id", "i.d"]);
+                const od = readDimension(v, ["outer", "od", "o.d"]);
+                const th = readDimension(v, ["thick", "cs", "cross"]);
                 return (
                   <tr
                     key={v.code}
@@ -315,20 +326,18 @@ export function ParametricProductDetail({ product }: { product: Product }) {
                         : "cursor-pointer border-b border-[#CBD5E0] odd:bg-white even:bg-[#F7FAFC] hover:bg-[#EDF2F7]"
                     }
                   >
-                    <td className="p-2 font-bold">
+                    <td className="p-1 font-mono font-bold">
                       {selected && <span className="mr-1 text-[#2F855A]">●</span>}
                       {v.code}
                     </td>
-                    <td className="p-2">{readDimension(v, ["inner", "id", "i.d"])}</td>
-                    <td className="p-2">{readDimension(v, ["outer", "od", "o.d"])}</td>
-                    <td className="p-2">{readDimension(v, ["thick", "cs", "cross"])}</td>
-                    <td className="p-2">{readDimension(v, ["hardness", "shore", "durometer"])}</td>
-                    <td className="p-2 text-right">{v.minimumOrderQuantity}</td>
-                    <td className="p-2 text-right font-bold">
-                      {usd > 0 ? `USD ${usd.toFixed(2)}` : "—"}
+                    <td className="p-1 font-mono">
+                      {id} / {od} / {th}
                     </td>
-                    <td className="p-2 text-right font-bold">{formatPrice(usd, currency)}</td>
-                    <td className="p-2">
+                    <td className="p-1">{product.material}</td>
+                    <td className="p-1">{readDimension(v, ["hardness", "shore", "durometer"])}</td>
+                    <td className="p-1 text-right">{v.minimumOrderQuantity}</td>
+                    <td className="p-1 text-right font-bold">{formatPrice(usd, currency)}</td>
+                    <td className="p-1">
                       <button
                         type="button"
                         onClick={(e) => {
