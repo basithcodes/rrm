@@ -9,6 +9,48 @@ export default async function AdminDashboardPage() {
   const totalVariantCount = Number(summary.totalVariants);
   const totalRawMaterials = Number(summary.totalRawMaterialLines);
   const totalCompetitorBenchmarks = Number(summary.totalCompetitorBenchmarks);
+  const pulseCards = [
+    {
+      label: "Open RFQs",
+      value: String(ownerDashboard.pendingRfqs),
+      detail: "Need owner follow-up",
+    },
+    {
+      label: "Active customers",
+      value: String(ownerDashboard.activeCustomers),
+      detail: "Live customer entities",
+    },
+    {
+      label: "Cataloged variants",
+      value: String(ownerDashboard.catalogedVariants),
+      detail: "Visible in the current catalog layer",
+    },
+    {
+      label: "Protected records",
+      value: String(ownerDashboard.protectedManufacturingRecords),
+      detail: "Internal process data behind the owner gate",
+    },
+  ];
+  const quickActions = [
+    {
+      href: "/admin/imports",
+      eyebrow: "Imports",
+      title: "Bring in a fresh catalog batch",
+      detail: "Preview and commit product rows without leaving the control room.",
+    },
+    {
+      href: "/rfq",
+      eyebrow: "RFQ",
+      title: "Inspect the public quote handoff",
+      detail: "Open the customer-facing request flow and validate the structured form.",
+    },
+    {
+      href: "/products",
+      eyebrow: "Catalog",
+      title: "Review the buyer-facing product browse",
+      detail: "Check how the public catalog looks before RFQs and import updates land.",
+    },
+  ];
 
   const adminModules = [
     {
@@ -54,39 +96,60 @@ export default async function AdminDashboardPage() {
       <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <div className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
-            Dashboard
+            Daily pulse
           </p>
           <h2 className="mt-4 display-title text-5xl font-semibold text-white">
-            A cleaner back-room dashboard for pricing, sourcing, and protected records.
+            Keep RFQs, imports, price books, and customer signals on one board.
           </h2>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-white/72">
-            This area is server-side gated before render. It is the right place to keep internal price books, chemistry notes, competitor records, and RFQ handling logic out of the public experience.
+            This dashboard follows the same operator-first pattern as wp: fast context at the top, shortcut cards for the critical flows, and detailed owner modules below.
           </p>
           <div className="mt-6 flex flex-wrap gap-2">
             <span className="admin-chip">Private price books</span>
             <span className="admin-chip">Protected manufacturing</span>
             <span className="admin-chip">RFQ queue</span>
           </div>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            {quickActions.map((action) => (
+              <Link
+                key={action.href}
+                href={action.href}
+                className="admin-shortcut-card rounded-[1.8rem] p-5"
+              >
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-white/45">
+                  {action.eyebrow}
+                </p>
+                <h3 className="mt-3 text-lg font-semibold text-white">{action.title}</h3>
+                <p className="mt-3 text-sm leading-7 text-white/65">{action.detail}</p>
+              </Link>
+            ))}
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-2">
-          <article className="admin-deep-card rounded-[1.8rem] p-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-white/55">Open RFQs</p>
-            <p className="admin-metric-value mt-3 text-4xl font-semibold">{ownerDashboard.pendingRfqs}</p>
-          </article>
-          <article className="admin-deep-card rounded-[1.8rem] p-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-white/55">Active customers</p>
-            <p className="admin-metric-value mt-3 text-4xl font-semibold">{ownerDashboard.activeCustomers}</p>
-          </article>
-          <article className="admin-deep-card rounded-[1.8rem] p-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-white/55">Cataloged variants</p>
-            <p className="admin-metric-value mt-3 text-4xl font-semibold">{ownerDashboard.catalogedVariants}</p>
-          </article>
-          <article className="admin-deep-card rounded-[1.8rem] p-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-white/55">Protected records</p>
-            <p className="admin-metric-value mt-3 text-4xl font-semibold">
-              {ownerDashboard.protectedManufacturingRecords}
-            </p>
+          {pulseCards.map((card) => (
+            <article key={card.label} className="admin-deep-card rounded-[1.8rem] p-5">
+              <p className="text-xs uppercase tracking-[0.18em] text-white/55">{card.label}</p>
+              <p className="admin-metric-value mt-3 text-4xl font-semibold">{card.value}</p>
+              <p className="mt-2 text-sm leading-6 text-white/62">{card.detail}</p>
+            </article>
+          ))}
+          <article className="admin-deep-card rounded-[1.8rem] p-5 md:col-span-2">
+            <p className="text-xs uppercase tracking-[0.18em] text-white/45">Workspace mode</p>
+            <h3 className="mt-3 text-xl font-semibold text-white">{summary.latestImportTitle}</h3>
+            <p className="mt-3 text-sm leading-7 text-white/65">{summary.latestImportDetail}</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="admin-chip">
+                {summary.importMode === "live" ? "Live import data" : "Sample import template"}
+              </span>
+              <span className="admin-chip">
+                {summary.catalogMode === "live" ? "Live catalog counts" : "Seed catalog fallback"}
+              </span>
+              <span className="admin-chip">
+                {summary.costMode === "live" ? "Live owner costs" : "Seed cost fallback"}
+              </span>
+            </div>
           </article>
         </div>
       </section>
@@ -94,14 +157,14 @@ export default async function AdminDashboardPage() {
       <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <div className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
-            Owner modules
+            Operator modules
           </p>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             {adminModules.map((module) => (
               <Link
                 key={module.href}
                 href={module.href}
-                className="admin-deep-card rounded-[1.8rem] p-5 transition hover:border-[rgba(246,213,158,0.28)] hover:bg-[rgba(246,213,158,0.06)]"
+                className="admin-deep-card rounded-[1.8rem] p-5 transition hover:border-[rgba(239,139,83,0.28)] hover:bg-[rgba(15,118,110,0.06)]"
               >
                 <p className="text-xs uppercase tracking-[0.18em] text-white/45">{module.stat}</p>
                 <h3 className="mt-3 text-xl font-semibold text-white">{module.title}</h3>
@@ -113,7 +176,7 @@ export default async function AdminDashboardPage() {
 
         <div className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
-            Workspace summary
+            Control room status
           </p>
           <div className="mt-6 grid gap-4">
             <article className="admin-deep-card rounded-[1.8rem] p-5">

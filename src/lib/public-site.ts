@@ -43,6 +43,14 @@ export type HomeRouteCard = {
   stat: string;
 };
 
+export type PublicNavigationItem = {
+  href: string;
+  label: string;
+  section: string;
+  description: string;
+  badge: string;
+};
+
 export type CapabilityTrack = {
   eyebrow: string;
   title: string;
@@ -108,12 +116,42 @@ const marketPlaybooks: Record<
   },
 };
 
-export const publicNavigation = [
-  { href: "/products", label: "Catalog" },
-  { href: "/industries", label: "Industries" },
-  { href: "/materials", label: "Materials" },
-  { href: "/markets", label: "Markets" },
-  { href: "/capabilities", label: "Capabilities" },
+export const publicNavigation: PublicNavigationItem[] = [
+  {
+    href: "/products",
+    label: "Catalog",
+    section: "Browse",
+    description: "Product families, filters, and shortlist tools.",
+    badge: "CT",
+  },
+  {
+    href: "/industries",
+    label: "Industries",
+    section: "Browse",
+    description: "Application-led entry points for buyer use cases.",
+    badge: "IN",
+  },
+  {
+    href: "/materials",
+    label: "Materials",
+    section: "Compare",
+    description: "Compound-first decisions before variant codes.",
+    badge: "MT",
+  },
+  {
+    href: "/markets",
+    label: "Markets",
+    section: "Coverage",
+    description: "GCC route context, currency, and buying cues.",
+    badge: "MK",
+  },
+  {
+    href: "/capabilities",
+    label: "Capabilities",
+    section: "Platform",
+    description: "See the split between public, owner, and import flows.",
+    badge: "CP",
+  },
 ];
 
 export const publicFooterLinks = [

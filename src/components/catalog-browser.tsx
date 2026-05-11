@@ -4,7 +4,7 @@ import Link from "next/link";
 import { startTransition, useDeferredValue, useEffect, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ProductCard } from "@/components/product-card";
-import { formatCountLabel } from "@/lib/public-site";
+import { formatCountLabel, publicNavigation } from "@/lib/public-site";
 import type { Product } from "@/lib/site-data";
 
 const allCategoriesLabel = "All categories";
@@ -250,6 +250,7 @@ export function CatalogBrowser({ products }: { products: Product[] }) {
       };
     })
     .sort((left, right) => right.productCount - left.productCount || left.category.localeCompare(right.category));
+  const supportRoutes = publicNavigation.filter((route) => route.href !== "/products").slice(0, 3);
 
   useEffect(() => {
     const nextState = resolveInitialState(products, searchParams);
@@ -638,13 +639,41 @@ export function CatalogBrowser({ products }: { products: Product[] }) {
 
           <div className="market-card-dark rounded-[2.2rem] p-6">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">
-              Launch rules
+              Browse rules
             </p>
             <ul className="mt-5 grid gap-3 text-sm leading-7 text-white/78">
               <li>Public pages show dimensions, applications, and technical fit.</li>
               <li>Prices stay off the shelf and move through RFQ or owner workflow.</li>
               <li>Manufacturing chemistry and cost inputs remain owner-only.</li>
             </ul>
+
+            <div className="mt-5 rounded-[1.6rem] border border-white/10 bg-white/8 p-4">
+              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-white/58">
+                Need another route?
+              </p>
+              <div className="mt-3 grid gap-3">
+                {supportRoutes.map((route) => (
+                  <Link
+                    key={route.href}
+                    href={route.href}
+                    className="rounded-[1.3rem] border border-white/10 bg-white/8 px-4 py-4 transition hover:bg-white/10"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-white/50">
+                          {route.section}
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-white">{route.label}</p>
+                      </div>
+                      <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-white/78">
+                        {route.badge}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-xs leading-6 text-white/70">{route.description}</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
         </aside>
 

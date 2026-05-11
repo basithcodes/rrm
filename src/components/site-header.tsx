@@ -5,6 +5,7 @@ const marketTags = ["UAE", "Saudi", "Oman", "Qatar"];
 const browseLanes = getCatalogAisles()
   .slice(0, 5)
   .map((lane) => lane.category);
+const featuredRoutes = publicNavigation.slice(0, 5);
 
 export function SiteHeader() {
   return (
@@ -64,6 +65,43 @@ export function SiteHeader() {
                 Request Quote
               </Link>
             </div>
+          </div>
+        </div>
+
+        <div className="border-t border-line px-4 py-4 sm:px-5">
+          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-accent-deep">
+                Route board
+              </p>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
+                Use the same wp-style rule here: each page should do one job clearly before the RFQ handoff.
+              </p>
+            </div>
+            <Link href="/rfq" className="text-sm font-semibold text-accent-deep">
+              Need a quote instead?
+            </Link>
+          </div>
+
+          <div className="-mx-1 mt-4 flex gap-3 overflow-x-auto px-1 pb-1">
+            {featuredRoutes.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="min-w-[15rem] shrink-0 rounded-[1.6rem] border border-line bg-white/78 px-4 py-4 transition-transform hover:-translate-y-0.5 md:min-w-[16rem]"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
+                      {item.section}
+                    </p>
+                    <h2 className="mt-2 text-lg font-semibold text-foreground">{item.label}</h2>
+                  </div>
+                  <span className="market-stamp">{item.badge}</span>
+                </div>
+                <p className="mt-3 text-sm leading-6 text-muted">{item.description}</p>
+              </Link>
+            ))}
           </div>
         </div>
 

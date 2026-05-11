@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { CatalogBrowser } from "@/components/catalog-browser";
 import { MarketingLayout } from "@/components/marketing-layout";
-import { getCatalogAisles } from "@/lib/public-site";
+import { getCatalogAisles, publicNavigation } from "@/lib/public-site";
 import { products } from "@/lib/site-data";
 
 function CatalogBrowserFallback() {
@@ -34,6 +34,7 @@ function CatalogBrowserFallback() {
 export default function ProductsPage() {
   const totalVariants = products.reduce((total, product) => total + product.variants.length, 0);
   const catalogAisles = getCatalogAisles().slice(0, 3);
+  const supportRoutes = publicNavigation.filter((item) => item.href !== "/products").slice(0, 4);
 
   return (
     <MarketingLayout>
@@ -50,19 +51,27 @@ export default function ProductsPage() {
                 looking for a part family and want to compare product cards, dimensions, and
                 variant depth before moving into an RFQ.
               </p>
-              <div className="mt-5 flex flex-wrap gap-2 text-sm font-semibold text-accent-deep">
-                <Link href="/materials" className="rounded-full border border-line bg-white/75 px-4 py-2">
-                  Compare materials
-                </Link>
-                <Link href="/industries" className="rounded-full border border-line bg-white/75 px-4 py-2">
-                  Browse industries
-                </Link>
-                <Link href="/markets" className="rounded-full border border-line bg-white/75 px-4 py-2">
-                  Review markets
-                </Link>
-                <Link href="/rfq" className="rounded-full border border-line bg-white/75 px-4 py-2">
-                  Send RFQ
-                </Link>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                {supportRoutes.map((route) => (
+                  <Link
+                    key={route.href}
+                    href={route.href}
+                    className="rounded-[1.55rem] border border-line bg-white/76 px-4 py-4 transition-transform hover:-translate-y-0.5"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
+                          {route.section}
+                        </p>
+                        <h2 className="mt-2 text-lg font-semibold text-foreground">
+                          {route.label}
+                        </h2>
+                      </div>
+                      <span className="market-stamp">{route.badge}</span>
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-muted">{route.description}</p>
+                  </Link>
+                ))}
               </div>
             </div>
 
