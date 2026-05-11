@@ -19,6 +19,57 @@ export default function Home() {
     { label: "Markets", value: String(markets.length) },
     { label: "Tracked currencies", value: "5" },
   ];
+  const catalogAisles = Array.from(
+    products.reduce(
+      (map, product) => {
+        const current = map.get(product.category) ?? {
+          category: product.category,
+          productCount: 0,
+          variantCount: 0,
+          fastestLeadTime: product.standardLeadTimeDays,
+          materials: new Set<string>(),
+        };
+
+        current.productCount += 1;
+        current.variantCount += product.variants.length;
+        current.fastestLeadTime = Math.min(current.fastestLeadTime, product.standardLeadTimeDays);
+        current.materials.add(product.material);
+        map.set(product.category, current);
+
+        return map;
+      },
+      new Map<
+        string,
+        {
+          category: string;
+          productCount: number;
+          variantCount: number;
+          fastestLeadTime: number;
+          materials: Set<string>;
+        }
+      >(),
+    ).values(),
+  )
+    .map((item) => ({
+      ...item,
+      materials: Array.from(item.materials).slice(0, 2),
+    }))
+    .sort((left, right) => right.productCount - left.productCount || left.category.localeCompare(right.category))
+    .slice(0, 4);
+  const shoppingFlow = [
+    {
+      title: "Enter through a clear aisle",
+      detail: "Start by category or market instead of forcing buyers to read every product card.",
+    },
+    {
+      title: "Shortlist with technical cues",
+      detail: "Variant count, lead time, and material show up before the RFQ conversation starts.",
+    },
+    {
+      title: "Move directly into RFQ",
+      detail: "Once buyers find the right family, the page keeps them one click away from a quote request.",
+    },
+  ];
 
   return (
     <MarketingLayout>
@@ -144,6 +195,85 @@ export default function Home() {
               <p className="mt-3 text-sm leading-7 text-muted">{pillar.detail}</p>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="section-shell py-10 md:py-14">
+        <div className="grid gap-6 lg:grid-cols-[0.82fr_1.18fr]">
+          <div className="market-card-dark rounded-[2.4rem] p-6 md:p-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">
+              How large catalogs stay usable
+            </p>
+            <h2 className="mt-4 display-title text-4xl font-semibold text-white md:text-5xl">
+              The public storefront now behaves more like an engineered supply counter.
+            </h2>
+            <p className="mt-4 text-sm leading-7 text-white/74">
+              The best industrial catalogs are beautiful because they are legible. They put browse
+              lanes, fast technical cues, and quote actions in front of the buyer before the page
+              turns into a wall of cards.
+            </p>
+
+            <div className="mt-6 grid gap-4">
+              {shoppingFlow.map((step, index) => (
+                <article
+                  key={step.title}
+                  className="rounded-[1.55rem] border border-white/10 bg-white/10 px-5 py-5"
+                >
+                  <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-white/58">
+                    Step {index + 1}
+                  </p>
+                  <h3 className="mt-3 text-xl font-semibold text-white">{step.title}</h3>
+                  <p className="mt-2 text-sm leading-7 text-white/74">{step.detail}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            {catalogAisles.map((aisle) => (
+              <Link
+                key={aisle.category}
+                href={`/products?category=${encodeURIComponent(aisle.category)}`}
+                className="panel rounded-[2rem] border border-white/65 p-6 transition-transform hover:-translate-y-1"
+              >
+                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-muted">
+                  {aisle.productCount} families
+                </p>
+                <h3 className="mt-4 display-title text-3xl font-semibold text-foreground">
+                  {aisle.category}
+                </h3>
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-[1.35rem] border border-line bg-white/72 px-4 py-4">
+                    <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-muted">
+                      Variant sizes
+                    </p>
+                    <p className="mt-2 text-2xl font-semibold text-foreground">
+                      {aisle.variantCount}
+                    </p>
+                  </div>
+                  <div className="rounded-[1.35rem] border border-line bg-white/72 px-4 py-4">
+                    <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-muted">
+                      Fastest lead time
+                    </p>
+                    <p className="mt-2 text-2xl font-semibold text-foreground">
+                      {aisle.fastestLeadTime} days
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {aisle.materials.map((material) => (
+                    <span
+                      key={material}
+                      className="rounded-full border border-[rgba(214,137,53,0.28)] bg-accent-warm-soft px-3 py-1 text-xs font-semibold text-accent-berry"
+                    >
+                      {material}
+                    </span>
+                  ))}
+                </div>
+                <p className="mt-5 text-sm font-semibold text-accent-deep">Open aisle</p>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 

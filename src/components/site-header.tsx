@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { products } from "@/lib/site-data";
 
 const navigation = [
   { href: "/products", label: "Products" },
@@ -7,6 +8,7 @@ const navigation = [
 ];
 
 const marketTags = ["UAE", "Saudi", "Oman", "Qatar"];
+const browseLanes = Array.from(new Set(products.map((product) => product.category))).slice(0, 5);
 
 export function SiteHeader() {
   return (
@@ -66,6 +68,23 @@ export function SiteHeader() {
                 Request Quote
               </Link>
             </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3 border-t border-line px-4 py-3 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-accent-deep">
+            Browse lanes
+          </p>
+          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
+            {browseLanes.map((lane) => (
+              <Link
+                key={lane}
+                href={`/products?category=${encodeURIComponent(lane)}`}
+                className="shrink-0 rounded-full border border-line bg-white/72 px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-accent hover:bg-[rgba(222,240,204,0.7)]"
+              >
+                {lane}
+              </Link>
+            ))}
           </div>
         </div>
       </div>
