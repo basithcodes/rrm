@@ -112,7 +112,7 @@ export function ImportWorkbench({ sampleCsvText }: { sampleCsvText: string }) {
   return (
     <div className="grid gap-8">
       <section className="grid gap-6 xl:grid-cols-[0.92fr_1.08fr]">
-        <div className="rounded-[2rem] border border-white/10 bg-white/4 p-6 md:p-8">
+        <div className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
@@ -125,7 +125,7 @@ export function ImportWorkbench({ sampleCsvText }: { sampleCsvText: string }) {
             <a
               href={templateHref}
               download="rrm-import-template.csv"
-              className="inline-flex rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-white/85"
+              className="admin-outline-button inline-flex rounded-full px-4 py-2 text-sm font-semibold"
             >
               Download sample template
             </a>
@@ -138,7 +138,7 @@ export function ImportWorkbench({ sampleCsvText }: { sampleCsvText: string }) {
                 type="file"
                 accept=".csv,text/csv"
                 onChange={handleFileChange}
-                className="rounded-2xl border border-white/10 bg-[#111b23] px-4 py-3 text-sm text-white/75 file:mr-4 file:rounded-full file:border-0 file:bg-accent file:px-4 file:py-2 file:font-semibold file:text-ink-inverse"
+                className="rounded-[1.4rem] border border-white/10 bg-[rgba(7,15,10,0.42)] px-4 py-3 text-sm text-white/75 file:mr-4 file:rounded-full file:border-0 file:bg-accent-warm file:px-4 file:py-2 file:font-semibold file:text-foreground"
               />
             </label>
 
@@ -147,7 +147,7 @@ export function ImportWorkbench({ sampleCsvText }: { sampleCsvText: string }) {
               <textarea
                 value={csvText}
                 onChange={(event) => setCsvText(event.target.value)}
-                className="min-h-72 rounded-[1.5rem] border border-white/10 bg-[#111b23] px-4 py-4 font-mono text-xs leading-6 text-white/78 outline-none"
+                className="min-h-72 rounded-[1.6rem] border border-white/10 bg-[rgba(7,15,10,0.42)] px-4 py-4 font-mono text-xs leading-6 text-white/78 outline-none"
                 spellCheck={false}
               />
             </label>
@@ -156,14 +156,14 @@ export function ImportWorkbench({ sampleCsvText }: { sampleCsvText: string }) {
               <button
                 type="button"
                 onClick={() => updatePreview(csvText, activeFileName || "pasted-import.csv")}
-                className="inline-flex items-center justify-center rounded-full bg-accent px-5 py-3 text-sm font-semibold text-ink-inverse"
+                className="admin-highlight-button inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold"
               >
                 {isParsing ? "Parsing..." : "Parse current CSV"}
               </button>
               <button
                 type="button"
                 onClick={() => updatePreview(sampleCsvText, "sample-template.csv")}
-                className="inline-flex items-center justify-center rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white/85"
+                className="admin-outline-button inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold"
               >
                 Reset to sample
               </button>
@@ -171,7 +171,7 @@ export function ImportWorkbench({ sampleCsvText }: { sampleCsvText: string }) {
           </div>
         </div>
 
-        <div className="rounded-[2rem] border border-white/10 bg-white/4 p-6 md:p-8">
+        <div className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
             CSV columns
           </p>
@@ -182,7 +182,7 @@ export function ImportWorkbench({ sampleCsvText }: { sampleCsvText: string }) {
                 {productImportHeaders.map((header) => (
                   <span
                     key={header}
-                    className="rounded-full border border-white/10 bg-[#111b23] px-3 py-1 text-xs font-semibold text-white/75"
+                    className="admin-chip"
                   >
                     {header}
                   </span>
@@ -195,7 +195,7 @@ export function ImportWorkbench({ sampleCsvText }: { sampleCsvText: string }) {
                 {ownerOnlyImportHeaders.map((header) => (
                   <span
                     key={header}
-                    className="rounded-full border border-white/10 bg-[#111b23] px-3 py-1 text-xs font-semibold text-white/75"
+                    className="admin-chip"
                   >
                     {header}
                   </span>
@@ -207,26 +207,26 @@ export function ImportWorkbench({ sampleCsvText }: { sampleCsvText: string }) {
       </section>
 
       <section className="grid gap-6 md:grid-cols-4">
-        <article className="rounded-[1.5rem] border border-white/10 bg-white/4 p-5">
+        <article className="admin-deep-card rounded-[1.8rem] p-5">
           <p className="text-xs uppercase tracking-[0.18em] text-white/45">File</p>
           <p className="mt-3 text-lg font-semibold text-white">{preview.fileName}</p>
         </article>
-        <article className="rounded-[1.5rem] border border-white/10 bg-white/4 p-5">
+        <article className="admin-deep-card rounded-[1.8rem] p-5">
           <p className="text-xs uppercase tracking-[0.18em] text-white/45">Rows detected</p>
-          <p className="mt-3 text-3xl font-semibold text-white">{preview.rowCount}</p>
+          <p className="mt-3 text-3xl font-semibold text-[#f6d59e]">{preview.rowCount}</p>
         </article>
-        <article className="rounded-[1.5rem] border border-white/10 bg-white/4 p-5">
+        <article className="admin-deep-card rounded-[1.8rem] p-5">
           <p className="text-xs uppercase tracking-[0.18em] text-white/45">Valid rows</p>
-          <p className="mt-3 text-3xl font-semibold text-white">{preview.successfulCount}</p>
+          <p className="mt-3 text-3xl font-semibold text-[#f6d59e]">{preview.successfulCount}</p>
         </article>
-        <article className="rounded-[1.5rem] border border-white/10 bg-white/4 p-5">
+        <article className="admin-deep-card rounded-[1.8rem] p-5">
           <p className="text-xs uppercase tracking-[0.18em] text-white/45">Issues</p>
-          <p className="mt-3 text-3xl font-semibold text-[#f0c6ac]">{preview.failedCount}</p>
+          <p className="mt-3 text-3xl font-semibold text-[#f6d59e]">{preview.failedCount}</p>
         </article>
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <div className="rounded-[2rem] border border-white/10 bg-white/4 p-6 md:p-8">
+        <div className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
@@ -245,7 +245,7 @@ export function ImportWorkbench({ sampleCsvText }: { sampleCsvText: string }) {
               <button
                 type="submit"
                 disabled={preview.successfulCount === 0 || isSaving}
-                className="inline-flex items-center justify-center rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-white/85 disabled:opacity-50"
+                className="admin-highlight-button inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold disabled:opacity-50"
               >
                 {isSaving ? "Importing..." : "Import valid rows"}
               </button>
@@ -259,7 +259,7 @@ export function ImportWorkbench({ sampleCsvText }: { sampleCsvText: string }) {
             {preview.rows.slice(0, 5).map((row) => (
               <article
                 key={`${row.slug}-${row.variant.code}`}
-                className="rounded-[1.5rem] border border-white/10 bg-[#111b23] p-5"
+                className="admin-deep-card rounded-[1.8rem] p-5"
               >
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                   <div>
@@ -267,7 +267,7 @@ export function ImportWorkbench({ sampleCsvText }: { sampleCsvText: string }) {
                     <h3 className="mt-2 text-lg font-semibold text-white">{row.product.name}</h3>
                     <p className="mt-2 text-sm leading-7 text-white/65">{row.product.summary}</p>
                   </div>
-                  <span className="rounded-full bg-[#293743] px-3 py-1 text-xs font-semibold text-white/75">
+                  <span className="admin-chip">
                     {row.variant.code}
                   </span>
                 </div>
@@ -284,7 +284,7 @@ export function ImportWorkbench({ sampleCsvText }: { sampleCsvText: string }) {
                 </div>
 
                 <div className="mt-5 grid gap-3 md:grid-cols-3">
-                  <div className="rounded-[1rem] border border-white/10 px-4 py-3">
+                  <div className="rounded-[1rem] border border-white/10 bg-white/3 px-4 py-3">
                     <p className="text-xs uppercase tracking-[0.18em] text-white/45">Dimensions</p>
                     <ul className="mt-2 grid gap-1 text-sm leading-6 text-white/65">
                       {row.variant.dimensions.map((dimension) => (
@@ -294,7 +294,7 @@ export function ImportWorkbench({ sampleCsvText }: { sampleCsvText: string }) {
                       ))}
                     </ul>
                   </div>
-                  <div className="rounded-[1rem] border border-white/10 px-4 py-3">
+                  <div className="rounded-[1rem] border border-white/10 bg-white/3 px-4 py-3">
                     <p className="text-xs uppercase tracking-[0.18em] text-white/45">Owner sourcing</p>
                     <p className="mt-2 text-sm leading-6 text-white/65">
                       {row.owner.rawMaterials.length} raw material lines
@@ -303,7 +303,7 @@ export function ImportWorkbench({ sampleCsvText }: { sampleCsvText: string }) {
                       {row.owner.competitorBenchmarks.length} competitor entries
                     </p>
                   </div>
-                  <div className="rounded-[1rem] border border-white/10 px-4 py-3">
+                  <div className="rounded-[1rem] border border-white/10 bg-white/3 px-4 py-3">
                     <p className="text-xs uppercase tracking-[0.18em] text-white/45">Process</p>
                     <p className="mt-2 text-sm leading-6 text-white/65">{row.owner.process.compoundCode}</p>
                     <p className="mt-1 text-sm leading-6 text-white/65">{row.owner.process.cureSystem}</p>
@@ -313,14 +313,14 @@ export function ImportWorkbench({ sampleCsvText }: { sampleCsvText: string }) {
             ))}
 
             {preview.rows.length === 0 ? (
-              <div className="rounded-[1.5rem] border border-white/10 bg-[#111b23] p-5 text-sm leading-7 text-white/65">
+              <div className="admin-deep-card rounded-[1.8rem] p-5 text-sm leading-7 text-white/65">
                 No valid rows parsed yet.
               </div>
             ) : null}
           </div>
         </div>
 
-        <div className="rounded-[2rem] border border-white/10 bg-white/4 p-6 md:p-8">
+        <div className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
             Validation issues
           </p>
@@ -341,7 +341,7 @@ export function ImportWorkbench({ sampleCsvText }: { sampleCsvText: string }) {
             )}
 
             {preview.missingHeaders.length === 0 ? null : (
-              <div className="rounded-[1rem] border border-white/10 bg-[#111b23] px-4 py-3 text-sm leading-7 text-white/65">
+              <div className="admin-deep-card rounded-[1rem] px-4 py-3 text-sm leading-7 text-white/65">
                 Required public headers must always be present. Owner-only headers can be added gradually.
               </div>
             )}

@@ -7,7 +7,7 @@ export default function AdminImportsPage() {
 
   return (
     <div className="grid gap-8">
-      <section className="rounded-[2rem] border border-white/10 bg-white/4 p-6 md:p-8">
+      <section className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
         <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
@@ -22,7 +22,7 @@ export default function AdminImportsPage() {
           </div>
           <Link
             href="/admin/imports/export"
-            className="inline-flex items-center justify-center rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white/85"
+            className="admin-outline-button inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold"
           >
             Export current catalog CSV
           </Link>

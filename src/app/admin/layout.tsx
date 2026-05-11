@@ -25,15 +25,35 @@ export default async function AdminLayout({
   await requireOwnerSession();
 
   return (
-    <div className="min-h-screen bg-[#111b23] text-white">
-      <div className="mx-auto grid min-h-screen max-w-7xl gap-6 px-4 py-6 lg:grid-cols-[17rem_1fr] lg:px-6">
-        <aside className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
+    <div className="admin-root">
+      <div className="mx-auto grid min-h-screen max-w-[90rem] gap-6 px-4 py-6 lg:grid-cols-[18rem_1fr] lg:px-6">
+        <aside className="admin-sidebar rounded-[2.4rem] p-6 backdrop-blur-xl lg:sticky lg:top-6 lg:h-[calc(100vh-3rem)] lg:overflow-y-auto">
+          <div className="flex items-center gap-3">
+            <span className="flex h-14 w-14 items-center justify-center rounded-[1.35rem] bg-[linear-gradient(135deg,#d68935_0%,#94452e_100%)] text-lg font-semibold text-white shadow-[0_18px_30px_-18px_rgba(214,137,53,0.75)]">
+              RRM
+            </span>
+            <div>
+              <p className="text-sm font-semibold text-white">Owner workspace</p>
+              <p className="mt-1 text-xs uppercase tracking-[0.18em] text-white/55">
+                Private market board
+              </p>
+            </div>
+          </div>
+
+          <p className="mt-8 text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
             Owner workspace
           </p>
           <h1 className="mt-4 display-title text-3xl font-semibold text-white">
             RRM Control Room
           </h1>
+          <p className="mt-4 text-sm leading-7 text-white/72">
+            Pricing, manufacturing, sourcing, imports, and benchmark data stay in the back-room ledger.
+          </p>
+
+          <div className="mt-6 flex flex-wrap gap-2">
+            <span className="admin-chip">Secure session</span>
+            <span className="admin-chip">Owner only</span>
+          </div>
 
           <div className="mt-8">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
@@ -45,7 +65,7 @@ export default async function AdminLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className="rounded-2xl border border-white/8 px-4 py-3 text-sm font-semibold text-white/80 transition hover:border-white/20 hover:bg-white/8 hover:text-white"
+                className="admin-link rounded-[1.4rem] px-4 py-3 text-sm font-semibold"
               >
                 {item.label}
               </Link>
@@ -62,7 +82,7 @@ export default async function AdminLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className="rounded-2xl border border-white/8 px-4 py-3 text-sm font-semibold text-white/80 transition hover:border-white/20 hover:bg-white/8 hover:text-white"
+                className="admin-link rounded-[1.4rem] px-4 py-3 text-sm font-semibold"
               >
                 {item.label}
               </Link>
@@ -72,16 +92,41 @@ export default async function AdminLayout({
           <form action={signOutAction} className="mt-8">
             <button
               type="submit"
-              className="inline-flex w-full items-center justify-center rounded-full border border-white/15 px-4 py-3 text-sm font-semibold text-white/85"
+              className="admin-outline-button inline-flex w-full items-center justify-center rounded-full px-4 py-3 text-sm font-semibold"
             >
               Sign out
             </button>
           </form>
         </aside>
 
-        <div className="rounded-[2rem] border border-white/10 bg-[#17232d] p-6 shadow-[0_30px_90px_-50px_rgba(0,0,0,0.7)] md:p-8">
+        <main className="admin-main rounded-[2.6rem] p-6 md:p-8">
+          <div className="mb-6 flex flex-col gap-4 border-b border-white/8 pb-6 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/50">
+                Owner operations
+              </p>
+              <h2 className="mt-3 display-title text-4xl font-semibold text-white md:text-5xl">
+                Private modules styled to match the new storefront.
+              </h2>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/products"
+                className="admin-outline-button inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold"
+              >
+                View public catalog
+              </Link>
+              <Link
+                href="/admin/imports"
+                className="admin-highlight-button inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold"
+              >
+                Import catalog data
+              </Link>
+            </div>
+          </div>
+
           {children}
-        </div>
+        </main>
       </div>
     </div>
   );

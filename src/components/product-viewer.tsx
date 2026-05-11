@@ -184,15 +184,15 @@ function SceneModel({ config }: { config: ProductViewerConfig }) {
 
 export function ProductViewer({ product }: { product: Product }) {
   return (
-    <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem] border border-white/70 bg-[linear-gradient(160deg,#fffaf3_0%,#ece0d0_100%)] shadow-[0_30px_90px_-48px_rgba(20,33,43,0.6)]">
+    <div className="relative aspect-[4/3] overflow-hidden rounded-[2.4rem] border border-white/70 bg-[linear-gradient(160deg,#fff9ef_0%,#f1e6bf_48%,#dff0cf_100%)] shadow-[0_32px_90px_-48px_rgba(23,53,35,0.55)]">
       <Canvas
         className="h-full w-full"
         camera={{ position: product.viewer.cameraPosition, fov: 34 }}
         dpr={[1, 2]}
         shadows
       >
-        <color attach="background" args={["#f6efe5"]} />
-        <hemisphereLight intensity={1.1} groundColor="#d5c8ba" />
+        <color attach="background" args={["#fbf6ea"]} />
+        <hemisphereLight intensity={1.15} groundColor="#e0d0b4" />
         <directionalLight position={[6, 7, 6]} intensity={2.2} castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} />
         <directionalLight position={[-5, 3, -4]} intensity={1.1} color={product.viewer.accentColor} />
         <group position={[0, -0.1, 0]}>
@@ -210,18 +210,18 @@ export function ProductViewer({ product }: { product: Product }) {
       </Canvas>
 
       <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-4 p-5">
-        <span className="rounded-full border border-white/70 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-accent-deep backdrop-blur-sm">
-          Interactive demo model
+        <span className="rounded-full border border-white/70 bg-white/72 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-accent-deep backdrop-blur-sm">
+          Rotate to inspect
         </span>
-        <span className="rounded-full bg-[#17232d] px-3 py-1 font-mono text-xs text-white/78">
+        <span className="rounded-full border border-white/10 bg-[#21492d] px-3 py-1 font-mono text-xs text-white/82">
           {product.viewer.label}
         </span>
       </div>
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 p-5">
-        <div className="max-w-sm rounded-[1.5rem] bg-white/78 p-4 backdrop-blur-md">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-muted">
-            Dummy 3D preview
+        <div className="max-w-sm rounded-[1.6rem] bg-white/82 p-4 shadow-[0_24px_44px_-28px_rgba(23,53,35,0.45)] backdrop-blur-md">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent-deep">
+            3D presentation
           </p>
           <h3 className="mt-3 text-2xl font-semibold text-foreground">{product.name}</h3>
           <p className="mt-3 text-sm leading-7 text-muted">

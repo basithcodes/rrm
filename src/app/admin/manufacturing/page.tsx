@@ -3,7 +3,7 @@ import { formatCurrency, getProductBySlug, ownerProductRecords } from "@/lib/sit
 export default function AdminManufacturingPage() {
   return (
     <div className="grid gap-8">
-      <section className="rounded-[2rem] border border-white/10 bg-white/4 p-6 md:p-8">
+      <section className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
           Manufacturing
         </p>
@@ -24,34 +24,34 @@ export default function AdminManufacturingPage() {
           }
 
           return (
-            <article key={`${record.slug}-manufacturing`} className="rounded-[2rem] border border-white/10 bg-white/4 p-6 md:p-8">
+            <article key={`${record.slug}-manufacturing`} className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.18em] text-white/45">{record.process.compoundCode}</p>
                   <h3 className="mt-2 text-2xl font-semibold text-white">{product.name}</h3>
                   <p className="mt-3 text-sm leading-7 text-white/65">{record.process.cureSystem}</p>
                 </div>
-                <span className="rounded-full bg-[#293743] px-3 py-1 text-xs font-semibold text-white/75">
+                <span className="admin-chip">
                   Scrap rate {record.process.scrapRate}
                 </span>
               </div>
 
               <div className="mt-6 grid gap-4 md:grid-cols-4">
-                <div className="rounded-[1rem] border border-white/10 bg-[#111b23] px-4 py-4">
+                <div className="admin-deep-card rounded-[1.2rem] px-4 py-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-white/45">Batch size</p>
                   <p className="mt-2 font-semibold text-white">{record.process.batchSizeKg} kg</p>
                 </div>
-                <div className="rounded-[1rem] border border-white/10 bg-[#111b23] px-4 py-4">
+                <div className="admin-deep-card rounded-[1.2rem] px-4 py-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-white/45">Monthly output</p>
                   <p className="mt-2 font-semibold text-white">{record.process.monthlyOutputKg} kg</p>
                 </div>
-                <div className="rounded-[1rem] border border-white/10 bg-[#111b23] px-4 py-4">
+                <div className="admin-deep-card rounded-[1.2rem] px-4 py-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-white/45">Raw materials</p>
                   <p className="mt-2 font-semibold text-white">{record.rawMaterials.length} lines</p>
                 </div>
-                <div className="rounded-[1rem] border border-white/10 bg-[#111b23] px-4 py-4">
+                <div className="admin-deep-card rounded-[1.2rem] px-4 py-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-white/45">Allocated overhead</p>
-                  <p className="mt-2 font-semibold text-white">
+                  <p className="mt-2 font-semibold text-[#f6d59e]">
                     {formatCurrency(
                       record.overheadAllocation.reduce((total, item) => total + item.monthlyUsd, 0),
                       "USD",
@@ -61,7 +61,7 @@ export default function AdminManufacturingPage() {
               </div>
 
               <div className="mt-6 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-                <div className="rounded-[1.5rem] border border-white/10 bg-[#111b23] p-5">
+                <div className="admin-deep-card rounded-[1.8rem] p-5">
                   <p className="text-xs uppercase tracking-[0.18em] text-white/45">QA checks</p>
                   <ul className="mt-4 grid gap-2 text-sm leading-7 text-white/65">
                     {record.process.qaChecks.map((check) => (
@@ -69,7 +69,7 @@ export default function AdminManufacturingPage() {
                     ))}
                   </ul>
                 </div>
-                <div className="rounded-[1.5rem] border border-white/10 bg-[#111b23] p-5">
+                <div className="admin-deep-card rounded-[1.8rem] p-5">
                   <p className="text-xs uppercase tracking-[0.18em] text-white/45">Raw material ratio snapshot</p>
                   <div className="mt-4 grid gap-3">
                     {record.rawMaterials.map((material) => (
@@ -83,7 +83,7 @@ export default function AdminManufacturingPage() {
                             {material.supplier}
                           </p>
                         </div>
-                        <p className="text-sm font-semibold text-[#f0c6ac]">{material.percentage}</p>
+                        <p className="text-sm font-semibold text-[#f6d59e]">{material.percentage}</p>
                       </div>
                     ))}
                   </div>

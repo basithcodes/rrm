@@ -63,34 +63,39 @@ export default function AdminDashboardPage() {
   return (
     <div className="grid gap-8">
       <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-[2rem] border border-white/10 bg-white/4 p-6 md:p-8">
+        <div className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
             Dashboard
           </p>
           <h2 className="mt-4 display-title text-5xl font-semibold text-white">
-            Secure workspace for products, costing, and protected manufacturing records.
+            A cleaner back-room dashboard for pricing, sourcing, and protected records.
           </h2>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-white/72">
             This area is server-side gated before render. It is the right place to keep internal price books, chemistry notes, competitor records, and RFQ handling logic out of the public experience.
           </p>
+          <div className="mt-6 flex flex-wrap gap-2">
+            <span className="admin-chip">Private price books</span>
+            <span className="admin-chip">Protected manufacturing</span>
+            <span className="admin-chip">RFQ queue</span>
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-2">
-          <article className="rounded-[1.5rem] border border-white/10 bg-white/4 p-5">
+          <article className="admin-deep-card rounded-[1.8rem] p-5">
             <p className="text-xs uppercase tracking-[0.18em] text-white/55">Open RFQs</p>
-            <p className="mt-3 text-4xl font-semibold text-white">{ownerDashboard.pendingRfqs}</p>
+            <p className="mt-3 text-4xl font-semibold text-[#f6d59e]">{ownerDashboard.pendingRfqs}</p>
           </article>
-          <article className="rounded-[1.5rem] border border-white/10 bg-white/4 p-5">
+          <article className="admin-deep-card rounded-[1.8rem] p-5">
             <p className="text-xs uppercase tracking-[0.18em] text-white/55">Active customers</p>
-            <p className="mt-3 text-4xl font-semibold text-white">{ownerDashboard.activeCustomers}</p>
+            <p className="mt-3 text-4xl font-semibold text-[#f6d59e]">{ownerDashboard.activeCustomers}</p>
           </article>
-          <article className="rounded-[1.5rem] border border-white/10 bg-white/4 p-5">
+          <article className="admin-deep-card rounded-[1.8rem] p-5">
             <p className="text-xs uppercase tracking-[0.18em] text-white/55">Cataloged variants</p>
-            <p className="mt-3 text-4xl font-semibold text-white">{ownerDashboard.catalogedVariants}</p>
+            <p className="mt-3 text-4xl font-semibold text-[#f6d59e]">{ownerDashboard.catalogedVariants}</p>
           </article>
-          <article className="rounded-[1.5rem] border border-white/10 bg-white/4 p-5">
+          <article className="admin-deep-card rounded-[1.8rem] p-5">
             <p className="text-xs uppercase tracking-[0.18em] text-white/55">Protected records</p>
-            <p className="mt-3 text-4xl font-semibold text-white">
+            <p className="mt-3 text-4xl font-semibold text-[#f6d59e]">
               {ownerDashboard.protectedManufacturingRecords}
             </p>
           </article>
@@ -98,7 +103,7 @@ export default function AdminDashboardPage() {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <div className="rounded-[2rem] border border-white/10 bg-white/4 p-6 md:p-8">
+        <div className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
             Owner modules
           </p>
@@ -107,7 +112,7 @@ export default function AdminDashboardPage() {
               <Link
                 key={module.href}
                 href={module.href}
-                className="rounded-[1.5rem] border border-white/10 bg-[#111b23] p-5 transition hover:border-white/20 hover:bg-white/8"
+                className="admin-deep-card rounded-[1.8rem] p-5 transition hover:border-[rgba(246,213,158,0.28)] hover:bg-[rgba(246,213,158,0.06)]"
               >
                 <p className="text-xs uppercase tracking-[0.18em] text-white/45">{module.stat}</p>
                 <h3 className="mt-3 text-xl font-semibold text-white">{module.title}</h3>
@@ -117,19 +122,19 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-[2rem] border border-white/10 bg-white/4 p-6 md:p-8">
+        <div className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
             Workspace summary
           </p>
           <div className="mt-6 grid gap-4">
-            <article className="rounded-[1.5rem] border border-white/10 bg-[#111b23] p-5">
+            <article className="admin-deep-card rounded-[1.8rem] p-5">
               <p className="text-xs uppercase tracking-[0.18em] text-white/45">Catalog overview</p>
               <h3 className="mt-3 text-xl font-semibold text-white">{products.length} products in dummy catalog</h3>
               <p className="mt-3 text-sm leading-7 text-white/65">
                 The product seed layer now includes dimensions, supply formats, technical profiles, and 3D preview metadata.
               </p>
             </article>
-            <article className="rounded-[1.5rem] border border-white/10 bg-[#111b23] p-5">
+            <article className="admin-deep-card rounded-[1.8rem] p-5">
               <p className="text-xs uppercase tracking-[0.18em] text-white/45">Cost summary</p>
               <h3 className="mt-3 text-xl font-semibold text-white">
                 {formatCurrency(totalInternalCosts, "USD")} monthly owner-only overhead
@@ -138,7 +143,7 @@ export default function AdminDashboardPage() {
                 Rent, electricity, labor, maintenance, and equipment reserve are now split out into their own cost page.
               </p>
             </article>
-            <article className="rounded-[1.5rem] border border-white/10 bg-[#111b23] p-5">
+            <article className="admin-deep-card rounded-[1.8rem] p-5">
               <p className="text-xs uppercase tracking-[0.18em] text-white/45">Import status</p>
               <h3 className="mt-3 text-xl font-semibold text-white">Extended CSV import template ready</h3>
               <p className="mt-3 text-sm leading-7 text-white/65">
@@ -150,22 +155,22 @@ export default function AdminDashboardPage() {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <div className="rounded-[2rem] border border-white/10 bg-white/4 p-6 md:p-8">
+        <div className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
             Recent RFQ queue
           </p>
           <div className="mt-6 grid gap-4">
-            {recentRfqs.map((rfq) => (
-              <article key={rfq.reference} className="rounded-[1.5rem] border border-white/10 bg-[#111b23] p-5">
+            {recentRfqs.map((rfq, index) => (
+              <article key={rfq.reference} className="admin-deep-card rounded-[1.8rem] p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
-                      {rfq.reference}
+                      Queue item {index + 1} · {rfq.reference}
                     </p>
                     <h3 className="mt-2 text-lg font-semibold text-white">{rfq.company}</h3>
                     <p className="mt-2 text-sm leading-7 text-white/65">{rfq.requestedProduct}</p>
                   </div>
-                  <span className="rounded-full bg-[#293743] px-3 py-1 text-xs font-semibold text-white/75">
+                  <span className="admin-chip">
                     {rfq.status}
                   </span>
                 </div>
@@ -185,19 +190,19 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-[2rem] border border-white/10 bg-white/4 p-6 md:p-8">
+        <div className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
             Customer pipeline snapshot
           </p>
           <div className="mt-6 grid gap-4">
             {keyCustomers.map((customer) => (
-              <article key={customer.company} className="rounded-[1.5rem] border border-white/10 bg-[#111b23] p-5">
+              <article key={customer.company} className="admin-deep-card rounded-[1.8rem] p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <h3 className="text-lg font-semibold text-white">{customer.company}</h3>
                     <p className="mt-2 text-sm leading-7 text-white/65">{customer.demand}</p>
                   </div>
-                  <span className="rounded-full bg-[#293743] px-3 py-1 text-xs font-semibold text-white/75">
+                  <span className="admin-chip">
                     {customer.relationship}
                   </span>
                 </div>

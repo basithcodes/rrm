@@ -3,7 +3,7 @@ import { formatCurrency, ownerProductRecords, products } from "@/lib/site-data";
 export default function AdminPricingPage() {
   return (
     <div className="grid gap-8">
-      <section className="rounded-[2rem] border border-white/10 bg-white/4 p-6 md:p-8">
+      <section className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
           Pricing
         </p>
@@ -20,7 +20,7 @@ export default function AdminPricingPage() {
           const ownerRecord = ownerProductRecords.find((record) => record.slug === product.slug);
 
           return (
-            <article key={product.slug} className="rounded-[2rem] border border-white/10 bg-white/4 p-6 md:p-8">
+            <article key={product.slug} className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.18em] text-white/45">{product.category}</p>
@@ -29,12 +29,12 @@ export default function AdminPricingPage() {
                     {ownerRecord?.priceBookNotes ?? "Price-book notes not available."}
                   </p>
                 </div>
-                <span className="rounded-full bg-[#293743] px-3 py-1 text-xs font-semibold text-white/75">
+                <span className="admin-chip">
                   {product.variants.length} variants
                 </span>
               </div>
 
-              <div className="mt-6 overflow-x-auto rounded-[1.5rem] border border-white/10">
+              <div className="mt-6 overflow-x-auto rounded-[1.8rem] border border-white/10 bg-[rgba(7,15,10,0.42)]">
                 <table className="min-w-full border-collapse text-left text-sm">
                   <thead className="bg-white/5 text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
                     <tr>

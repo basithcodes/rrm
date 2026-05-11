@@ -3,7 +3,7 @@ import { formatCurrency, getProductBySlug, ownerProductRecords } from "@/lib/sit
 export default function AdminSourcingPage() {
   return (
     <div className="grid gap-8">
-      <section className="rounded-[2rem] border border-white/10 bg-white/4 p-6 md:p-8">
+      <section className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
           Sourcing
         </p>
@@ -24,19 +24,19 @@ export default function AdminSourcingPage() {
           }
 
           return (
-            <article key={record.slug} className="rounded-[2rem] border border-white/10 bg-white/4 p-6 md:p-8">
+            <article key={record.slug} className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.18em] text-white/45">{product.material}</p>
                   <h3 className="mt-2 text-2xl font-semibold text-white">{product.name}</h3>
                   <p className="mt-3 max-w-3xl text-sm leading-7 text-white/65">{record.priceBookNotes}</p>
                 </div>
-                <span className="rounded-full bg-[#293743] px-3 py-1 text-xs font-semibold text-white/75">
+                <span className="admin-chip">
                   {record.rawMaterials.length} materials
                 </span>
               </div>
 
-              <div className="mt-6 overflow-x-auto rounded-[1.5rem] border border-white/10">
+              <div className="mt-6 overflow-x-auto rounded-[1.8rem] border border-white/10 bg-[rgba(7,15,10,0.42)]">
                 <table className="min-w-full border-collapse text-left text-sm">
                   <thead className="bg-white/5 text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
                     <tr>
@@ -67,7 +67,7 @@ export default function AdminSourcingPage() {
                 </table>
               </div>
 
-              <ul className="mt-5 grid gap-2 text-sm leading-7 text-white/65">
+              <ul className="mt-5 grid gap-2 rounded-[1.4rem] border border-white/8 bg-[rgba(255,255,255,0.03)] p-4 text-sm leading-7 text-white/65">
                 {record.sourcingNotes.map((note) => (
                   <li key={note}>{note}</li>
                 ))}

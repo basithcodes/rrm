@@ -5,7 +5,7 @@ export default function AdminCostsPage() {
 
   return (
     <div className="grid gap-8">
-      <section className="rounded-[2rem] border border-white/10 bg-white/4 p-6 md:p-8">
+      <section className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
@@ -18,9 +18,9 @@ export default function AdminCostsPage() {
               Dummy owner-only cost data is now separated from the dashboard so overhead assumptions can be reviewed without mixing them into the public product pages.
             </p>
           </div>
-          <div className="rounded-[1.5rem] border border-white/10 bg-[#111b23] px-5 py-4">
+          <div className="admin-deep-card rounded-[1.7rem] px-5 py-4">
             <p className="text-xs uppercase tracking-[0.18em] text-white/45">Monthly total</p>
-            <p className="mt-2 text-2xl font-semibold text-[#f0c6ac]">
+            <p className="mt-2 text-2xl font-semibold text-[#f6d59e]">
               {formatCurrency(totalInternalCosts, "USD")}
             </p>
           </div>
@@ -28,19 +28,19 @@ export default function AdminCostsPage() {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <div className="rounded-[2rem] border border-white/10 bg-white/4 p-6 md:p-8">
+        <div className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
             Overhead buckets
           </p>
           <div className="mt-6 grid gap-4">
             {internalCostBuckets.map((bucket) => (
-              <article key={bucket.title} className="rounded-[1.5rem] border border-white/10 bg-[#111b23] p-5">
+              <article key={bucket.title} className="admin-deep-card rounded-[1.8rem] p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <h3 className="text-lg font-semibold text-white">{bucket.title}</h3>
                     <p className="mt-2 text-sm leading-7 text-white/65">{bucket.note}</p>
                   </div>
-                  <p className="text-sm font-semibold text-[#f0c6ac]">
+                  <p className="text-sm font-semibold text-[#f6d59e]">
                     {formatCurrency(bucket.monthlyUsd, "USD")}
                   </p>
                 </div>
@@ -57,13 +57,13 @@ export default function AdminCostsPage() {
           </div>
         </div>
 
-        <div className="rounded-[2rem] border border-white/10 bg-white/4 p-6 md:p-8">
+        <div className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
             Product cost allocation
           </p>
           <div className="mt-6 grid gap-4">
             {ownerProductRecords.map((record) => (
-              <article key={record.slug} className="rounded-[1.5rem] border border-white/10 bg-[#111b23] p-5">
+              <article key={record.slug} className="admin-deep-card rounded-[1.8rem] p-5">
                 <h3 className="text-lg font-semibold text-white">{record.slug}</h3>
                 <div className="mt-4 grid gap-3">
                   {record.overheadAllocation.map((allocation) => (
@@ -75,7 +75,7 @@ export default function AdminCostsPage() {
                         <p className="font-semibold text-white">{allocation.label}</p>
                         <p className="mt-1 text-sm leading-6 text-white/65">{allocation.allocationBasis}</p>
                       </div>
-                      <p className="text-sm font-semibold text-[#f0c6ac]">
+                      <p className="text-sm font-semibold text-[#f6d59e]">
                         {formatCurrency(allocation.monthlyUsd, "USD")}
                       </p>
                     </div>

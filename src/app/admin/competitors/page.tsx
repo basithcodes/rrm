@@ -3,7 +3,7 @@ import { formatCurrency, getProductBySlug, ownerProductRecords } from "@/lib/sit
 export default function AdminCompetitorsPage() {
   return (
     <div className="grid gap-8">
-      <section className="rounded-[2rem] border border-white/10 bg-white/4 p-6 md:p-8">
+      <section className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
           Competitors
         </p>
@@ -24,20 +24,23 @@ export default function AdminCompetitorsPage() {
           }
 
           return (
-            <article key={`${record.slug}-benchmarks`} className="rounded-[2rem] border border-white/10 bg-white/4 p-6 md:p-8">
-              <h3 className="text-2xl font-semibold text-white">{product.name}</h3>
+            <article key={`${record.slug}-benchmarks`} className="admin-surface-card rounded-[2.4rem] p-6 md:p-8">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <h3 className="text-2xl font-semibold text-white">{product.name}</h3>
+                <span className="admin-chip">{record.competitorBenchmarks.length} benchmarks</span>
+              </div>
               <div className="mt-6 grid gap-4 md:grid-cols-2">
                 {record.competitorBenchmarks.map((benchmark) => (
                   <div
                     key={`${record.slug}-${benchmark.competitor}-${benchmark.market}`}
-                    className="rounded-[1.5rem] border border-white/10 bg-[#111b23] p-5"
+                    className="admin-deep-card rounded-[1.8rem] p-5"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <p className="text-xs uppercase tracking-[0.18em] text-white/45">{benchmark.market}</p>
                         <h4 className="mt-2 text-lg font-semibold text-white">{benchmark.competitor}</h4>
                       </div>
-                      <p className="text-sm font-semibold text-[#f0c6ac]">
+                      <p className="text-sm font-semibold text-[#f6d59e]">
                         {formatCurrency(benchmark.unitPrice, benchmark.currency)}
                       </p>
                     </div>

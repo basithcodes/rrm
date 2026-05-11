@@ -9,9 +9,12 @@ export default async function OwnerAccessPage({ searchParams }: OwnerAccessPageP
   const hasError = params.error === "invalid";
 
   return (
-    <main className="section-shell flex flex-1 items-center py-10 md:py-16">
+    <main className="section-shell relative flex flex-1 items-center py-10 md:py-16">
+      <div className="pointer-events-none absolute left-0 top-10 h-56 w-56 rounded-full bg-[rgba(222,240,204,0.72)] blur-3xl" />
+      <div className="pointer-events-none absolute right-0 top-20 h-56 w-56 rounded-full bg-[rgba(246,213,158,0.45)] blur-3xl" />
       <div className="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-        <section className="panel rounded-[2rem] bg-[#17232d] p-8 text-ink-inverse md:p-10">
+        <section className="market-card-dark relative overflow-hidden rounded-[2.6rem] p-8 text-ink-inverse md:p-10">
+          <div className="pointer-events-none absolute right-[-2rem] top-[-2rem] h-40 w-40 rounded-full bg-[rgba(246,213,158,0.16)] blur-2xl" />
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
             Owner workspace access
           </p>
@@ -23,7 +26,7 @@ export default async function OwnerAccessPage({ searchParams }: OwnerAccessPageP
           </p>
         </section>
 
-        <section className="panel rounded-[2rem] p-8 md:p-10">
+        <section className="panel rounded-[2.6rem] border border-white/65 p-8 md:p-10">
           <span className="eyebrow">Sign in</span>
           <h2 className="mt-5 display-title text-4xl font-semibold text-foreground">
             Owner-only area
@@ -38,7 +41,7 @@ export default async function OwnerAccessPage({ searchParams }: OwnerAccessPageP
               <input
                 name="passcode"
                 type="password"
-                className="rounded-2xl border border-line bg-surface px-4 py-3 text-foreground outline-none transition focus:border-accent"
+                className="rounded-[1.4rem] border border-line bg-white/80 px-4 py-3 text-foreground outline-none transition focus:border-accent"
                 placeholder="Enter owner access code"
                 required
               />
@@ -52,7 +55,7 @@ export default async function OwnerAccessPage({ searchParams }: OwnerAccessPageP
 
             <button
               type="submit"
-              className="inline-flex items-center justify-center rounded-full bg-accent px-5 py-3 text-sm font-semibold text-ink-inverse"
+              className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,#2f7d3a_0%,#1c5428_100%)] px-5 py-3 text-sm font-semibold text-ink-inverse"
             >
               Enter owner workspace
             </button>
