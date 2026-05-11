@@ -1,143 +1,101 @@
 "use client";
 
+// =====================================================================
+// Industrial Site Header
+// ---------------------------------------------------------------------
+// Tight, schematic-style top bar — no pastel panels, no rounded blobs.
+// Single white surface with a slate underline, brand mark, route links,
+// and the two primary CTAs.
+// =====================================================================
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { getCatalogAisles, getPublicNavigationGroups } from "@/lib/public-site";
-
-const marketTags = ["UAE", "Saudi", "Oman", "Qatar"];
-const browseLanes = getCatalogAisles()
-  .slice(0, 5)
-  .map((lane) => lane.category);
+import { publicNavigation } from "@/lib/public-site";
 
 function isRouteActive(pathname: string, href: string) {
+  if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 export function SiteHeader() {
   const pathname = usePathname();
-  const navigationGroups = getPublicNavigationGroups();
+  const links = [
+    { href: "/", label: "Home" },
+    ...publicNavigation.map((item) => ({ href: item.href, label: item.label })),
+  ];
 
   return (
-    <header className="section-shell sticky top-0 z-30 py-4">
-      <div className="panel overflow-hidden rounded-[2.2rem] border border-white/65 shadow-[0_22px_54px_-38px_rgba(23,53,35,0.55)]">
-        <div className="flex flex-col gap-3 border-b border-line px-4 py-3 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
-          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-accent-deep">
-            <span className="sm:hidden">Organized industrial catalog</span>
-            <span className="hidden sm:inline">Organized industrial catalog for GCC procurement teams</span>
-          </p>
-          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
-            {marketTags.map((market) => (
-              <span key={market} className="market-stamp shrink-0">
-                {market}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-4 px-4 py-4 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
-          <Link href="/" className="flex items-start gap-3 sm:items-center sm:gap-4">
-            <span className="brand-mark flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.1rem] text-base font-semibold sm:h-14 sm:w-14 sm:rounded-[1.35rem] sm:text-lg">
-              RRM
-            </span>
-            <div className="min-w-0">
-              <p className="text-base font-semibold text-foreground sm:text-lg">RRM Industrial Rubber</p>
-              <p className="mt-1 max-w-md text-sm leading-5 text-muted sm:leading-6">
-                Route-first catalog, material guidance, and RFQ-first ordering for GCC buyers.
-              </p>
-            </div>
-          </Link>
-
-          <div className="flex flex-col gap-3 lg:max-w-md lg:items-end">
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
-              <Link
-                href="/owner-access"
-                className="inline-flex w-full items-center justify-center rounded-full border border-line bg-white/75 px-4 py-2 text-sm font-semibold text-foreground sm:w-auto"
-              >
-                Owner Access
-              </Link>
-              <Link
-                href="/rfq"
-                className="brand-button inline-flex w-full items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold sm:w-auto"
-              >
-                Request Quote
-              </Link>
-            </div>
-
-            <p className="max-w-md text-sm leading-6 text-muted lg:text-right">
-              The site is grouped by decision type so buyers can move from route selection into the right working page without scanning every link.
+    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-2">
+        {/* Brand */}
+        <Link href="/" className="flex items-center gap-2">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-sm bg-slate-900 font-mono text-[11px] font-bold tracking-wider text-white">
+            RRM
+          </span>
+          <div className="leading-tight">
+            <p className="font-mono text-[12px] font-bold uppercase tracking-[0.18em] text-slate-900">
+              RRM Industrial
+            </p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+              GCC Sealing Supplier
             </p>
           </div>
-        </div>
+        </Link>
 
-        <div className="border-t border-line px-4 py-4 sm:px-5">
-          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-accent-deep">
-                Site directory
-              </p>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-                Routes are grouped by the decision they solve first: browse the part family, compare compounds, review market context, understand platform scope, then hand off through RFQ.
-              </p>
-            </div>
-            <Link href="/rfq" className="text-sm font-semibold text-accent-deep">
-              Need a quote instead?
-            </Link>
-          </div>
-
-          <div className="mt-4 grid gap-3 lg:grid-cols-4">
-            {navigationGroups.map((group) => (
-              <section
-                key={group.section}
-                className="rounded-[1.6rem] border border-line bg-white/76 px-4 py-4"
-              >
-                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
-                  {group.section}
-                </p>
-                <div className="mt-3 grid gap-2">
-                  {group.items.map((item) => {
-                    const active = isRouteActive(pathname, item.href);
-
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        className={`rounded-[1.2rem] border px-3 py-3 transition-colors ${
-                          active
-                            ? "border-accent bg-[rgba(222,240,204,0.74)]"
-                            : "border-line bg-white/80 hover:border-accent hover:bg-[rgba(222,240,204,0.7)]"
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="text-sm font-semibold text-foreground">{item.label}</p>
-                            <p className="mt-1 text-xs leading-5 text-muted">{item.description}</p>
-                          </div>
-                          <span className="market-stamp">{item.badge}</span>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </section>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3 border-t border-line px-4 py-3 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
-          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-accent-deep">
-            Popular catalog lanes
-          </p>
-          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
-            {browseLanes.map((lane) => (
+        {/* Routes */}
+        <nav className="hidden flex-1 items-center justify-center gap-1 lg:flex">
+          {links.map((link) => {
+            const active = isRouteActive(pathname, link.href);
+            return (
               <Link
-                key={lane}
-                href={`/products?category=${encodeURIComponent(lane)}`}
-                className="shrink-0 rounded-full border border-line bg-white/72 px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-accent hover:bg-[rgba(222,240,204,0.7)]"
+                key={link.href}
+                href={link.href}
+                className={`px-2 py-1 text-[12px] font-semibold uppercase tracking-wider transition-colors ${
+                  active
+                    ? "text-emerald-700"
+                    : "text-slate-700 hover:text-emerald-700"
+                }`}
               >
-                {lane}
+                {link.label}
               </Link>
-            ))}
-          </div>
+            );
+          })}
+        </nav>
+
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          <Link
+            href="/owner-access"
+            className="rounded-sm border border-slate-300 bg-white px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-900 transition-colors hover:border-slate-900"
+          >
+            Owner
+          </Link>
+          <Link
+            href="/rfq"
+            className="rounded-sm bg-emerald-700 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white transition-colors hover:bg-emerald-800"
+          >
+            Request Quote
+          </Link>
+        </div>
+      </div>
+
+      {/* Mobile route strip */}
+      <div className="border-t border-slate-200 bg-slate-50 lg:hidden">
+        <div className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-3 py-1">
+          {links.map((link) => {
+            const active = isRouteActive(pathname, link.href);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`shrink-0 px-2 py-1 text-[11px] font-bold uppercase tracking-wider ${
+                  active ? "text-emerald-700" : "text-slate-700"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </header>

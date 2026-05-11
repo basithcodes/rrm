@@ -1,33 +1,46 @@
 @import "tailwindcss";
 
+/* =====================================================================
+   Industrial Engineering Baseline
+   ---------------------------------------------------------------------
+   The entire app — public and admin — renders on a flat white surface
+   with thin slate borders, mono technical accents, and a single emerald
+   action color. Every legacy "panel" / "card" utility from the previous
+   pastel theme is force-flattened here so we don't have to rewrite
+   every server component.
+   ===================================================================== */
+
 :root {
-  --background: #f6f1e8;
-  --foreground: #17313e;
-  --surface: #fffdf8;
-  --surface-strong: #ece1d2;
-  --muted: #66727d;
-  --line: rgba(23, 49, 62, 0.12);
-  --accent: #0f766e;
-  --accent-deep: #115e59;
-  --accent-soft: #d7eee8;
-  --accent-warm: #ef8b53;
-  --accent-warm-soft: #f5c9aa;
-  --accent-berry: #8e4f32;
-  --ink-inverse: #fffaf4;
-  --shadow-soft: 0 30px 80px -52px rgba(11, 17, 32, 0.34);
-  --brand-gradient: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
-  --brand-gradient-mark: linear-gradient(160deg, #0f766e 0%, #1d3c4b 100%);
-  --brand-shadow: 0 18px 34px -22px rgba(15, 118, 110, 0.72);
-  --brand-mark-shadow: 0 18px 34px -20px rgba(17, 94, 89, 0.72);
-  --admin-table-background: rgba(255, 255, 255, 0.04);
-  --admin-alert-error-border: rgba(239, 139, 83, 0.32);
-  --admin-alert-error-background: rgba(78, 34, 18, 0.9);
-  --admin-alert-error-text: #ffd9c9;
-  --admin-alert-success-border: rgba(15, 118, 110, 0.3);
-  --admin-alert-success-background: rgba(13, 56, 52, 0.92);
-  --admin-alert-success-text: #d8efea;
-  --public-alert-error-border: rgba(239, 139, 83, 0.24);
-  --public-alert-error-background: rgba(245, 201, 170, 0.34);
+  --color-bg: #ffffff;
+  --color-bg-muted: #f8fafc; /* slate-50 */
+  --color-fg: #0f172a;       /* slate-900 */
+  --color-muted: #64748b;    /* slate-500 */
+  --color-line: #e2e8f0;     /* slate-200 */
+  --color-line-strong: #cbd5e0;
+  --color-accent: #047857;   /* emerald-700 */
+  --color-accent-deep: #065f46;
+  --color-accent-soft: #d1fae5;
+  --color-ink-inverse: #ffffff;
+
+  /* Tailwind v4 theme tokens — keep the names other code references but
+     remap to the new flat palette. */
+  --background: var(--color-bg);
+  --foreground: var(--color-fg);
+  --surface: var(--color-bg);
+  --surface-strong: var(--color-bg-muted);
+  --muted: var(--color-muted);
+  --line: var(--color-line);
+  --accent: var(--color-accent);
+  --accent-deep: var(--color-accent-deep);
+  --accent-soft: var(--color-accent-soft);
+  --accent-warm: var(--color-accent);
+  --accent-warm-soft: var(--color-accent-soft);
+  --accent-berry: var(--color-accent-deep);
+  --shadow-soft: none;
+  --brand-gradient: var(--color-accent);
+  --brand-gradient-mark: #0f172a;
+  --brand-shadow: none;
+  --brand-mark-shadow: none;
 }
 
 @theme inline {
@@ -43,9 +56,9 @@
   --color-accent-warm: var(--accent-warm);
   --color-accent-warm-soft: var(--accent-warm-soft);
   --color-accent-berry: var(--accent-berry);
-  --color-ink-inverse: var(--ink-inverse);
+  --color-ink-inverse: var(--ink-inverse, #ffffff);
   --font-sans: var(--font-sans);
-  --font-display: var(--font-display);
+  --font-display: var(--font-sans);
   --font-mono: var(--font-mono);
 }
 
@@ -58,15 +71,17 @@ html {
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), sans-serif;
-  background-image:
-    radial-gradient(circle at 10% 8%, rgba(15, 118, 110, 0.15), transparent 24%),
-    radial-gradient(circle at 84% 0%, rgba(239, 139, 83, 0.18), transparent 18%),
-    radial-gradient(circle at 70% 34%, rgba(15, 118, 110, 0.08), transparent 26%),
-    linear-gradient(180deg, #fbf6ee 0%, #f6f1e8 46%, #ede2d1 100%);
-  position: relative;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Kill the pastel grid overlay that the previous theme rendered via
+   body::before. Pure white surface across the entire application. */
+body::before {
+  content: none !important;
 }
 
 a {
@@ -74,270 +89,251 @@ a {
   text-decoration: none;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(15, 118, 110, 0.08) 1px, transparent 1px);
-  background-size: 72px 72px;
-  opacity: 0.28;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.78), transparent 88%);
-}
-
 ::selection {
-  background: rgba(47, 125, 58, 0.24);
+  background: rgba(4, 120, 87, 0.18);
 }
 
-.section-shell {
-  width: 100%;
-  max-width: 86rem;
-  margin: 0 auto;
-  padding-inline: 1.5rem;
-}
-
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  border-radius: 999px;
-  border: 1px solid rgba(15, 118, 110, 0.14);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(246, 241, 232, 0.86));
-  padding: 0.45rem 0.75rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--accent-deep);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
-}
-
-.panel {
-  border: 1px solid var(--line);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 241, 232, 0.92)),
-    var(--surface);
-  box-shadow: var(--shadow-soft);
-  backdrop-filter: blur(12px);
-}
-
+/* ---------------------------------------------------------------------
+   Display / typography helpers — strict sans-serif, tight tracking.
+   --------------------------------------------------------------------- */
 .display-title {
-  font-family: var(--font-display), sans-serif;
-  letter-spacing: -0.035em;
-  line-height: 0.94;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  font-weight: 700;
 }
 
 .text-balance {
   text-wrap: balance;
 }
 
-.market-card-dark {
-  background:
-    radial-gradient(circle at top right, rgba(239, 139, 83, 0.18), transparent 34%),
-    radial-gradient(circle at bottom left, rgba(15, 118, 110, 0.16), transparent 30%),
-    linear-gradient(180deg, #183440 0%, #0b1120 100%);
-  color: var(--ink-inverse);
-  box-shadow: 0 28px 80px -40px rgba(11, 17, 32, 0.78);
+/* SKUs, prices, dimensions — mono everywhere. Add `data-numeric`
+   attribute or use Tailwind `font-mono` directly. */
+.font-numeric,
+[data-numeric="true"] {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.section-shell {
+  width: 100%;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding-inline: 1rem;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--color-line);
+  background: var(--color-bg);
+  padding: 0.25rem 0.5rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-accent-deep);
+  border-radius: 0.125rem;
+  box-shadow: none;
 }
 
 .market-stamp {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  border: 1px solid rgba(15, 118, 110, 0.12);
-  background: rgba(255, 255, 255, 0.78);
-  padding: 0.45rem 0.8rem;
-  font-size: 0.76rem;
+  border: 1px solid var(--color-line);
+  background: var(--color-bg-muted);
+  padding: 0.2rem 0.45rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.65rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--foreground);
+  color: var(--color-fg);
+  border-radius: 0.125rem;
 }
 
-.brand-button {
-  background: var(--brand-gradient);
-  color: var(--ink-inverse);
-  box-shadow: var(--brand-shadow);
+/* =====================================================================
+   FORCE-FLATTEN LEGACY PANEL / CARD UTILITIES
+   ---------------------------------------------------------------------
+   Pages built before the industrial overhaul still emit classes such as
+   `.panel rounded-[2.4rem] shadow-[...]`. The rules below override the
+   Tailwind utilities (with `!important`) so every legacy card snaps to
+   the same sharp, thin-bordered, shadow-less industrial chrome.
+   ===================================================================== */
+.panel,
+.admin-surface-card,
+.admin-deep-card,
+.admin-shortcut-card,
+.admin-rail-note {
+  background: var(--color-bg) !important;
+  background-image: none !important;
+  border: 1px solid var(--color-line) !important;
+  border-radius: 0.375rem !important; /* rounded-md */
+  box-shadow: none !important;
+  color: var(--color-fg) !important;
+  backdrop-filter: none !important;
 }
 
-.brand-mark {
-  background: var(--brand-gradient-mark);
-  color: var(--ink-inverse);
-  box-shadow: var(--brand-mark-shadow);
-}
-
-.produce-divider {
-  height: 1px;
-  width: 100%;
-  background: linear-gradient(90deg, transparent, rgba(47, 125, 58, 0.22), transparent);
+/* Dark hero/strip variants kept dark for emphasis but flattened. */
+.market-card-dark {
+  background: #0f172a !important;
+  background-image: none !important;
+  border: 1px solid #1e293b !important;
+  border-radius: 0.375rem !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
 }
 
 .admin-root {
-  position: relative;
-  min-height: 100vh;
-  background:
-    radial-gradient(circle at 12% 8%, rgba(239, 139, 83, 0.11), transparent 20%),
-    radial-gradient(circle at 88% 0%, rgba(15, 118, 110, 0.1), transparent 22%),
-    repeating-linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.02) 0,
-      rgba(255, 255, 255, 0.02) 56px,
-      rgba(0, 0, 0, 0.04) 56px,
-      rgba(0, 0, 0, 0.04) 112px
-    ),
-    linear-gradient(180deg, #101a27 0%, #0b1120 100%);
-  color: var(--ink-inverse);
+  background: var(--color-bg) !important;
+  background-image: none !important;
+  color: var(--color-fg) !important;
 }
 
-.admin-sidebar {
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  background:
-    radial-gradient(circle at top right, rgba(239, 139, 83, 0.12), transparent 28%),
-    linear-gradient(180deg, rgba(24, 52, 64, 0.96), rgba(11, 17, 32, 0.97));
-  box-shadow: 0 28px 80px -42px rgba(0, 0, 0, 0.7);
-}
-
+.admin-sidebar,
 .admin-main {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background:
-    radial-gradient(circle at top left, rgba(15, 118, 110, 0.1), transparent 28%),
-    linear-gradient(180deg, rgba(18, 31, 45, 0.95), rgba(11, 17, 32, 0.97));
-  box-shadow: 0 34px 90px -54px rgba(0, 0, 0, 0.74);
+  background: var(--color-bg) !important;
+  background-image: none !important;
+  border: 1px solid var(--color-line) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: var(--color-fg) !important;
 }
 
 .admin-link {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 249, 240, 0.8);
-  transition:
-    background-color 160ms ease,
-    border-color 160ms ease,
-    transform 160ms ease,
-    color 160ms ease;
+  border: 1px solid var(--color-line) !important;
+  background: var(--color-bg) !important;
+  background-image: none !important;
+  color: var(--color-fg) !important;
+  border-radius: 0.25rem !important;
+  box-shadow: none !important;
+  transition: border-color 120ms ease, color 120ms ease, background-color 120ms ease;
 }
 
 .admin-link:hover {
-  border-color: rgba(239, 139, 83, 0.28);
-  background: rgba(15, 118, 110, 0.08);
-  color: rgba(255, 249, 240, 0.96);
-  transform: translateY(-1px);
+  border-color: var(--color-accent) !important;
+  color: var(--color-accent-deep) !important;
+  background: var(--color-bg-muted) !important;
+  transform: none !important;
 }
 
 .admin-link-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.06);
-  padding-inline: 0.55rem;
-  font-size: 0.68rem;
+  min-width: 1.6rem;
+  height: 1.4rem;
+  border-radius: 0.125rem !important;
+  border: 1px solid var(--color-line);
+  background: var(--color-bg-muted);
+  padding-inline: 0.4rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.6rem;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(255, 250, 244, 0.78);
+  color: var(--color-fg);
+  box-shadow: none !important;
 }
 
 .admin-chip {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.08);
-  padding: 0.45rem 0.8rem;
-  font-size: 0.72rem;
+  border-radius: 0.125rem !important;
+  border: 1px solid var(--color-line);
+  background: var(--color-bg-muted);
+  padding: 0.2rem 0.45rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(255, 249, 240, 0.8);
+  color: var(--color-fg);
+  box-shadow: none !important;
 }
 
 .admin-outline-button {
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 249, 240, 0.9);
+  border: 1px solid var(--color-line) !important;
+  background: var(--color-bg) !important;
+  color: var(--color-fg) !important;
+  border-radius: 0.25rem !important;
+  box-shadow: none !important;
 }
-
 .admin-outline-button:hover {
-  border-color: rgba(239, 139, 83, 0.28);
-  background: rgba(15, 118, 110, 0.08);
+  border-color: var(--color-accent) !important;
+  background: var(--color-bg-muted) !important;
 }
 
 .admin-highlight-button {
-  background: var(--brand-gradient);
-  color: var(--ink-inverse);
-  box-shadow: var(--brand-shadow);
+  background: var(--color-accent) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border-radius: 0.25rem !important;
+  box-shadow: none !important;
 }
-
-.admin-rail-note {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background:
-    radial-gradient(circle at top right, rgba(239, 139, 83, 0.08), transparent 28%),
-    rgba(255, 255, 255, 0.04);
-}
-
-.admin-shortcut-card {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background:
-    radial-gradient(circle at top right, rgba(15, 118, 110, 0.12), transparent 28%),
-    rgba(255, 255, 255, 0.04);
-  transition:
-    background-color 160ms ease,
-    border-color 160ms ease,
-    transform 160ms ease;
-}
-
-.admin-shortcut-card:hover {
-  border-color: rgba(239, 139, 83, 0.28);
-  background:
-    radial-gradient(circle at top right, rgba(239, 139, 83, 0.16), transparent 28%),
-    rgba(255, 255, 255, 0.05);
-  transform: translateY(-1px);
-}
-
-.admin-surface-card {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-.admin-deep-card {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background:
-    radial-gradient(circle at top right, rgba(239, 139, 83, 0.1), transparent 28%),
-    radial-gradient(circle at bottom left, rgba(15, 118, 110, 0.08), transparent 24%),
-    rgba(11, 17, 32, 0.56);
+.admin-highlight-button:hover {
+  background: var(--color-accent-deep) !important;
 }
 
 .admin-table-surface {
-  background: var(--admin-table-background);
+  background: var(--color-bg) !important;
+  background-image: none !important;
+  border: 1px solid var(--color-line) !important;
+  border-radius: 0.25rem !important;
+  box-shadow: none !important;
 }
 
 .admin-metric-value {
-  color: var(--accent-warm-soft);
+  color: var(--color-fg);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
 }
 
 .admin-alert-error {
-  border: 1px solid var(--admin-alert-error-border);
-  background: var(--admin-alert-error-background);
-  color: var(--admin-alert-error-text);
+  border: 1px solid #fecaca !important;
+  background: #fef2f2 !important;
+  color: #991b1b !important;
+  border-radius: 0.25rem !important;
 }
 
 .admin-alert-success {
-  border: 1px solid var(--admin-alert-success-border);
-  background: var(--admin-alert-success-background);
-  color: var(--admin-alert-success-text);
+  border: 1px solid #a7f3d0 !important;
+  background: #ecfdf5 !important;
+  color: #065f46 !important;
+  border-radius: 0.25rem !important;
 }
 
 .public-alert-error {
-  border: 1px solid var(--public-alert-error-border);
-  background: var(--public-alert-error-background);
-  color: var(--accent-berry);
+  border: 1px solid #fecaca !important;
+  background: #fef2f2 !important;
+  color: #991b1b !important;
+  border-radius: 0.25rem !important;
+}
+
+/* Brand mark + buttons (used by header / nav / CTAs across the app). */
+.brand-mark {
+  background: #0f172a !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border-radius: 0.25rem !important;
+  box-shadow: none !important;
+}
+
+.brand-button {
+  background: var(--color-accent) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+  border-radius: 0.25rem !important;
+  box-shadow: none !important;
+}
+.brand-button:hover {
+  background: var(--color-accent-deep) !important;
+}
+
+.produce-divider {
+  height: 1px;
+  width: 100%;
+  background: var(--color-line);
 }

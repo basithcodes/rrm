@@ -45,7 +45,7 @@ export function HomeSearch({ entries }: { entries: HomeSearchEntry[] }) {
 
   return (
     <div className="relative w-full">
-      <div className="flex w-full items-stretch overflow-hidden rounded border border-white/15 bg-white shadow-[0_10px_40px_-20px_rgba(0,0,0,0.6)]">
+      <div className="flex w-full items-stretch overflow-hidden rounded-md border border-slate-300 bg-white shadow-sm">
         <span
           aria-hidden
           className="flex items-center px-4 text-[#4A5568]"
@@ -78,7 +78,7 @@ export function HomeSearch({ entries }: { entries: HomeSearchEntry[] }) {
       </div>
 
       {open && query.trim() && (
-        <div className="absolute left-0 right-0 z-50 mt-1 max-h-96 overflow-auto border border-[#CBD5E0] bg-white text-[#1A202C] shadow-lg">
+        <div className="absolute left-0 right-0 z-50 mt-1 max-h-96 overflow-auto rounded-md border border-slate-200 bg-white text-slate-900 shadow-sm">
           {matches.length === 0 ? (
             <p className="p-3 text-sm text-[#4A5568]">
               No products match &ldquo;{query}&rdquo;. Try a SKU prefix or material code.
