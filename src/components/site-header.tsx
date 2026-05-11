@@ -1,14 +1,10 @@
 import Link from "next/link";
-import { products } from "@/lib/site-data";
-
-const navigation = [
-  { href: "/products", label: "Products" },
-  { href: "/industries", label: "Industries" },
-  { href: "/rfq", label: "RFQ" },
-];
+import { getCatalogAisles, publicNavigation } from "@/lib/public-site";
 
 const marketTags = ["UAE", "Saudi", "Oman", "Qatar"];
-const browseLanes = Array.from(new Set(products.map((product) => product.category))).slice(0, 5);
+const browseLanes = getCatalogAisles()
+  .slice(0, 5)
+  .map((lane) => lane.category);
 
 export function SiteHeader() {
   return (
@@ -16,8 +12,8 @@ export function SiteHeader() {
       <div className="panel overflow-hidden rounded-[2.2rem] border border-white/65 shadow-[0_22px_54px_-38px_rgba(23,53,35,0.55)]">
         <div className="flex flex-col gap-3 border-b border-line px-4 py-3 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
           <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-accent-deep">
-            <span className="sm:hidden">Cleaner industrial catalog</span>
-            <span className="hidden sm:inline">Fresh-market inspiration for a cleaner industrial catalog</span>
+            <span className="sm:hidden">Organized industrial catalog</span>
+            <span className="hidden sm:inline">Organized industrial catalog for GCC procurement teams</span>
           </p>
           <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
             {marketTags.map((market) => (
@@ -36,14 +32,14 @@ export function SiteHeader() {
             <div className="min-w-0">
               <p className="text-base font-semibold text-foreground sm:text-lg">RRM Industrial Rubber</p>
               <p className="mt-1 max-w-md text-sm leading-5 text-muted sm:leading-6">
-                Catalog aisles, dimensional detail, and RFQ-first ordering for GCC buyers.
+                Route-first catalog, material guidance, and RFQ-first ordering for GCC buyers.
               </p>
             </div>
           </Link>
 
           <div className="flex flex-col gap-4 lg:items-end">
             <nav className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 text-sm font-semibold text-foreground sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
-              {navigation.map((item) => (
+              {publicNavigation.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -73,7 +69,7 @@ export function SiteHeader() {
 
         <div className="flex flex-col gap-3 border-t border-line px-4 py-3 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
           <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-accent-deep">
-            Browse lanes
+            Popular catalog lanes
           </p>
           <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
             {browseLanes.map((lane) => (

@@ -1,13 +1,5 @@
 import Link from "next/link";
-
-const footerLinks = [
-  { href: "/products", label: "Browse products" },
-  { href: "/industries", label: "Explore industries" },
-  { href: "/rfq", label: "Start an RFQ" },
-  { href: "/owner-access", label: "Owner workspace" },
-];
-
-const markets = ["UAE", "Saudi Arabia", "Oman", "Qatar"];
+import { marketProfiles, publicFooterLinks } from "@/lib/public-site";
 
 export function SiteFooter() {
   return (
@@ -17,11 +9,11 @@ export function SiteFooter() {
           <div>
             <span className="eyebrow">Market board finish</span>
             <h2 className="mt-5 display-title max-w-3xl text-4xl font-semibold text-foreground md:text-5xl">
-              A fresher storefront for serious industrial buying.
+              A cleaner route map for serious industrial buying.
             </h2>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-muted md:text-base">
-              The public experience now behaves more like a clean produce market: strong sections,
-              clear labels, visible grades, and a simple path from browsing to order sheet.
+              Each page now does one job: catalog discovery, industry fit, material guidance,
+              market context, platform capabilities, or RFQ handoff.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
@@ -31,10 +23,10 @@ export function SiteFooter() {
                 Browse catalog
               </Link>
               <Link
-                href="/rfq"
+                href="/materials"
                 className="inline-flex rounded-full border border-line bg-white/80 px-5 py-3 text-sm font-semibold text-foreground"
               >
-                Send RFQ
+                Compare materials
               </Link>
             </div>
           </div>
@@ -45,12 +37,12 @@ export function SiteFooter() {
                 Operating markets
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
-                {markets.map((market) => (
+                {marketProfiles.map((market) => (
                   <span
-                    key={market}
+                    key={market.name}
                     className="rounded-full border border-white/12 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-white/80"
                   >
-                    {market}
+                    {market.name}
                   </span>
                 ))}
               </div>
@@ -60,8 +52,8 @@ export function SiteFooter() {
               </p>
             </div>
 
-            <div className="grid gap-3 rounded-[2rem] border border-line bg-white/55 p-6 text-sm text-muted sm:grid-cols-2">
-              {footerLinks.map((item) => (
+            <div className="grid gap-3 rounded-[2rem] border border-line bg-white/55 p-6 text-sm text-muted sm:grid-cols-2 lg:grid-cols-3">
+              {publicFooterLinks.map((item) => (
                 <Link key={item.href} href={item.href} className="font-medium hover:text-foreground">
                   {item.label}
                 </Link>

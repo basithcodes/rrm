@@ -10,24 +10,38 @@ export default function IndustriesPage() {
           <div className="panel rounded-[2.8rem] border border-white/65 p-6 md:p-8">
             <span className="eyebrow">Industries</span>
             <h1 className="mt-5 display-title text-5xl font-semibold text-foreground md:text-6xl">
-              Application aisles for buyers who shop by problem, not part number.
+              Start from the operating environment when the exact part number is not known yet.
             </h1>
             <p className="mt-5 max-w-3xl text-lg leading-8 text-muted">
-              A great vegetable store groups produce by use and freshness. This page borrows that
-              idea for industrial buyers: each industry tile frames the environment, challenge, and
-              likely product family in one glance.
+              This page is for application-led browsing. Each industry card groups the working
+              environment, challenge, and likely product families so buyers can move from problem
+              context to the right product page or RFQ without scanning unrelated details.
             </p>
+            <div className="mt-5 flex flex-wrap gap-2 text-sm font-semibold text-accent-deep">
+              <Link href="/products" className="rounded-full border border-line bg-white/75 px-4 py-2">
+                Open catalog
+              </Link>
+              <Link href="/materials" className="rounded-full border border-line bg-white/75 px-4 py-2">
+                Compare materials
+              </Link>
+              <Link href="/markets" className="rounded-full border border-line bg-white/75 px-4 py-2">
+                Review markets
+              </Link>
+              <Link href="/rfq" className="rounded-full border border-line bg-white/75 px-4 py-2">
+                Send RFQ
+              </Link>
+            </div>
           </div>
 
           <div className="market-card-dark rounded-[2.8rem] p-6 md:p-8">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">
-              How buyers arrive
+              Typical entry points
             </p>
             <div className="mt-5 grid gap-4">
               {customerSegments.map((segment) => (
                 <div key={segment.title} className="rounded-[1.45rem] border border-white/10 bg-white/10 p-4">
                   <p className="text-sm font-semibold text-white">{segment.title}</p>
-                  <p className="mt-2 text-sm leading-6 text-white/75">{segment.channel}</p>
+                  <p className="mt-2 text-sm leading-6 text-white/75">Primary route: {segment.channel}</p>
                 </div>
               ))}
             </div>
@@ -67,12 +81,20 @@ export default function IndustriesPage() {
         </div>
 
         <div className="mt-8 flex justify-center">
-          <Link
-            href="/rfq"
-            className="brand-button inline-flex rounded-full px-6 py-3 text-sm font-semibold"
-          >
-            Request application support
-          </Link>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Link
+              href="/products"
+              className="inline-flex rounded-full border border-line bg-white/80 px-6 py-3 text-sm font-semibold text-foreground"
+            >
+              Browse matching products
+            </Link>
+            <Link
+              href="/rfq"
+              className="brand-button inline-flex rounded-full px-6 py-3 text-sm font-semibold"
+            >
+              Request application support
+            </Link>
+          </div>
         </div>
       </section>
     </MarketingLayout>

@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { CatalogBrowser } from "@/components/catalog-browser";
 import { MarketingLayout } from "@/components/marketing-layout";
+import { getCatalogAisles } from "@/lib/public-site";
 import { products } from "@/lib/site-data";
 
 function CatalogBrowserFallback() {
@@ -31,6 +33,7 @@ function CatalogBrowserFallback() {
 
 export default function ProductsPage() {
   const totalVariants = products.reduce((total, product) => total + product.variants.length, 0);
+  const catalogAisles = getCatalogAisles().slice(0, 3);
 
   return (
     <MarketingLayout>
@@ -40,18 +43,32 @@ export default function ProductsPage() {
           <div className="mt-6 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
             <div>
               <h1 className="display-title text-5xl font-semibold text-foreground md:text-6xl">
-                Catalog aisles that feel organized the moment a buyer lands.
+                Find the product family first, then narrow by size, material, and application.
               </h1>
               <p className="mt-5 max-w-2xl text-lg leading-8 text-muted">
-                The layout takes cues from a premium vegetable store: categories are obvious,
-                the product cards feel sorted, and each item moves buyers naturally from overview
-                to dimensions to RFQ.
+                This page is only for browsing the catalog. Use it when you already know you are
+                looking for a part family and want to compare product cards, dimensions, and
+                variant depth before moving into an RFQ.
               </p>
+              <div className="mt-5 flex flex-wrap gap-2 text-sm font-semibold text-accent-deep">
+                <Link href="/materials" className="rounded-full border border-line bg-white/75 px-4 py-2">
+                  Compare materials
+                </Link>
+                <Link href="/industries" className="rounded-full border border-line bg-white/75 px-4 py-2">
+                  Browse industries
+                </Link>
+                <Link href="/markets" className="rounded-full border border-line bg-white/75 px-4 py-2">
+                  Review markets
+                </Link>
+                <Link href="/rfq" className="rounded-full border border-line bg-white/75 px-4 py-2">
+                  Send RFQ
+                </Link>
+              </div>
             </div>
 
             <div className="market-card-dark rounded-[2rem] p-5 text-ink-inverse">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/55">
-                Catalog numbers
+                Catalog rules
               </p>
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
                 <div className="rounded-[1.35rem] border border-white/10 bg-white/10 px-4 py-4">
@@ -71,6 +88,22 @@ export default function ProductsPage() {
                     Public rule
                   </p>
                   <p className="mt-2 text-base font-semibold text-white">Quote first</p>
+                </div>
+              </div>
+              <div className="mt-5 rounded-[1.45rem] border border-white/10 bg-white/10 p-4">
+                <p className="text-[0.7rem] uppercase tracking-[0.18em] text-white/58">
+                  Fast entry aisles
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {catalogAisles.map((aisle) => (
+                    <Link
+                      key={aisle.category}
+                      href={`/products?category=${encodeURIComponent(aisle.category)}`}
+                      className="rounded-full border border-white/10 bg-white/10 px-3 py-2 text-xs font-semibold text-white"
+                    >
+                      {aisle.category}
+                    </Link>
+                  ))}
                 </div>
               </div>
             </div>
