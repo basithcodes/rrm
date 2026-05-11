@@ -132,93 +132,118 @@ export async function executeCatalogImport(
 
       const parentKey = `${parsed.Parent_Name.trim().toLowerCase()}|${parsed.Category.trim().toLowerCase()}`;
 
-      // ── 1. Upsert Product (by slug derived from name+category) ───
-      let productEntry = productLookup.get(parentKey);
-      if (!productEntry) {
-        const slug = slugify(parsed.Parent_Name, parsed.Category);
-        const existing = await prisma.product.findUnique({ where: { slug } });
-        const upserted = await prisma.product.upsert({
-          where: { slug },
-          create: {
-            slug,
-            name: parsed.Parent_Name.trim(),
-            category: parsed.Category.trim(),
-            material: parsed.Material.trim(),
-            summary: parsed.Description?.trim() || `${parsed.Parent_Name} (${parsed.Category})`,
-            description: parsed.Description?.trim() || "",
-          },
-          update: {
-            name: parsed.Parent_Name.trim(),
-            category: parsed.Category.trim(),
-            material: parsed.Material.trim(),
-            ...(parsed.Description?.trim()
-              ? { summary: parsed.Description.trim(), description: parsed.Description.trim() }
-              : {}),
-          },
-        });
-        productEntry = { id: upserted.id, createdInBatch: !existing };
-        productLookup.set(parentKey, productEntry);
-        if (existing) {
-          productsUpdated += 1;
-        } else {
-          productsCreated += 1;
+      // Each row's three upserts (Product / ProductVariant /
+      // ManufacturingData) run inside an interactive Prisma transaction
+      // so a single failure rolls back the whole row — we never end up
+      // with an orphaned variant or a half-written trade-secret record.
+      const txResult = await prisma.$transaction(async (tx) => {
+        // ── 1. Upsert Product (by slug derived from name+category) ───
+        let productEntry = productLookup.get(parentKey);
+        let productCreated = false;
+        let productUpdated = false;
+        if (!productEntry) {
+          const slug = slugify(parsed.Parent_Name, parsed.Category);
+          const existing = await tx.product.findUnique({ where: { slug } });
+          const upserted = await tx.product.upsert({
+            where: { slug },
+            create: {
+              slug,
+              name: parsed.Parent_Name.trim(),
+              category: parsed.Category.trim(),
+              material: parsed.Material.trim(),
+              summary: parsed.Description?.trim() || `${parsed.Parent_Name} (${parsed.Category})`,
+              description: parsed.Description?.trim() || "",
+            },
+            update: {
+              name: parsed.Parent_Name.trim(),
+              category: parsed.Category.trim(),
+              material: parsed.Material.trim(),
+              ...(parsed.Description?.trim()
+                ? { summary: parsed.Description.trim(), description: parsed.Description.trim() }
+                : {}),
+            },
+          });
+          productEntry = { id: upserted.id, createdInBatch: !existing };
+          if (existing) productUpdated = true;
+          else productCreated = true;
         }
-      }
 
-      // ── 2. Upsert ProductVariant (by SKU) ───────────────────────
-      const dimensions = extractDimensions(rawRow);
-      const basePriceUsd = toNumberOrNull(parsed.BasePrice_USD);
-      const moq = toNumberOrNull(parsed.MOQ);
+        // ── 2. Upsert ProductVariant (by SKU) ───────────────────────
+        const dimensions = extractDimensions(rawRow);
+        const basePriceUsd = toNumberOrNull(parsed.BasePrice_USD);
+        const moq = toNumberOrNull(parsed.MOQ);
 
-      const existingVariant = await prisma.productVariant.findUnique({
-        where: { code: sku },
-        select: { id: true },
-      });
+        const existingVariant = await tx.productVariant.findUnique({
+          where: { code: sku },
+          select: { id: true },
+        });
 
-      const variant = await prisma.productVariant.upsert({
-        where: { code: sku },
-        create: {
-          code: sku,
-          productId: productEntry.id,
-          description: parsed.Description?.trim() || sku,
-          minimumOrderQuantity: moq != null && moq > 0 ? Math.floor(moq) : 1,
-          dimensionsJson: dimensions,
-          basePriceUsd: basePriceUsd != null ? basePriceUsd : null,
-        },
-        update: {
-          productId: productEntry.id,
-          ...(parsed.Description?.trim() ? { description: parsed.Description.trim() } : {}),
-          ...(moq != null && moq > 0 ? { minimumOrderQuantity: Math.floor(moq) } : {}),
-          dimensionsJson: dimensions,
-          ...(basePriceUsd != null ? { basePriceUsd } : {}),
-        },
-      });
-
-      if (existingVariant) variantsUpdated += 1;
-      else variantsCreated += 1;
-
-      // ── 3. Upsert ManufacturingData (trade secrets, by variantId) ─
-      const labor = toNumberOrNull(parsed.LaborCost);
-      const machine = toNumberOrNull(parsed.MachineCost);
-      const chemistry = parsed.Chemistry_Notes?.trim();
-
-      if (chemistry || labor != null || machine != null) {
-        await prisma.manufacturingData.upsert({
-          where: { variantId: variant.id },
+        const variant = await tx.productVariant.upsert({
+          where: { code: sku },
           create: {
-            variantId: variant.id,
-            chemicalFormula: chemistry || "",
-            laborCostUsd: labor ?? 0,
-            machineCostUsd: machine ?? 0,
+            code: sku,
+            productId: productEntry.id,
+            description: parsed.Description?.trim() || sku,
+            minimumOrderQuantity: moq != null && moq > 0 ? Math.floor(moq) : 1,
+            dimensionsJson: dimensions,
+            basePriceUsd: basePriceUsd != null ? basePriceUsd : null,
           },
           update: {
-            ...(chemistry ? { chemicalFormula: chemistry } : {}),
-            ...(labor != null ? { laborCostUsd: labor } : {}),
-            ...(machine != null ? { machineCostUsd: machine } : {}),
+            productId: productEntry.id,
+            ...(parsed.Description?.trim() ? { description: parsed.Description.trim() } : {}),
+            ...(moq != null && moq > 0 ? { minimumOrderQuantity: Math.floor(moq) } : {}),
+            dimensionsJson: dimensions,
+            ...(basePriceUsd != null ? { basePriceUsd } : {}),
           },
         });
-        manufacturingRecordsUpserted += 1;
+
+        const variantCreated = !existingVariant;
+        const variantUpdated = Boolean(existingVariant);
+
+        // ── 3. Upsert ManufacturingData (trade secrets, by variantId) ─
+        const labor = toNumberOrNull(parsed.LaborCost);
+        const machine = toNumberOrNull(parsed.MachineCost);
+        const chemistry = parsed.Chemistry_Notes?.trim();
+        let manufacturingTouched = false;
+
+        if (chemistry || labor != null || machine != null) {
+          await tx.manufacturingData.upsert({
+            where: { variantId: variant.id },
+            create: {
+              variantId: variant.id,
+              chemicalFormula: chemistry || "",
+              laborCostUsd: labor ?? 0,
+              machineCostUsd: machine ?? 0,
+            },
+            update: {
+              ...(chemistry ? { chemicalFormula: chemistry } : {}),
+              ...(labor != null ? { laborCostUsd: labor } : {}),
+              ...(machine != null ? { machineCostUsd: machine } : {}),
+            },
+          });
+          manufacturingTouched = true;
+        }
+
+        return {
+          productEntry,
+          productCreated,
+          productUpdated,
+          variantCreated,
+          variantUpdated,
+          manufacturingTouched,
+        };
+      });
+
+      // Counter mutations only happen after the transaction commits, so
+      // a row that fails mid-transaction never inflates the summary.
+      if (!productLookup.has(parentKey)) {
+        productLookup.set(parentKey, txResult.productEntry);
       }
+      if (txResult.productCreated) productsCreated += 1;
+      if (txResult.productUpdated) productsUpdated += 1;
+      if (txResult.variantCreated) variantsCreated += 1;
+      if (txResult.variantUpdated) variantsUpdated += 1;
+      if (txResult.manufacturingTouched) manufacturingRecordsUpserted += 1;
     } catch (error) {
       errors.push({
         rowIndex: i + 1,

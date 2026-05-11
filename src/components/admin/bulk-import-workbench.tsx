@@ -4,9 +4,9 @@
 // Bulk CSV Import Workbench
 // ---------------------------------------------------------------------
 // Operator-facing drag-drop surface for the catalog import pipeline.
-//   1. Drop or pick a CSV file.
-//   2. papaparse parses on the client; first 5 rows render in a preview
-//      table so the operator can verify column mapping.
+//   1. Drop or pick a CSV file (dashed slate-300 dropzone).
+//   2. papaparse parses on the client; first 5 rows render in a dense
+//      mono preview table so the operator can verify column mapping.
 //   3. "Execute Import Run" posts the parsed JSON to the
 //      `executeCatalogImport` server action.
 //   4. Result summary + per-row error log are rendered inline.
@@ -104,19 +104,18 @@ export function BulkImportWorkbench() {
   const previewRows = parsed?.rows.slice(0, 5) ?? [];
 
   return (
-    <section className="border border-[#CBD5E0] bg-white">
-      <header className="flex items-center justify-between border-b border-[#CBD5E0] bg-[#EDF2F7] px-2 py-1">
-        <p className="text-[10px] font-bold uppercase tracking-wider text-[#1A202C]">
+    <section className="border border-slate-200 bg-white">
+      <header className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-2 py-1">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-900">
           Bulk catalog import (CSV)
         </p>
-        <p className="text-[11px] text-[#4A5568]">
-          Required columns:{" "}
-          <span className="font-mono font-bold text-[#1A202C]">
+        <p className="font-mono text-[11px] text-slate-500">
+          Required:{" "}
+          <span className="font-bold text-slate-900">
             {REQUIRED_COLUMNS.join(", ")}
           </span>
-          {" · "}Dynamic{" "}
-          <span className="font-mono font-bold text-[#1A202C]">Dim_*</span> columns
-          fold into <span className="font-mono">dimensionsJson</span>.
+          {" · "}Dynamic <span className="font-bold text-slate-900">Dim_*</span> →
+          dimensionsJson
         </p>
       </header>
 
@@ -130,20 +129,20 @@ export function BulkImportWorkbench() {
           }}
           onDragLeave={() => setDragActive(false)}
           onDrop={onDrop}
-          className={`flex cursor-pointer flex-col items-center justify-center gap-2 border-2 border-dashed px-4 py-10 text-center transition ${
+          className={`flex cursor-pointer flex-col items-center justify-center gap-2 border-dashed border-2 px-4 py-10 text-center transition-colors ${
             dragActive
-              ? "border-[#2F855A] bg-[#E6FFFA]"
-              : "border-[#CBD5E0] bg-[#F7FAFC] hover:bg-[#EDF2F7]"
+              ? "border-emerald-700 bg-emerald-50"
+              : "border-slate-300 bg-slate-50 hover:bg-white"
           }`}
         >
-          <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#4A5568]">
+          <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-500">
             CSV upload
           </span>
-          <p className="text-sm font-bold text-[#1A202C]">
+          <p className="text-[13px] font-bold tracking-tight text-slate-900">
             Drop a supplier price-list CSV here
           </p>
-          <p className="text-[12px] text-[#4A5568]">
-            or click to browse — first 5 rows will render in a preview before submission.
+          <p className="font-mono text-[11px] text-slate-500">
+            or click to browse — first 5 rows render in a preview before submission.
           </p>
           <input
             ref={inputRef}
@@ -159,43 +158,42 @@ export function BulkImportWorkbench() {
         </label>
 
         {parseError && (
-          <p className="mt-3 border border-rose-300 bg-rose-50 p-2 text-[12px] font-bold text-rose-800">
+          <p className="mt-3 border border-rose-300 bg-rose-50 p-2 font-mono text-[11px] font-bold text-rose-800">
             {parseError}
           </p>
         )}
 
         {parsed && parsed.missingRequired.length > 0 && (
-          <p className="mt-3 border border-rose-300 bg-rose-50 p-2 text-[12px] font-bold text-rose-800">
-            Missing required column(s):{" "}
-            <span className="font-mono">{parsed.missingRequired.join(", ")}</span>
+          <p className="mt-3 border border-rose-300 bg-rose-50 p-2 font-mono text-[11px] font-bold text-rose-800">
+            Missing required column(s): {parsed.missingRequired.join(", ")}
           </p>
         )}
 
-        {/* ── Preview table ─────────────────────────────────────── */}
+        {/* ── Preview table (first 5 rows, dense p-1 mono) ──────── */}
         {parsed && previewRows.length > 0 && (
           <div className="mt-4">
             <div className="mb-1 flex items-center justify-between">
-              <p className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#1A202C]">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-900">
                 Preview · {parsed.fileName} · showing {previewRows.length} of {parsed.rowCount} rows
               </p>
-              <p className="text-[11px] text-[#4A5568]">
+              <p className="font-mono text-[11px] text-slate-500">
                 {parsed.columns.length} columns detected
               </p>
             </div>
-            <div className="overflow-auto border border-[#CBD5E0]">
+            <div className="overflow-auto border border-slate-200">
               <table className="w-full border-collapse text-[11px]">
-                <thead className="bg-[#EDF2F7] text-[10px] font-bold uppercase tracking-wider text-[#1A202C]">
+                <thead className="bg-slate-100 text-[10px] font-bold uppercase tracking-widest text-slate-900">
                   <tr>
-                    <th className="border-b border-[#CBD5E0] p-1 text-left">#</th>
+                    <th className="border-b border-slate-200 p-1 text-left">#</th>
                     {parsed.columns.map((col) => (
                       <th
                         key={col}
-                        className={`border-b border-[#CBD5E0] p-1 text-left font-mono ${
+                        className={`border-b border-slate-200 p-1 text-left font-mono ${
                           (REQUIRED_COLUMNS as readonly string[]).includes(col)
-                            ? "text-[#2F855A]"
+                            ? "text-emerald-700"
                             : col.startsWith("Dim_")
-                              ? "text-[#1A202C]"
-                              : "text-[#4A5568]"
+                              ? "text-slate-900"
+                              : "text-slate-500"
                         }`}
                       >
                         {col}
@@ -207,11 +205,11 @@ export function BulkImportWorkbench() {
                   {previewRows.map((row, i) => (
                     <tr
                       key={i}
-                      className="border-b border-[#EDF2F7] hover:bg-[#F7FAFC]"
+                      className="border-b border-slate-100 odd:bg-white even:bg-slate-50 hover:bg-emerald-50"
                     >
-                      <td className="p-1 font-mono text-[#4A5568]">{i + 1}</td>
+                      <td className="p-1 font-mono text-slate-500">{i + 1}</td>
                       {parsed.columns.map((col) => (
-                        <td key={col} className="p-1 font-mono">
+                        <td key={col} className="p-1 font-mono text-slate-900">
                           {row[col] === undefined || row[col] === null || row[col] === ""
                             ? "—"
                             : String(row[col])}
@@ -227,10 +225,11 @@ export function BulkImportWorkbench() {
 
         {/* ── Execute button ────────────────────────────────────── */}
         {parsed && (
-          <div className="mt-4 flex items-center justify-between gap-3 border-t border-[#CBD5E0] pt-3">
-            <p className="text-[12px] text-[#4A5568]">
-              <span className="font-bold text-[#1A202C]">{parsed.rowCount}</span> rows ready for upsert into Product / ProductVariant /{" "}
-              <span className="font-mono">ManufacturingData</span>.
+          <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-200 pt-3">
+            <p className="font-mono text-[11px] text-slate-600">
+              <span className="font-bold text-slate-900">{parsed.rowCount}</span> rows
+              ready for upsert into Product / ProductVariant /{" "}
+              <span className="text-slate-900">ManufacturingData</span>.
             </p>
             <div className="flex gap-2">
               <button
@@ -241,7 +240,7 @@ export function BulkImportWorkbench() {
                   setParseError(null);
                   if (inputRef.current) inputRef.current.value = "";
                 }}
-                className="rounded border border-[#CBD5E0] bg-white px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#1A202C] hover:bg-[#EDF2F7]"
+                className="rounded-sm border border-slate-200 bg-white px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-widest text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900"
               >
                 Reset
               </button>
@@ -249,7 +248,7 @@ export function BulkImportWorkbench() {
                 type="button"
                 disabled={isPending || parsed.missingRequired.length > 0}
                 onClick={execute}
-                className="rounded bg-[#2F855A] px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white hover:bg-[#276749] disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-sm bg-emerald-700 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-widest text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isPending ? "Running…" : "Execute Import Run"}
               </button>
@@ -261,33 +260,39 @@ export function BulkImportWorkbench() {
         {result && <ImportResult result={result} />}
 
         {/* ── Column reference ───────────────────────────────────── */}
-        <details className="mt-4 border border-[#EDF2F7]">
-          <summary className="cursor-pointer bg-[#F7FAFC] px-2 py-1 font-mono text-[11px] font-bold uppercase tracking-wider text-[#4A5568]">
+        <details className="mt-4 border border-slate-200">
+          <summary className="cursor-pointer bg-slate-50 px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-slate-500">
             Expected column reference
           </summary>
           <div className="grid gap-3 p-3 text-[11px] sm:grid-cols-3">
             <div>
-              <p className="font-mono font-bold text-[#2F855A]">Required</p>
-              <ul className="mt-1 space-y-0.5 font-mono">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-700">
+                Required
+              </p>
+              <ul className="mt-1 space-y-0.5 font-mono text-slate-900">
                 {REQUIRED_COLUMNS.map((c) => (
                   <li key={c}>{c}</li>
                 ))}
               </ul>
             </div>
             <div>
-              <p className="font-mono font-bold text-[#1A202C]">Optional</p>
-              <ul className="mt-1 space-y-0.5 font-mono text-[#4A5568]">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-900">
+                Optional
+              </p>
+              <ul className="mt-1 space-y-0.5 font-mono text-slate-500">
                 {OPTIONAL_COLUMNS.map((c) => (
                   <li key={c}>{c}</li>
                 ))}
               </ul>
             </div>
             <div>
-              <p className="font-mono font-bold text-[#1A202C]">Dynamic</p>
-              <p className="mt-1 font-mono text-[#4A5568]">
-                Dim_ID, Dim_OD, Dim_CS, Dim_Width, Dim_*… — any header beginning with{" "}
-                <span className="text-[#1A202C]">Dim_</span> is folded into{" "}
-                <span className="text-[#1A202C]">dimensionsJson</span> on the variant.
+              <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-900">
+                Dynamic
+              </p>
+              <p className="mt-1 font-mono text-slate-500">
+                Dim_ID, Dim_OD, Dim_CS, Dim_Width, Dim_*… any header beginning with{" "}
+                <span className="text-slate-900">Dim_</span> is folded into{" "}
+                <span className="text-slate-900">dimensionsJson</span> on the variant.
               </p>
             </div>
           </div>
@@ -300,8 +305,8 @@ export function BulkImportWorkbench() {
 function ImportResult({ result }: { result: CatalogImportResult }) {
   if (!result.ok) {
     return (
-      <div className="mt-4 border border-rose-300 bg-rose-50 p-3 text-[12px] text-rose-800">
-        <p className="font-bold uppercase tracking-wider">Import failed</p>
+      <div className="mt-4 border border-rose-300 bg-rose-50 p-3 font-mono text-[11px] text-rose-800">
+        <p className="font-bold uppercase tracking-widest">Import failed</p>
         <p className="mt-1">{result.message}</p>
         {result.errors && result.errors.length > 0 && (
           <ErrorTable errors={result.errors} />
@@ -311,22 +316,22 @@ function ImportResult({ result }: { result: CatalogImportResult }) {
   }
 
   return (
-    <div className="mt-4 border border-[#2F855A] bg-[#E6FFFA] p-3">
-      <p className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#276749]">
+    <div className="mt-4 border border-emerald-700 bg-emerald-50 p-3">
+      <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-emerald-800">
         Import successful
       </p>
-      <p className="mt-1 text-[12px] text-[#1A202C]">{result.message}</p>
+      <p className="mt-1 font-mono text-[11px] text-slate-900">{result.message}</p>
       <table className="mt-2 w-full border-collapse text-[11px]">
         <tbody>
           {Object.entries(result.summary).map(([key, value]) => (
-            <tr key={key} className="border-b border-[#CBD5E0] last:border-b-0">
+            <tr key={key} className="border-b border-slate-200 last:border-b-0">
               <th
                 scope="row"
-                className="w-64 p-1 text-left font-mono text-[#4A5568]"
+                className="w-64 p-1 text-left font-mono text-slate-500"
               >
                 {key}
               </th>
-              <td className="p-1 text-right font-mono font-bold text-[#1A202C]">
+              <td className="p-1 text-right font-mono font-bold text-slate-900">
                 {value}
               </td>
             </tr>
@@ -341,11 +346,11 @@ function ImportResult({ result }: { result: CatalogImportResult }) {
 function ErrorTable({ errors }: { errors: ImportRowError[] }) {
   return (
     <div className="mt-3 border border-rose-300">
-      <p className="border-b border-rose-300 bg-rose-100 px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-rose-900">
+      <p className="border-b border-rose-300 bg-rose-100 px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-rose-900">
         Skipped rows ({errors.length})
       </p>
       <table className="w-full border-collapse text-[11px]">
-        <thead className="bg-rose-50 text-[10px] font-bold uppercase tracking-wider text-rose-900">
+        <thead className="bg-rose-50 text-[10px] font-bold uppercase tracking-widest text-rose-900">
           <tr>
             <th className="border-b border-rose-200 p-1 text-left">Row</th>
             <th className="border-b border-rose-200 p-1 text-left">SKU</th>
@@ -355,9 +360,9 @@ function ErrorTable({ errors }: { errors: ImportRowError[] }) {
         <tbody>
           {errors.map((error, i) => (
             <tr key={i} className="border-b border-rose-100">
-              <td className="p-1 font-mono">{error.rowIndex}</td>
-              <td className="p-1 font-mono font-bold">{error.sku}</td>
-              <td className="p-1 text-rose-900">{error.reason}</td>
+              <td className="p-1 font-mono text-slate-700">{error.rowIndex}</td>
+              <td className="p-1 font-mono font-bold text-slate-900">{error.sku}</td>
+              <td className="p-1 font-mono text-rose-900">{error.reason}</td>
             </tr>
           ))}
         </tbody>
