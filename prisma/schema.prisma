@@ -182,6 +182,11 @@ model ProductVariant {
   prices               ProductPrice[]
   rfqItems             RfqItem[]
   quoteLines           QuoteLine[]
+  // 1-to-1 link to the strictly isolated ManufacturingData payload
+  // (chemical formula + labor/machine costs). NEVER serialise this
+  // relation through public/catalog/RFQ endpoints. See ManufacturingData
+  // model comment for the full isolation contract.
+  manufacturingData    ManufacturingData?
 }
 
 model VariantDimension {
@@ -228,6 +233,12 @@ model Rfq {
   status          InquiryStatus @default(NEW)
   sourceChannel   String?
   notes           String?
+  // Free-form JSON snapshot of customer details captured at submission
+  // time (company, contact, email, phone, market, etc). Stored in JSONB
+  // so the public RFQ form can accept evolving fields without schema
+  // migrations. The normalised Customer row remains the source of truth
+  // for CRM workflows; this column is purely a captured-at-submit copy.
+  customerDetailsJson Json?
   assignedToId    String?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
@@ -364,6 +375,47 @@ model TradeSecret {
   product              Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
+}
+
+// =============================================================================
+//                      TRADE-SECRET / MANUFACTURING DATA
+// =============================================================================
+// The ManufacturingData table holds the most sensitive trade secrets for
+// each Variant: the exact chemical formula and the broken-down internal
+// cost (labour + machine). It is intentionally:
+//
+//   * Isolated in its own table (no Json blob mixed into Product/Variant).
+//   * Keyed 1-to-1 to ProductVariant via a UNIQUE foreign key.
+//   * Reachable ONLY through the HMAC-authenticated admin API route
+//     (`/api/admin/trade-secrets` and any future admin-only endpoints).
+//
+// STRICT RULE:
+//   This model MUST NOT be selected, joined, or serialised by:
+//     - any route under `src/app/api/public/**`
+//     - any route under `src/app/api/catalog/**`
+//     - the RFQ submission / quote workflows
+//     - the Flutter mobile client
+//     - any server component rendered on a public page
+//   Owner-only admin/sourcing workbench pages are the only legitimate
+//   consumers, and they must verify the HMAC owner session before reading.
+// =============================================================================
+model ManufacturingData {
+  id              String         @id @default(cuid())
+  variantId       String         @unique
+  // Full chemical formula / compound recipe. Plain string so the owner can
+  // paste structured JSON, free-form prose, or a reference key — the column
+  // never leaves the admin surface.
+  chemicalFormula String
+  // Internal cost components in USD. Kept as Float per spec; switch to
+  // Decimal(14,4) if you need exact currency precision in the future.
+  laborCostUsd    Float
+  machineCostUsd  Float
+  notes           String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  variant         ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@index([variantId])
 }
 
 model ImportBatch {

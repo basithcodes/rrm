@@ -3318,30 +3318,37 @@ class _ProductCatalogGrid extends StatelessWidget {
               ),
             )
           else
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minWidth: MediaQuery.of(context).size.width - 360,
-                ),
-                child: DataTable(
-                  columnSpacing: 24,
-                  horizontalMargin: 16,
-                  headingRowColor: WidgetStateProperty.all(_accentWarm),
-                  showCheckboxColumn: false,
-                  dividerThickness: 1,
-                  columns: const <DataColumn>[
-                    DataColumn(label: Text('SKU')),
-                    DataColumn(label: Text('IMAGE')),
-                    DataColumn(label: Text('NAME')),
-                    DataColumn(label: Text('MATERIAL')),
-                    DataColumn(label: Text('HARDNESS')),
-                    DataColumn(label: Text('TEMP RANGE')),
-                    DataColumn(label: Text('PRESSURE')),
-                    DataColumn(label: Text('VARIANTS')),
-                    DataColumn(label: Text('PRICE'), numeric: true),
-                    DataColumn(label: Text('ACTION')),
-                  ],
+            Expanded(
+              // Engineers on phones scroll BOTH axes — vertical for the long
+              // SKU list, horizontal for the wide engineering column set.
+              child: Scrollbar(
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minWidth: MediaQuery.of(context).size.width - 360,
+                      ),
+                      child: DataTable(
+                        columnSpacing: 24,
+                        horizontalMargin: 16,
+                        headingRowColor: WidgetStateProperty.all(_accentWarm),
+                        showCheckboxColumn: false,
+                        dividerThickness: 1,
+                        columns: const <DataColumn>[
+                          DataColumn(label: Text('SKU')),
+                          DataColumn(label: Text('IMAGE')),
+                          DataColumn(label: Text('NAME')),
+                          DataColumn(label: Text('MATERIAL')),
+                          DataColumn(label: Text('HARDNESS')),
+                          DataColumn(label: Text('TEMP RANGE')),
+                          DataColumn(label: Text('PRESSURE')),
+                          DataColumn(label: Text('VARIANTS')),
+                          DataColumn(label: Text('PRICE'), numeric: true),
+                          DataColumn(label: Text('ACTION')),
+                        ],
                   rows: products.map((p) {
                     final variants = asJsonMapList(p['variants']);
                     final firstVariant = variants.isNotEmpty ? variants.first : <String, dynamic>{};
@@ -3415,6 +3422,9 @@ class _ProductCatalogGrid extends StatelessWidget {
                 ),
               ),
             ),
+                  ),
+                ),
+              ),
         ],
       ),
     );
@@ -4100,56 +4110,70 @@ class _VariantDataTable extends StatelessWidget {
               ],
             ),
           ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: DataTable(
-              columnSpacing: 24,
-              horizontalMargin: 16,
-              headingRowColor: WidgetStateProperty.all(_surfaceColor),
-              dividerThickness: 1,
-              columns: const <DataColumn>[
-                DataColumn(label: Text('PART #')),
-                DataColumn(label: Text('INNER ⌀')),
-                DataColumn(label: Text('OUTER ⌀')),
-                DataColumn(label: Text('THICKNESS')),
-                DataColumn(label: Text('HARDNESS')),
-                DataColumn(label: Text('MOQ'), numeric: true),
-                DataColumn(label: Text('PRICE'), numeric: true),
-                DataColumn(label: Text('ACTION')),
-              ],
-              rows: filtered.map((variant) {
-                final baseUsd = _readVariantBaseUsd(variant);
-                final bag = _collectDimensionMap(variant);
-                return DataRow(
-                  cells: <DataCell>[
-                    DataCell(Text(
-                      readString(variant, 'code'),
-                      style: const TextStyle(fontWeight: FontWeight.w800, color: _inkColor),
-                    )),
-                    DataCell(Text(_lookup(bag, ['inner', 'id', 'i.d']))),
-                    DataCell(Text(_lookup(bag, ['outer', 'od', 'o.d']))),
-                    DataCell(Text(_lookup(bag, ['thick', 'cs', 'cross']))),
-                    DataCell(Text(_lookup(bag, ['hardness', 'shore', 'durometer']))),
-                    DataCell(Text('${readInt(variant, 'minimumOrderQuantity')}')),
-                    DataCell(Text(
-                      formatFromUsd(baseUsd, currency),
-                      style: const TextStyle(fontWeight: FontWeight.w800, color: _inkColor),
-                    )),
-                    DataCell(FilledButton(
-                      onPressed: onRfq,
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        textStyle: const TextStyle(
-                            fontFamily: _technicalFontFamily,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 11,
-                            letterSpacing: 0.6),
-                      ),
-                      child: const Text('ADD TO QUOTE'),
-                    )),
-                  ],
-                );
-              }).toList(growable: false),
+          // Dual-axis scrollable region: engineers on phones need to scan
+          // both rows (vertical) and the wide engineering column set
+          // (horizontal) without losing context. The fixed-height ConstrainedBox
+          // bounds the inner vertical scroll so it nests cleanly inside the
+          // outer ListView on narrow layouts.
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 480),
+            child: Scrollbar(
+              thumbVisibility: true,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: DataTable(
+                    columnSpacing: 24,
+                    horizontalMargin: 16,
+                    headingRowColor: WidgetStateProperty.all(_surfaceColor),
+                    dividerThickness: 1,
+                    columns: const <DataColumn>[
+                      DataColumn(label: Text('PART #')),
+                      DataColumn(label: Text('INNER ⌀')),
+                      DataColumn(label: Text('OUTER ⌀')),
+                      DataColumn(label: Text('THICKNESS')),
+                      DataColumn(label: Text('HARDNESS')),
+                      DataColumn(label: Text('MOQ'), numeric: true),
+                      DataColumn(label: Text('PRICE'), numeric: true),
+                      DataColumn(label: Text('ACTION')),
+                    ],
+                    rows: filtered.map((variant) {
+                      final baseUsd = _readVariantBaseUsd(variant);
+                      final bag = _collectDimensionMap(variant);
+                      return DataRow(
+                        cells: <DataCell>[
+                          DataCell(Text(
+                            readString(variant, 'code'),
+                            style: const TextStyle(fontWeight: FontWeight.w800, color: _inkColor),
+                          )),
+                          DataCell(Text(_lookup(bag, ['inner', 'id', 'i.d']))),
+                          DataCell(Text(_lookup(bag, ['outer', 'od', 'o.d']))),
+                          DataCell(Text(_lookup(bag, ['thick', 'cs', 'cross']))),
+                          DataCell(Text(_lookup(bag, ['hardness', 'shore', 'durometer']))),
+                          DataCell(Text('${readInt(variant, 'minimumOrderQuantity')}')),
+                          DataCell(Text(
+                            formatFromUsd(baseUsd, currency),
+                            style: const TextStyle(fontWeight: FontWeight.w800, color: _inkColor),
+                          )),
+                          DataCell(FilledButton(
+                            onPressed: onRfq,
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              textStyle: const TextStyle(
+                                  fontFamily: _technicalFontFamily,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 11,
+                                  letterSpacing: 0.6),
+                            ),
+                            child: const Text('ADD TO QUOTE'),
+                          )),
+                        ],
+                      );
+                    }).toList(growable: false),
+                  ),
+                ),
+              ),
             ),
           ),
           if (filtered.isEmpty)

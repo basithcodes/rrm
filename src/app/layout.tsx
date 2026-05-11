@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, IBM_Plex_Mono, Sora } from "next/font/google";
+import { QuoteCartProvider } from "@/lib/quote-cart";
 import "./globals.css";
 
 const sora = Sora({
@@ -35,7 +36,9 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       className={`${sora.variable} ${fraunces.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <QuoteCartProvider>{children}</QuoteCartProvider>
+      </body>
     </html>
   );
 }

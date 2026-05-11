@@ -45,6 +45,31 @@ const ownerSections: Array<{ title: string; items: NavItem[] }> = [
     ],
   },
   {
+    title: "Sales pipeline",
+    items: [
+      {
+        href: "/admin/rfqs",
+        label: "RFQs",
+        description:
+          "Incoming Requests for Quote, customer details, items requested, and status updates.",
+        badge: "RQ",
+      },
+      {
+        href: "/admin/secrets",
+        label: "Trade Secrets",
+        description:
+          "Variant-level chemical formulas and labour/machine cost vault. Owner only.",
+        badge: "TS",
+      },
+      {
+        href: "/admin/settings",
+        label: "Settings",
+        description: "Workspace reset, environment notes, and operator tools.",
+        badge: "ST",
+      },
+    ],
+  },
+  {
     title: "Operations",
     items: [
       {

@@ -90,6 +90,11 @@ export type Product = {
   qualityChecks: string[];
   standardLeadTimeDays: number;
   viewer: ProductViewerConfig;
+  // Optional 3D asset URL. When present, the public product detail page
+  // loads the GLB/GLTF through @react-three/drei's useGLTF hook and applies
+  // parametric scaling driven by the currently selected variant row. When
+  // absent, the page falls back to the procedural demo viewer.
+  threeDModelUrl?: string;
   manufacturingVisibility: "owner-only";
   variants: ProductVariant[];
   featured?: boolean;

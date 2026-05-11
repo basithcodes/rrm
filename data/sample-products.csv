@@ -1,0 +1,12 @@
+parent_slug,parent_name,category,material,summary,sku,variant_description,moq,base_price_usd,inner_diameter,outer_diameter,cross_section,width,length,thickness,hardness,temperature_range,three_d_model_url
+nbr-o-ring,NBR O-Ring Series,O-Ring,NBR (Nitrile),Nitrile O-rings for hydraulic and pneumatic sealing.,NBR-OR-002,2.0mm CS / 4mm ID nitrile O-ring,500,0.06,4,8,2,,,,70 Shore A,-30°C to +110°C,
+nbr-o-ring,NBR O-Ring Series,O-Ring,NBR (Nitrile),Nitrile O-rings for hydraulic and pneumatic sealing.,NBR-OR-005,3.5mm CS / 12mm ID nitrile O-ring,250,0.18,12,19,3.5,,,,70 Shore A,-30°C to +110°C,
+nbr-o-ring,NBR O-Ring Series,O-Ring,NBR (Nitrile),Nitrile O-rings for hydraulic and pneumatic sealing.,NBR-OR-009,5.3mm CS / 25mm ID nitrile O-ring,150,0.42,25,35.6,5.3,,,,70 Shore A,-30°C to +110°C,
+silicone-sheet,Silicone Rubber Sheet,Sheet,VMQ (Silicone),Food-grade translucent silicone sheet on the roll.,SIL-SH-1M3,Silicone sheet 1m × 10m × 3mm,4,142.00,,,,1000,10000,3,60 Shore A,-50°C to +220°C,
+silicone-sheet,Silicone Rubber Sheet,Sheet,VMQ (Silicone),Food-grade translucent silicone sheet on the roll.,SIL-SH-1M5,Silicone sheet 1m × 10m × 5mm,4,224.00,,,,1000,10000,5,60 Shore A,-50°C to +220°C,
+epdm-glazing-gasket,EPDM Glazing Gasket,Sealing Profile,EPDM,Curtain-wall glazing wedge gasket profile.,EPDM-GL-W6,Wedge gasket 6mm gap,200,0.95,,,,12,6000,6,65 Shore A,-40°C to +120°C,
+epdm-glazing-gasket,EPDM Glazing Gasket,Sealing Profile,EPDM,Curtain-wall glazing wedge gasket profile.,EPDM-GL-W8,Wedge gasket 8mm gap,200,1.10,,,,14,6000,8,65 Shore A,-40°C to +120°C,
+neoprene-expansion-joint,Neoprene Expansion Joint,Expansion Joint,CR (Neoprene),Single-arch flanged expansion joint.,NPR-EJ-DN50,DN50 single-arch expansion joint,5,68.00,50,160,,,200,,55 Shore A,-20°C to +95°C,
+neoprene-expansion-joint,Neoprene Expansion Joint,Expansion Joint,CR (Neoprene),Single-arch flanged expansion joint.,NPR-EJ-DN100,DN100 single-arch expansion joint,5,118.00,100,220,,,230,,55 Shore A,-20°C to +95°C,
+nr-vibration-mount,Natural Rubber Anti-Vibration Mount,Mount,NR/SBR,Cylindrical anti-vibration isolation mount.,NR-AVM-50,50mm Ø isolation mount,200,6.40,,50,,,,,55 Shore A,-30°C to +80°C,
+nr-vibration-mount,Natural Rubber Anti-Vibration Mount,Mount,NR/SBR,Cylindrical anti-vibration isolation mount.,NR-AVM-80,80mm Ø isolation mount,120,10.60,,80,,,,,55 Shore A,-30°C to +80°C,

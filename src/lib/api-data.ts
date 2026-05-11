@@ -22,6 +22,18 @@ import {
 } from "@/lib/site-data";
 import { getLiveOwnerDashboardData } from "@/lib/owner-dashboard/service";
 
+// ---------------------------------------------------------------------------
+// Trade-secret isolation contract
+// ---------------------------------------------------------------------------
+// This module produces PUBLIC catalog payloads consumed by the Next.js
+// marketing site and the Flutter mobile client. It MUST NOT import, select,
+// or relay any fields from the `TradeSecret` Prisma model (chemical
+// formulas, manufacturing cost, supplier notes). That model is gated behind
+// the HMAC-authenticated `/api/admin/trade-secrets` route and is reachable
+// only via `prisma.tradeSecret.*` calls in that file.
+// ---------------------------------------------------------------------------
+
+
 function formatMinimumOrderRange(product: Product) {
   const quantities = product.variants.map((variant) => variant.minimumOrderQuantity);
   const minimum = Math.min(...quantities);

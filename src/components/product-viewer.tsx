@@ -200,10 +200,8 @@ export function ProductViewer({ product }: { product: Product }) {
         </group>
         <ContactShadows position={[0, -1.65, 0]} opacity={0.36} scale={11} blur={2.1} far={6} />
         <OrbitControls
-          enablePan={false}
+          enablePan
           enableDamping
-          autoRotate
-          autoRotateSpeed={product.viewer.rotationSpeed}
           minDistance={3.6}
           maxDistance={8.5}
         />
