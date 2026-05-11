@@ -6,7 +6,7 @@ export default async function AdminDashboardPage() {
   const payload = await getOwnerDashboardPayload();
   const { dashboard: ownerDashboard, internalCostBuckets, keyCustomers, ownerProductRecords, products, recentRfqs } = payload;
   const totalInternalCosts = internalCostBuckets.reduce(
-    (sum, bucket) => sum + Number(bucket.amountUsd),
+    (sum, bucket) => sum + Number(bucket.monthlyUsd),
     0,
   );
   const totalVariantCount = products.reduce((total, product) => total + product.variants.length, 0);
