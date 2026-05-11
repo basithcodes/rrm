@@ -8,16 +8,41 @@ const apiBaseUrl = String.fromEnvironment(
   defaultValue: 'http://localhost:3000',
 );
 
-const _canvasColor = Color(0xFFF4EEDB);
-const _surfaceColor = Color(0xFFFFFAEF);
-const _lineColor = Color(0x33A88D5D);
-const _inkColor = Color(0xFF173523);
-const _mutedColor = Color(0xFF6A725A);
-const _accentGreen = Color(0xFF2F7D3A);
-const _accentDeep = Color(0xFF1C5428);
-const _accentWarm = Color(0xFFF6D59E);
-const _accentBerry = Color(0xFF94452E);
-const _inkInverse = Color(0xFFFFFAEF);
+// =====================================================================
+// Industrial Professional Design System
+// ---------------------------------------------------------------------
+//  Charcoal/Navy   #1A202C  ->  _inkColor          (nav, headers, body)
+//  Light Grey      #F7FAFC  ->  _canvasColor       (data backgrounds)
+//  Pure White      #FFFFFF  ->  _surfaceColor      (panels, data area)
+//  Border Grey     #CBD5E0  ->  _lineColor         (single-pixel borders)
+//  Muted Slate     #4A5568  ->  _mutedColor        (secondary text)
+//  Deep Green      #2F855A  ->  _accentGreen       (single accent, CTAs)
+//  Deep Green dk   #276749  ->  _accentDeep
+//  Neutral Pad     #EDF2F7  ->  _accentWarm        (subtle header band)
+//  Alert Red       #C53030  ->  _accentBerry       (errors)
+//  White on dark   #FFFFFF  ->  _inkInverse
+// =====================================================================
+const _canvasColor = Color(0xFFF7FAFC);
+const _surfaceColor = Color(0xFFFFFFFF);
+const _lineColor = Color(0xFFCBD5E0);
+const _inkColor = Color(0xFF1A202C);
+const _mutedColor = Color(0xFF4A5568);
+const _accentGreen = Color(0xFF2F855A);
+const _accentDeep = Color(0xFF276749);
+const _accentWarm = Color(0xFFEDF2F7);
+const _accentBerry = Color(0xFFC53030);
+const _inkInverse = Color(0xFFFFFFFF);
+
+// Technical sans-serif preference. Inter is preferred; if it is not bundled
+// the platform picks the closest neutral sans-serif (Roboto / system UI).
+const _technicalFontFamily = 'Inter';
+const List<String> _technicalFontFallback = <String>[
+  'Inter',
+  'Roboto',
+  'Helvetica Neue',
+  'Arial',
+  'sans-serif',
+];
 
 const _allCategoriesLabel = 'All categories';
 const _allMaterialsLabel = 'All materials';
@@ -379,76 +404,116 @@ class _RrmFlutterAppState extends State<RrmFlutterApp> {
         seedColor: _accentGreen,
         brightness: Brightness.light,
         primary: _accentGreen,
-        secondary: _accentWarm,
+        secondary: _inkColor,
         surface: _surfaceColor,
+        onSurface: _inkColor,
       ),
       scaffoldBackgroundColor: _canvasColor,
+      fontFamily: _technicalFontFamily,
+      fontFamilyFallback: _technicalFontFallback,
+      dividerColor: _lineColor,
+    );
+
+    // Strict technical-first hierarchy. All headers share the same charcoal
+    // ink; only weights and sizes differentiate. Body copy is 14pt so dense
+    // data tables stay readable without overwhelming the layout.
+    const headerStyle = TextStyle(
+      fontFamily: _technicalFontFamily,
+      color: _inkColor,
+      fontWeight: FontWeight.w800,
+      letterSpacing: -0.2,
+      height: 1.15,
     );
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'RRM Flutter Frontend',
+      title: 'RRM Industrial Catalog',
       theme: baseTheme.copyWith(
         textTheme: baseTheme.textTheme.copyWith(
-          displaySmall: const TextStyle(
-            fontFamily: 'Georgia',
-            fontWeight: FontWeight.w700,
-            color: _inkColor,
-            height: 1.02,
-          ),
-          headlineMedium: const TextStyle(
-            fontFamily: 'Georgia',
-            fontWeight: FontWeight.w700,
-            color: _inkColor,
-            height: 1.08,
-          ),
-          headlineSmall: const TextStyle(
-            fontFamily: 'Georgia',
-            fontWeight: FontWeight.w700,
-            color: _inkColor,
-          ),
-          titleLarge: const TextStyle(
-            fontFamily: 'Georgia',
-            fontWeight: FontWeight.w700,
-            color: _inkColor,
-          ),
-          bodyLarge: const TextStyle(color: _mutedColor, height: 1.5),
-          bodyMedium: const TextStyle(color: _mutedColor, height: 1.5),
+          displaySmall: headerStyle.copyWith(fontSize: 32),
+          headlineMedium: headerStyle.copyWith(fontSize: 26),
+          headlineSmall: headerStyle.copyWith(fontSize: 22),
+          titleLarge: headerStyle.copyWith(fontSize: 18),
+          titleMedium: headerStyle.copyWith(fontSize: 15),
+          titleSmall: headerStyle.copyWith(fontSize: 12, letterSpacing: 0.6),
+          bodyLarge: const TextStyle(color: _inkColor, fontSize: 14.5, height: 1.55),
+          bodyMedium: const TextStyle(color: _mutedColor, fontSize: 13.5, height: 1.5),
+          bodySmall: const TextStyle(color: _mutedColor, fontSize: 12, height: 1.45),
+          labelLarge: const TextStyle(color: _inkColor, fontSize: 13.5, fontWeight: FontWeight.w700),
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: Colors.white.withOpacity(0.78),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          fillColor: _surfaceColor,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          hintStyle: const TextStyle(color: _mutedColor, fontSize: 14),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(4),
             borderSide: const BorderSide(color: _lineColor),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(4),
             borderSide: const BorderSide(color: _lineColor),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-            borderSide: const BorderSide(color: _accentGreen, width: 1.4),
+            borderRadius: BorderRadius.circular(4),
+            borderSide: const BorderSide(color: _accentGreen, width: 1.5),
           ),
         ),
         filledButtonTheme: FilledButtonThemeData(
           style: FilledButton.styleFrom(
             backgroundColor: _accentGreen,
             foregroundColor: _inkInverse,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
-            textStyle: const TextStyle(fontWeight: FontWeight.w700),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            textStyle: const TextStyle(
+              fontFamily: _technicalFontFamily,
+              fontWeight: FontWeight.w700,
+              fontSize: 13.5,
+              letterSpacing: 0.3,
+            ),
           ),
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
             foregroundColor: _inkColor,
             side: const BorderSide(color: _lineColor),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
-            textStyle: const TextStyle(fontWeight: FontWeight.w700),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            textStyle: const TextStyle(
+              fontFamily: _technicalFontFamily,
+              fontWeight: FontWeight.w700,
+              fontSize: 13.5,
+            ),
           ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: _accentGreen,
+            textStyle: const TextStyle(
+              fontFamily: _technicalFontFamily,
+              fontWeight: FontWeight.w700,
+              fontSize: 13.5,
+            ),
+          ),
+        ),
+        dataTableTheme: const DataTableThemeData(
+          headingTextStyle: TextStyle(
+            fontFamily: _technicalFontFamily,
+            color: _inkColor,
+            fontWeight: FontWeight.w800,
+            fontSize: 12.5,
+            letterSpacing: 0.4,
+          ),
+          dataTextStyle: TextStyle(
+            fontFamily: _technicalFontFamily,
+            color: _inkColor,
+            fontSize: 14,
+            height: 1.3,
+          ),
+          headingRowHeight: 44,
+          dataRowMinHeight: 44,
+          dataRowMaxHeight: 56,
+          dividerThickness: 1,
         ),
       ),
       onGenerateRoute: _buildRoute,
@@ -464,6 +529,7 @@ class _RrmFlutterAppState extends State<RrmFlutterApp> {
         settings: settings,
         builder: (context) => PublicShell(
           currentPath: uri.path,
+          api: _api,
           child: ProductDetailScreen(api: _api, slug: uri.pathSegments[1]),
         ),
       );
@@ -482,6 +548,7 @@ class _RrmFlutterAppState extends State<RrmFlutterApp> {
           settings: settings,
           builder: (context) => PublicShell(
             currentPath: uri.path,
+            api: _api,
             child: HomeScreen(api: _api),
           ),
         );
@@ -490,6 +557,7 @@ class _RrmFlutterAppState extends State<RrmFlutterApp> {
           settings: settings,
           builder: (context) => PublicShell(
             currentPath: uri.path,
+            api: _api,
             child: ProductsScreen(api: _api, initialUri: uri),
           ),
         );
@@ -498,6 +566,7 @@ class _RrmFlutterAppState extends State<RrmFlutterApp> {
           settings: settings,
           builder: (context) => PublicShell(
             currentPath: uri.path,
+            api: _api,
             child: IndustriesScreen(api: _api),
           ),
         );
@@ -506,6 +575,7 @@ class _RrmFlutterAppState extends State<RrmFlutterApp> {
           settings: settings,
           builder: (context) => PublicShell(
             currentPath: uri.path,
+            api: _api,
             child: RfqScreen(api: _api),
           ),
         );
@@ -514,6 +584,7 @@ class _RrmFlutterAppState extends State<RrmFlutterApp> {
           settings: settings,
           builder: (context) => PublicShell(
             currentPath: uri.path,
+            api: _api,
             child: OwnerAccessScreen(api: _api),
           ),
         );
@@ -522,6 +593,7 @@ class _RrmFlutterAppState extends State<RrmFlutterApp> {
           settings: settings,
           builder: (context) => PublicShell(
             currentPath: '/',
+            api: _api,
             child: const NotFoundScreen(),
           ),
         );
@@ -533,7 +605,7 @@ class SurfacePanel extends StatelessWidget {
   const SurfacePanel({
     required this.child,
     super.key,
-    this.padding = const EdgeInsets.all(24),
+    this.padding = const EdgeInsets.all(20),
     this.dark = false,
   });
 
@@ -543,32 +615,17 @@ class SurfacePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Industrial-grade panel: flat surface, single-pixel border, no drop
+    // shadows. Whitespace separates content; borders separate regions.
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: dark ? Colors.white.withOpacity(0.08) : _lineColor),
-        gradient: dark
-            ? const LinearGradient(
-                colors: <Color>[_inkColor, _accentDeep],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
-            : LinearGradient(
-                colors: <Color>[
-                  Colors.white.withOpacity(0.88),
-                  const Color(0xFFF4E5C0).withOpacity(0.72),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: _inkColor.withOpacity(dark ? 0.25 : 0.08),
-            blurRadius: 40,
-            offset: const Offset(0, 18),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: dark ? Colors.white.withOpacity(0.12) : _lineColor,
+          width: 1,
+        ),
+        color: dark ? _inkColor : _surfaceColor,
       ),
       child: child,
     );
@@ -897,170 +954,365 @@ class PublicShell extends StatelessWidget {
     required this.currentPath,
     required this.child,
     super.key,
+    this.api,
   });
 
   final String currentPath;
   final Widget child;
+  final RrmApiClient? api;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: <Color>[
-              _canvasColor,
-              Color(0xFFF7EBD0),
-              Color(0xFFE3F1CF),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      backgroundColor: _canvasColor,
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            _IndustrialAppBar(currentPath: currentPath, api: api),
+            Expanded(child: child),
+            _IndustrialFooter(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _IndustrialAppBar extends StatelessWidget {
+  const _IndustrialAppBar({required this.currentPath, this.api});
+
+  final String currentPath;
+  final RrmApiClient? api;
+
+  @override
+  Widget build(BuildContext context) {
+    // Two-row charcoal header. Row 1: brand + nav + RFQ CTA.
+    // Row 2: dominant global search bar (Part-Number / Material / ID-OD).
+    return Container(
+      decoration: const BoxDecoration(
+        color: _inkColor,
+        border: Border(bottom: BorderSide(color: _accentGreen, width: 2)),
+      ),
+      child: Column(
+        children: <Widget>[
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = constraints.maxWidth < 900;
+              final brand = Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Container(
+                    height: 36,
+                    width: 36,
+                    decoration: BoxDecoration(
+                      color: _accentGreen,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'RRM',
+                      style: TextStyle(color: _inkInverse, fontWeight: FontWeight.w900, fontSize: 12, letterSpacing: 0.6),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'RRM INDUSTRIAL',
+                    style: TextStyle(
+                      color: _inkInverse,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                      letterSpacing: 1.4,
+                    ),
+                  ),
+                ],
+              );
+
+              final nav = Row(
+                mainAxisSize: MainAxisSize.min,
+                children: _publicNavigation
+                    .map((item) => _HeaderNavLink(
+                          label: item.label,
+                          selected: _isSelectedPath(currentPath, item.route),
+                          onTap: () => _replaceRoute(context, item.route),
+                        ))
+                    .toList(growable: false),
+              );
+
+              final cta = FilledButton(
+                onPressed: () => _replaceRoute(context, '/rfq'),
+                child: const Text('REQUEST FOR QUOTE'),
+              );
+
+              if (compact) {
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[brand, cta],
+                      ),
+                      const SizedBox(height: 10),
+                      SingleChildScrollView(scrollDirection: Axis.horizontal, child: nav),
+                    ],
+                  ),
+                );
+              }
+
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(24, 14, 24, 14),
+                child: Row(
+                  children: <Widget>[
+                    brand,
+                    const SizedBox(width: 32),
+                    Expanded(child: nav),
+                    cta,
+                  ],
+                ),
+              );
+            },
+          ),
+          // Row 2 — dominant global search with autosuggest.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 18),
+            child: GlobalCatalogSearch(api: api),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeaderNavLink extends StatelessWidget {
+  const _HeaderNavLink({required this.label, required this.selected, required this.onTap});
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: selected ? _accentGreen : Colors.transparent,
+              width: 2,
+            ),
           ),
         ),
-        child: SafeArea(
-          child: Column(
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-                child: SurfacePanel(
-                  padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final compact = constraints.maxWidth < 960;
-                      final nav = Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: _publicNavigation
-                            .map(
-                              (item) => NavigationChip(
-                                label: item.label,
-                                icon: item.icon,
-                                selected: _isSelectedPath(currentPath, item.route),
-                                onTap: () => _replaceRoute(context, item.route),
-                              ),
-                            )
-                            .toList(growable: false),
-                      );
-
-                      final brand = Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Container(
-                            height: 52,
-                            width: 52,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: LinearGradient(
-                                colors: <Color>[_accentGreen, _accentDeep],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                            ),
-                            alignment: Alignment.center,
-                            child: const Text(
-                              'RRM',
-                              style: TextStyle(color: _inkInverse, fontWeight: FontWeight.w800),
-                            ),
-                          ),
-                          const SizedBox(width: 14),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const <Widget>[
-                              Text(
-                                'RRM Industrial Rubber',
-                                style: TextStyle(fontWeight: FontWeight.w800, color: _inkColor),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Vegetable-store clarity for industrial buyers',
-                                style: TextStyle(color: _mutedColor, fontSize: 12),
-                              ),
-                            ],
-                          ),
-                        ],
-                      );
-
-                      final cta = FilledButton(
-                        onPressed: () => _replaceRoute(context, '/rfq'),
-                        child: const Text('Start an RFQ'),
-                      );
-
-                      if (compact) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            brand,
-                            const SizedBox(height: 18),
-                            nav,
-                            const SizedBox(height: 18),
-                            cta,
-                          ],
-                        );
-                      }
-
-                      return Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Expanded(flex: 4, child: brand),
-                          Expanded(flex: 5, child: nav),
-                          Align(alignment: Alignment.centerRight, child: cta),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              ),
-              Expanded(child: child),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-                child: SurfacePanel(
-                  padding: const EdgeInsets.all(22),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final compact = constraints.maxWidth < 900;
-                      final content = <Widget>[
-                        const Text(
-                          'Public shelves stay focused on product fit, dimensions, and RFQ flow. Pricing, chemistry, and competitive notes remain in the owner workspace.',
-                          style: TextStyle(color: _mutedColor, height: 1.6),
-                        ),
-                        const SizedBox(height: 14),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: const <Widget>[
-                            PillChip(label: '5 currencies'),
-                            PillChip(label: '3D-ready products'),
-                            PillChip(label: 'Owner-only cost logic', warm: true),
-                          ],
-                        ),
-                      ];
-
-                      if (compact) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: content,
-                        );
-                      }
-
-                      return Row(
-                        children: <Widget>[
-                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: content)),
-                          OutlinedButton(
-                            onPressed: () => _replaceRoute(context, '/owner-access'),
-                            child: const Text('Owner workspace'),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ],
+        child: Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            color: selected ? _inkInverse : _inkInverse.withOpacity(0.78),
+            fontWeight: FontWeight.w700,
+            fontSize: 12.5,
+            letterSpacing: 0.6,
           ),
         ),
       ),
     );
   }
+}
+
+class _IndustrialFooter extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(24, 18, 24, 18),
+      decoration: const BoxDecoration(
+        color: _inkColor,
+        border: Border(top: BorderSide(color: _lineColor, width: 1)),
+      ),
+      child: Row(
+        children: <Widget>[
+          const Expanded(
+            child: Text(
+              'RRM Industrial — engineering-grade rubber products. Public catalog excludes pricing logic, chemistry, and competitor data; those remain inside the owner workspace.',
+              style: TextStyle(color: Color(0xFFA0AEC0), fontSize: 12.5, height: 1.5),
+            ),
+          ),
+          TextButton(
+            onPressed: () => _replaceRoute(context, '/owner-access'),
+            style: TextButton.styleFrom(foregroundColor: _inkInverse),
+            child: const Text('OWNER WORKSPACE'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Dominant global search bar with autosuggest backed by the public catalog
+/// payload. Searches SKUs, product titles, materials, and applications.
+class GlobalCatalogSearch extends StatefulWidget {
+  const GlobalCatalogSearch({super.key, this.api});
+
+  final RrmApiClient? api;
+
+  @override
+  State<GlobalCatalogSearch> createState() => _GlobalCatalogSearchState();
+}
+
+class _GlobalCatalogSearchState extends State<GlobalCatalogSearch> {
+  RrmApiClient get _api => widget.api ?? RrmApiClient(baseUrl: apiBaseUrl);
+  List<JsonMap> _catalog = const <JsonMap>[];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCatalog();
+  }
+
+  Future<void> _loadCatalog() async {
+    try {
+      final products = await _api.fetchCatalog();
+      if (!mounted) return;
+      setState(() => _catalog = products);
+    } catch (_) {
+      // Search degrades to free-text submit when the catalog is unreachable.
+    }
+  }
+
+  Iterable<_SuggestionEntry> _suggestions(String query) {
+    final normalized = query.trim().toLowerCase();
+    if (normalized.isEmpty) return const <_SuggestionEntry>[];
+
+    final entries = <_SuggestionEntry>[];
+
+    for (final product in _catalog) {
+      final name = readString(product, 'name');
+      final slug = readString(product, 'slug');
+      final material = readString(product, 'material');
+      final category = readString(product, 'category');
+
+      if (name.toLowerCase().contains(normalized) ||
+          material.toLowerCase().contains(normalized) ||
+          category.toLowerCase().contains(normalized)) {
+        entries.add(_SuggestionEntry(
+          label: name,
+          subtitle: '$category • $material',
+          route: '/products/$slug',
+        ));
+      }
+
+      for (final variant in asJsonMapList(product['variants'])) {
+        final code = readString(variant, 'code');
+        if (code.toLowerCase().contains(normalized)) {
+          entries.add(_SuggestionEntry(
+            label: code,
+            subtitle: 'SKU • $name',
+            route: '/products/$slug',
+          ));
+        }
+      }
+    }
+
+    return entries.take(8);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 880),
+        child: RawAutocomplete<_SuggestionEntry>(
+          optionsBuilder: (TextEditingValue value) => _suggestions(value.text),
+          displayStringForOption: (entry) => entry.label,
+          onSelected: (entry) => _pushRoute(context, entry.route),
+          fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
+            return Material(
+              color: Colors.transparent,
+              child: TextField(
+                controller: controller,
+                focusNode: focusNode,
+                onSubmitted: (text) {
+                  final t = text.trim();
+                  if (t.isEmpty) return;
+                  _replaceRoute(context, '/products?q=${Uri.encodeComponent(t)}');
+                },
+                style: const TextStyle(color: _inkColor, fontSize: 15),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: _surfaceColor,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  prefixIcon: const Icon(Icons.search, color: _inkColor),
+                  hintText: 'Search by Part Number, Material, ID/OD…',
+                  hintStyle: const TextStyle(color: _mutedColor, fontSize: 14.5),
+                  suffixIcon: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: FilledButton(
+                      onPressed: () {
+                        final t = controller.text.trim();
+                        if (t.isEmpty) {
+                          _replaceRoute(context, '/products');
+                        } else {
+                          _replaceRoute(context, '/products?q=${Uri.encodeComponent(t)}');
+                        }
+                      },
+                      child: const Text('SEARCH'),
+                    ),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+            );
+          },
+          optionsViewBuilder: (context, onSelected, options) {
+            return Align(
+              alignment: Alignment.topLeft,
+              child: Material(
+                elevation: 0,
+                color: _surfaceColor,
+                shape: RoundedRectangleBorder(
+                  side: const BorderSide(color: _lineColor),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 360, maxWidth: 880),
+                  child: ListView.separated(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    itemCount: options.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1, color: _lineColor),
+                    itemBuilder: (context, index) {
+                      final entry = options.elementAt(index);
+                      return ListTile(
+                        dense: true,
+                        title: Text(entry.label,
+                            style: const TextStyle(
+                                color: _inkColor, fontWeight: FontWeight.w700, fontSize: 14)),
+                        subtitle: Text(entry.subtitle,
+                            style: const TextStyle(color: _mutedColor, fontSize: 12.5)),
+                        onTap: () => onSelected(entry),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _SuggestionEntry {
+  const _SuggestionEntry({required this.label, required this.subtitle, required this.route});
+  final String label;
+  final String subtitle;
+  final String route;
 }
 
 class AdminShell extends StatelessWidget {
@@ -2548,11 +2800,12 @@ class ProductsScreen extends StatefulWidget {
 class _ProductsScreenState extends State<ProductsScreen> {
   late final Future<List<JsonMap>> _catalogFuture;
   late final TextEditingController _searchController;
-  late String _selectedCategory;
-  late String _selectedMaterial;
-  late String _sortValue;
-  late List<String> _compareSlugs;
-  String _shareMessage = '';
+  String _selectedCategory = _allCategoriesLabel;
+  final Set<String> _selectedMaterials = <String>{};
+  final Set<String> _selectedHardness = <String>{};
+  final Set<String> _selectedTemperature = <String>{};
+  String _currency = 'USD';
+  final Set<String> _quoteSkus = <String>{};
 
   @override
   void initState() {
@@ -2560,14 +2813,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
     _catalogFuture = widget.api.fetchCatalog();
     _searchController = TextEditingController(text: widget.initialUri.queryParameters['q'] ?? '');
     _selectedCategory = widget.initialUri.queryParameters['category'] ?? _allCategoriesLabel;
-    _selectedMaterial = widget.initialUri.queryParameters['material'] ?? _allMaterialsLabel;
-    _sortValue = widget.initialUri.queryParameters['sort'] ?? 'relevance';
-    _compareSlugs = (widget.initialUri.queryParameters['compare'] ?? '')
-        .split(',')
-        .map((value) => value.trim())
-        .where((value) => value.isNotEmpty)
-        .take(_maxComparedProducts)
-        .toList(growable: true);
+    final material = widget.initialUri.queryParameters['material'];
+    if (material != null && material.isNotEmpty && material != _allMaterialsLabel) {
+      _selectedMaterials.add(material);
+    }
     _searchController.addListener(() => setState(() {}));
   }
 
@@ -2577,46 +2826,122 @@ class _ProductsScreenState extends State<ProductsScreen> {
     super.dispose();
   }
 
-  void _toggleCompare(String slug) {
-    setState(() {
-      if (_compareSlugs.contains(slug)) {
-        _compareSlugs.remove(slug);
-      } else if (_compareSlugs.length < _maxComparedProducts) {
-        _compareSlugs.add(slug);
-      }
-    });
-  }
-
   void _clearFilters() {
     setState(() {
       _searchController.clear();
       _selectedCategory = _allCategoriesLabel;
-      _selectedMaterial = _allMaterialsLabel;
-      _sortValue = 'relevance';
+      _selectedMaterials.clear();
+      _selectedHardness.clear();
+      _selectedTemperature.clear();
     });
   }
 
-  Future<void> _copyCurrentView() async {
-    final queryParameters = _buildCatalogViewQueryParameters(
-      query: _searchController.text,
-      category: _selectedCategory,
-      material: _selectedMaterial,
-      sortValue: _sortValue,
-      compareSlugs: _compareSlugs,
-    );
-    final relativeRoute = queryParameters.isEmpty
-        ? '/products'
-        : '/products?${Uri(queryParameters: queryParameters).query}';
+  // Aggregate dynamic facet attributes from the catalog payload. Filters
+  // returned here drive the per-category sidebar (e.g. selecting "O-Rings"
+  // surfaces Material / Shore Hardness / Thickness chips).
+  _CatalogFacets _computeFacets(List<JsonMap> products) {
+    final materials = <String>{};
+    final hardness = <String>{};
+    final temperature = <String>{};
+    final categories = <String>{};
 
-    await Clipboard.setData(ClipboardData(text: relativeRoute));
+    for (final product in products) {
+      categories.add(readString(product, 'category'));
+      if (_selectedCategory != _allCategoriesLabel &&
+          readString(product, 'category') != _selectedCategory) {
+        continue;
+      }
+      materials.add(readString(product, 'material'));
 
-    if (!mounted) {
-      return;
+      for (final variant in asJsonMapList(product['variants'])) {
+        final bag = variant['dimensionsJson'];
+        if (bag is Map) {
+          for (final entry in bag.entries) {
+            final key = entry.key.toString().toLowerCase();
+            final value = entry.value.toString();
+            if (key.contains('hardness') || key.contains('shore') || key.contains('durometer')) {
+              hardness.add(value);
+            }
+            if (key.contains('temp')) {
+              temperature.add(value);
+            }
+          }
+        }
+        for (final dim in asJsonMapList(variant['dimensions'])) {
+          final label = readString(dim, 'label').toLowerCase();
+          final value = readString(dim, 'value');
+          if (label.contains('hardness') || label.contains('shore') || label.contains('durometer')) {
+            hardness.add(value);
+          }
+          if (label.contains('temp')) {
+            temperature.add(value);
+          }
+        }
+      }
     }
 
-    setState(() {
-      _shareMessage = 'Current catalog view copied as $relativeRoute';
-    });
+    return _CatalogFacets(
+      categories: categories.toList()..sort(),
+      materials: materials.toList()..sort(),
+      hardness: hardness.toList()..sort(),
+      temperature: temperature.toList()..sort(),
+    );
+  }
+
+  bool _matchesFacets(JsonMap product) {
+    if (_selectedCategory != _allCategoriesLabel &&
+        readString(product, 'category') != _selectedCategory) {
+      return false;
+    }
+    if (_selectedMaterials.isNotEmpty &&
+        !_selectedMaterials.contains(readString(product, 'material'))) {
+      return false;
+    }
+    if (_selectedHardness.isEmpty && _selectedTemperature.isEmpty) {
+      return true;
+    }
+    for (final variant in asJsonMapList(product['variants'])) {
+      final flat = _collectDimensionMap(variant);
+      final variantHardness = flat.entries
+          .where((e) {
+            final k = e.key.toLowerCase();
+            return k.contains('hardness') || k.contains('shore') || k.contains('durometer');
+          })
+          .map((e) => e.value)
+          .toSet();
+      final variantTemperature = flat.entries
+          .where((e) => e.key.toLowerCase().contains('temp'))
+          .map((e) => e.value)
+          .toSet();
+      final hardnessMatches = _selectedHardness.isEmpty ||
+          _selectedHardness.any(variantHardness.contains);
+      final temperatureMatches = _selectedTemperature.isEmpty ||
+          _selectedTemperature.any(variantTemperature.contains);
+      if (hardnessMatches && temperatureMatches) return true;
+    }
+    return false;
+  }
+
+  String _summarizeKeySpec(JsonMap product, String keyword) {
+    for (final variant in asJsonMapList(product['variants'])) {
+      final flat = _collectDimensionMap(variant);
+      for (final entry in flat.entries) {
+        if (entry.key.toLowerCase().contains(keyword)) {
+          return entry.value;
+        }
+      }
+    }
+    return '—';
+  }
+
+  double _minVariantUsd(JsonMap product) {
+    double? min;
+    for (final variant in asJsonMapList(product['variants'])) {
+      final usd = _readVariantBaseUsd(variant);
+      if (usd <= 0) continue;
+      min = (min == null) ? usd : (usd < min ? usd : min);
+    }
+    return min ?? 0;
   }
 
   @override
@@ -2625,9 +2950,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
       future: _catalogFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const LoadingView(message: 'Loading catalog aisles...');
+          return const LoadingView(message: 'Loading catalog…');
         }
-
         if (snapshot.hasError) {
           return MessageCard(
             title: 'Unable to load the catalog',
@@ -2638,569 +2962,551 @@ class _ProductsScreenState extends State<ProductsScreen> {
         }
 
         final products = snapshot.requireData;
-        final categories = <String>{for (final product in products) readString(product, 'category')}.toList()..sort();
-        final materials = <String>{for (final product in products) readString(product, 'material')}.toList()..sort();
-        final categorySummaries = _buildCatalogAisles(products);
-        final normalizedQuery = _searchController.text.trim().toLowerCase();
-        final filteredProducts = _sortCatalogProducts(
-          products.where((product) {
-            if (_selectedCategory != _allCategoriesLabel && readString(product, 'category') != _selectedCategory) {
-              return false;
-            }
+        final facets = _computeFacets(products);
+        final query = _searchController.text.trim().toLowerCase();
+        final filtered = products.where((p) {
+          if (!_matchesFacets(p)) return false;
+          return _matchesSearch(p, query);
+        }).toList(growable: false);
 
-            if (_selectedMaterial != _allMaterialsLabel && readString(product, 'material') != _selectedMaterial) {
-              return false;
-            }
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final wide = constraints.maxWidth >= 1100;
+            final sidebar = _FacetSidebar(
+              facets: facets,
+              selectedCategory: _selectedCategory,
+              selectedMaterials: _selectedMaterials,
+              selectedHardness: _selectedHardness,
+              selectedTemperature: _selectedTemperature,
+              onCategorySelected: (c) => setState(() {
+                _selectedCategory = c;
+                _selectedMaterials.clear();
+                _selectedHardness.clear();
+                _selectedTemperature.clear();
+              }),
+              onToggleMaterial: (m) => setState(() {
+                if (!_selectedMaterials.add(m)) _selectedMaterials.remove(m);
+              }),
+              onToggleHardness: (h) => setState(() {
+                if (!_selectedHardness.add(h)) _selectedHardness.remove(h);
+              }),
+              onToggleTemperature: (t) => setState(() {
+                if (!_selectedTemperature.add(t)) _selectedTemperature.remove(t);
+              }),
+              onClear: _clearFilters,
+              matchingCount: filtered.length,
+              totalCount: products.length,
+            );
 
-            return _matchesSearch(product, normalizedQuery);
-          }).toList(growable: false),
-          _sortValue,
-          normalizedQuery,
-        );
-        final selectedProducts = _compareSlugs
-            .map((slug) => products.where((product) => readString(product, 'slug') == slug).cast<JsonMap?>().firstOrNull)
-            .whereType<JsonMap>()
-            .toList(growable: false);
-        final totalVariants = products.fold<int>(
-          0,
-          (sum, product) => sum + asJsonMapList(product['variants']).length,
-        );
-        final visibleVariants = filteredProducts.fold<int>(
-          0,
-          (sum, product) => sum + asJsonMapList(product['variants']).length,
-        );
-        final hasActiveFilters = normalizedQuery.isNotEmpty ||
-            _selectedCategory != _allCategoriesLabel ||
-            _selectedMaterial != _allMaterialsLabel ||
-            _sortValue != 'relevance';
+            final grid = _ProductCatalogGrid(
+              products: filtered,
+              currency: _currency,
+              quoteSkus: _quoteSkus,
+              searchController: _searchController,
+              onCurrencyChanged: (c) => setState(() => _currency = c ?? 'USD'),
+              onToggleQuote: (sku) => setState(() {
+                if (!_quoteSkus.add(sku)) _quoteSkus.remove(sku);
+              }),
+              onOpenDetails: (slug) => _pushRoute(context, '/products/$slug'),
+              keySpec: _summarizeKeySpec,
+              minVariantUsd: _minVariantUsd,
+            );
 
-        return ListView(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-          children: <Widget>[
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final wide = constraints.maxWidth >= 1100;
-                final left = SurfacePanel(
-                  padding: const EdgeInsets.all(28),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const SectionHeading(
-                        eyebrow: 'Browse lanes',
-                        title: 'Start with the right shelf before you open product cards.',
-                        description: 'Large industrial catalogs work better when buyers can enter through a clear lane. These category tiles show product depth, variant volume, and the quickest lead time without forcing a full-card scan.',
-                      ),
-                      const SizedBox(height: 18),
-                      ResponsiveWrap(
-                        phone: 1,
-                        tablet: 2,
-                        desktop: 2,
-                        wide: 2,
-                        children: categorySummaries
-                            .map(
-                              (summary) => SurfacePanel(
-                                padding: const EdgeInsets.all(20),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text(
-                                      '${readInt(summary, 'productCount')} families',
-                                      style: const TextStyle(
-                                        color: _mutedColor,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: 1.5,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Text(
-                                      readString(summary, 'category'),
-                                      style: Theme.of(context).textTheme.titleLarge,
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Wrap(
-                                      spacing: 8,
-                                      runSpacing: 8,
-                                      children: asStringList(summary['materials'])
-                                          .map((material) => PillChip(label: material, warm: true))
-                                          .toList(growable: false),
-                                    ),
-                                    const SizedBox(height: 14),
-                                    ResponsiveWrap(
-                                      phone: 2,
-                                      tablet: 2,
-                                      desktop: 2,
-                                      wide: 2,
-                                      children: <Widget>[
-                                        MetricCard(
-                                          label: 'Variant sizes',
-                                          value: '${readInt(summary, 'variantCount')}',
-                                        ),
-                                        MetricCard(
-                                          label: 'Fastest lead time',
-                                          value: '${readInt(summary, 'fastestLeadTime')} days',
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 14),
-                                    OutlinedButton(
-                                      onPressed: () => setState(() {
-                                        _selectedCategory = readString(summary, 'category');
-                                      }),
-                                      child: Text(
-                                        _selectedCategory == readString(summary, 'category')
-                                            ? 'Active lane'
-                                            : 'Open aisle',
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            )
-                            .toList(growable: false),
-                      ),
-                    ],
-                  ),
-                );
-
-                final right = SurfacePanel(
-                  dark: true,
-                  padding: const EdgeInsets.all(26),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const SectionHeading(
-                        eyebrow: 'Shortlist and share',
-                        title: 'Keep teams aligned while they narrow a large catalog.',
-                        description: 'Keep the current slice visible, shortlist candidates, then move directly into RFQ.',
-                        dark: true,
-                      ),
-                      const SizedBox(height: 18),
-                      ResponsiveWrap(
-                        phone: 1,
-                        tablet: 3,
-                        desktop: 3,
-                        wide: 3,
-                        children: <Widget>[
-                          MetricCard(label: 'Matching families', value: '${filteredProducts.length}', dark: true),
-                          MetricCard(label: 'Visible variants', value: '$visibleVariants', dark: true),
-                          MetricCard(
-                            label: 'Shortlist tray',
-                            value: '${selectedProducts.length}/$_maxComparedProducts',
-                            dark: true,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 18),
-                      Container(
-                        padding: const EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(22),
-                          border: Border.all(color: Colors.white.withOpacity(0.08)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              'CURRENT SHORTLIST',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.58),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 1.6,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            if (selectedProducts.isEmpty)
-                              Text(
-                                'Add products to the compare tray and this board becomes a live shortlist for RFQ preparation.',
-                                style: TextStyle(color: Colors.white.withOpacity(0.74), height: 1.5),
-                              )
-                            else
-                              ...selectedProducts.map(
-                                (product) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 10),
-                                  child: Row(
-                                    children: <Widget>[
-                                      Expanded(
-                                        child: Text(
-                                          readString(product, 'name'),
-                                          style: const TextStyle(color: _inkInverse, fontWeight: FontWeight.w800),
-                                        ),
-                                      ),
-                                      PillChip(label: readString(product, 'category'), dark: true),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      if (_shareMessage.isNotEmpty) ...<Widget>[
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.08),
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(color: Colors.white.withOpacity(0.08)),
-                          ),
-                          child: Text(
-                            _shareMessage,
-                            style: TextStyle(color: Colors.white.withOpacity(0.82), height: 1.5),
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 18),
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: <Widget>[
-                          OutlinedButton(
-                            onPressed: _copyCurrentView,
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: _inkInverse,
-                              side: BorderSide(color: Colors.white.withOpacity(0.14)),
-                            ),
-                            child: const Text('Copy current view'),
-                          ),
-                          FilledButton(
-                            onPressed: () => _replaceRoute(context, '/rfq'),
-                            child: const Text('Continue to RFQ'),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-
-                if (wide) {
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Expanded(flex: 12, child: left),
-                      const SizedBox(width: 18),
-                      Expanded(flex: 8, child: right),
-                    ],
-                  );
-                }
-
-                return Column(
-                  children: <Widget>[
-                    left,
-                    const SizedBox(height: 18),
-                    right,
-                  ],
-                );
-              },
-            ),
-            const SizedBox(height: 22),
-            SurfacePanel(
-              padding: const EdgeInsets.all(28),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final wide = constraints.maxWidth >= 980;
-                  final intro = Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const SectionHeading(
-                        eyebrow: 'Product catalog',
-                        title: 'Catalog aisles that feel organized the moment a buyer lands.',
-                        description: 'The Flutter catalog keeps the same search, filter, sort, and comparison behavior while rendering from JSON instead of the original Next pages.',
-                      ),
-                      const SizedBox(height: 18),
-                      Text(
-                        'Search by product name, material, application, dimension, or variant code, then compare up to three products before moving into the quote flow.',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    ],
-                  );
-                  final stats = SurfacePanel(
-                    dark: true,
-                    padding: const EdgeInsets.all(22),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          'CATALOG NUMBERS',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.58),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 1.8,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        ResponsiveWrap(
-                          phone: 1,
-                          tablet: 3,
-                          desktop: 3,
-                          wide: 3,
-                          children: <Widget>[
-                            MetricCard(label: 'Product families', value: '${products.length}', dark: true),
-                            MetricCard(label: 'Variant sizes', value: '$totalVariants', dark: true),
-                            const MetricCard(label: 'Public rule', value: 'Quote first', dark: true),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-
-                  if (wide) {
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Expanded(flex: 11, child: intro),
-                        const SizedBox(width: 18),
-                        Expanded(flex: 9, child: stats),
-                      ],
-                    );
-                  }
-
-                  return Column(
-                    children: <Widget>[
-                      intro,
-                      const SizedBox(height: 18),
-                      stats,
-                    ],
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 22),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final sidebar = SurfacePanel(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const SectionHeading(
-                        eyebrow: 'Search the aisles',
-                        title: 'Filter the catalog the way a buyer actually shops.',
-                        description: 'Search, category, material, sort order, and compare tray stay on one page.',
-                      ),
-                      const SizedBox(height: 18),
-                      TextField(
-                        controller: _searchController,
-                        decoration: const InputDecoration(labelText: 'Search catalog'),
-                      ),
-                      const SizedBox(height: 14),
-                      DropdownButtonFormField<String>(
-                        value: _sortValue,
-                        decoration: const InputDecoration(labelText: 'Sort results'),
-                        items: _sortOptions
-                            .map(
-                              (option) => DropdownMenuItem<String>(
-                                value: option['value'],
-                                child: Text(option['label']!),
-                              ),
-                            )
-                            .toList(growable: false),
-                        onChanged: (value) => setState(() => _sortValue = value ?? 'relevance'),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Category',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 10),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: <String>[_allCategoriesLabel, ...categories]
-                            .map(
-                              (category) => FilterChip(
-                                label: Text(category),
-                                selected: _selectedCategory == category,
-                                onSelected: (_) => setState(() => _selectedCategory = category),
-                              ),
-                            )
-                            .toList(growable: false),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Material',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 10),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: <String>[_allMaterialsLabel, ...materials]
-                            .map(
-                              (material) => FilterChip(
-                                label: Text(material),
-                                selected: _selectedMaterial == material,
-                                onSelected: (_) => setState(() => _selectedMaterial = material),
-                              ),
-                            )
-                            .toList(growable: false),
-                      ),
-                      const SizedBox(height: 18),
-                      ResponsiveWrap(
-                        phone: 2,
-                        tablet: 2,
-                        desktop: 1,
-                        wide: 1,
-                        children: <Widget>[
-                          MetricCard(label: 'Matching products', value: '${filteredProducts.length}'),
-                          MetricCard(
-                            label: 'Compare tray',
-                            value: '${selectedProducts.length}/$_maxComparedProducts',
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 18),
-                      OutlinedButton(
-                        onPressed: hasActiveFilters ? _clearFilters : null,
-                        child: const Text('Clear filters'),
-                      ),
-                      const SizedBox(height: 18),
-                      SurfacePanel(
-                        dark: true,
-                        padding: const EdgeInsets.all(18),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              'LAUNCH RULES',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.58),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 1.8,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            ...const <String>[
-                              'Public pages show dimensions, applications, and technical fit.',
-                              'Prices stay off the shelf and move through RFQ or owner workflow.',
-                              'Manufacturing chemistry and cost inputs remain owner-only.',
-                            ].map(
-                              (rule) => Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: Text(
-                                  rule,
-                                  style: TextStyle(color: Colors.white.withOpacity(0.76), height: 1.5),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-
-                final results = Column(
+            if (wide) {
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    SurfacePanel(
-                      padding: const EdgeInsets.all(22),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Text(
-                                  'LIVE CATALOG RESULTS',
-                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                        color: _mutedColor,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: 1.5,
-                                      ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  '${filteredProducts.length} matching product family${filteredProducts.length == 1 ? '' : 'ies'}${normalizedQuery.isNotEmpty ? ' for "${_searchController.text.trim()}"' : ''}.',
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                ),
-                              ],
-                            ),
-                          ),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: <Widget>[
-                              if (_sortValue != 'relevance')
-                                PillChip(
-                                  label: _sortOptions.firstWhere((option) => option['value'] == _sortValue)['label']!,
-                                ),
-                              if (_selectedCategory != _allCategoriesLabel) PillChip(label: _selectedCategory),
-                              if (_selectedMaterial != _allMaterialsLabel) PillChip(label: _selectedMaterial, warm: true),
-                              if (selectedProducts.isNotEmpty) PillChip(label: 'Compare ${selectedProducts.length}'),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (selectedProducts.isNotEmpty) ...<Widget>[
-                      const SizedBox(height: 18),
-                      ComparisonTable(
-                        products: selectedProducts,
-                        onClear: () => setState(() => _compareSlugs = <String>[]),
-                      ),
-                    ],
-                    const SizedBox(height: 18),
-                    if (filteredProducts.isEmpty)
-                      const MessageCard(
-                        title: 'No matching products',
-                        message: 'Try relaxing the search or clearing one of the filters to widen the aisle.',
-                      )
-                    else
-                      ResponsiveWrap(
-                        phone: 1,
-                        tablet: 2,
-                        desktop: 2,
-                        wide: 2,
-                        children: filteredProducts
-                            .map(
-                              (product) => CatalogProductCard(
-                                product: product,
-                                selectedForCompare: _compareSlugs.contains(readString(product, 'slug')),
-                                compareDisabled: _compareSlugs.length >= _maxComparedProducts,
-                                onToggleCompare: () => _toggleCompare(readString(product, 'slug')),
-                                onOpenDetails: () => _pushRoute(
-                                  context,
-                                  '/products/${readString(product, 'slug')}',
-                                ),
-                              ),
-                            )
-                            .toList(growable: false),
-                      ),
+                    SizedBox(width: 280, child: sidebar),
+                    const SizedBox(width: 16),
+                    Expanded(child: grid),
                   ],
-                );
-
-                if (constraints.maxWidth >= 1120) {
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      SizedBox(width: 340, child: sidebar),
-                      const SizedBox(width: 18),
-                      Expanded(child: results),
-                    ],
-                  );
-                }
-
-                return Column(
-                  children: <Widget>[
-                    sidebar,
-                    const SizedBox(height: 18),
-                    results,
-                  ],
-                );
-              },
-            ),
-          ],
+                ),
+              );
+            }
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+              children: <Widget>[sidebar, const SizedBox(height: 16), grid],
+            );
+          },
         );
       },
     );
   }
 }
+
+class _CatalogFacets {
+  const _CatalogFacets({
+    required this.categories,
+    required this.materials,
+    required this.hardness,
+    required this.temperature,
+  });
+  final List<String> categories;
+  final List<String> materials;
+  final List<String> hardness;
+  final List<String> temperature;
+}
+
+class _FacetSidebar extends StatelessWidget {
+  const _FacetSidebar({
+    required this.facets,
+    required this.selectedCategory,
+    required this.selectedMaterials,
+    required this.selectedHardness,
+    required this.selectedTemperature,
+    required this.onCategorySelected,
+    required this.onToggleMaterial,
+    required this.onToggleHardness,
+    required this.onToggleTemperature,
+    required this.onClear,
+    required this.matchingCount,
+    required this.totalCount,
+  });
+
+  final _CatalogFacets facets;
+  final String selectedCategory;
+  final Set<String> selectedMaterials;
+  final Set<String> selectedHardness;
+  final Set<String> selectedTemperature;
+  final ValueChanged<String> onCategorySelected;
+  final ValueChanged<String> onToggleMaterial;
+  final ValueChanged<String> onToggleHardness;
+  final ValueChanged<String> onToggleTemperature;
+  final VoidCallback onClear;
+  final int matchingCount;
+  final int totalCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return SurfacePanel(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              const Expanded(
+                child: Text('FILTERS',
+                    style: TextStyle(
+                      color: _inkColor,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12,
+                      letterSpacing: 1.2,
+                    )),
+              ),
+              TextButton(onPressed: onClear, child: const Text('CLEAR')),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text('$matchingCount of $totalCount products',
+              style: const TextStyle(color: _mutedColor, fontSize: 12.5)),
+          const Divider(height: 24, color: _lineColor),
+          _FacetSection(
+            title: 'CATEGORY',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                _FacetCheckRow(
+                  label: _allCategoriesLabel,
+                  selected: selectedCategory == _allCategoriesLabel,
+                  onTap: () => onCategorySelected(_allCategoriesLabel),
+                ),
+                ...facets.categories.map((c) => _FacetCheckRow(
+                      label: c,
+                      selected: selectedCategory == c,
+                      onTap: () => onCategorySelected(c),
+                    )),
+              ],
+            ),
+          ),
+          if (facets.materials.isNotEmpty)
+            _FacetSection(
+              title: 'MATERIAL',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: facets.materials
+                    .map((m) => _FacetCheckRow(
+                          label: m,
+                          selected: selectedMaterials.contains(m),
+                          onTap: () => onToggleMaterial(m),
+                          checkbox: true,
+                        ))
+                    .toList(growable: false),
+              ),
+            ),
+          if (facets.hardness.isNotEmpty)
+            _FacetSection(
+              title: 'SHORE HARDNESS',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: facets.hardness
+                    .map((h) => _FacetCheckRow(
+                          label: h,
+                          selected: selectedHardness.contains(h),
+                          onTap: () => onToggleHardness(h),
+                          checkbox: true,
+                        ))
+                    .toList(growable: false),
+              ),
+            ),
+          if (facets.temperature.isNotEmpty)
+            _FacetSection(
+              title: 'TEMPERATURE RANGE',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: facets.temperature
+                    .map((t) => _FacetCheckRow(
+                          label: t,
+                          selected: selectedTemperature.contains(t),
+                          onTap: () => onToggleTemperature(t),
+                          checkbox: true,
+                        ))
+                    .toList(growable: false),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FacetSection extends StatelessWidget {
+  const _FacetSection({required this.title, required this.child});
+  final String title;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(title,
+              style: const TextStyle(
+                color: _inkColor,
+                fontWeight: FontWeight.w800,
+                fontSize: 11.5,
+                letterSpacing: 1.2,
+              )),
+          const SizedBox(height: 8),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _FacetCheckRow extends StatelessWidget {
+  const _FacetCheckRow({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.checkbox = false,
+  });
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final bool checkbox;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5),
+        child: Row(
+          children: <Widget>[
+            Icon(
+              checkbox
+                  ? (selected ? Icons.check_box : Icons.check_box_outline_blank)
+                  : (selected ? Icons.radio_button_checked : Icons.radio_button_unchecked),
+              size: 16,
+              color: selected ? _accentGreen : _mutedColor,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: selected ? _inkColor : _mutedColor,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  fontSize: 13.5,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProductCatalogGrid extends StatelessWidget {
+  const _ProductCatalogGrid({
+    required this.products,
+    required this.currency,
+    required this.quoteSkus,
+    required this.searchController,
+    required this.onCurrencyChanged,
+    required this.onToggleQuote,
+    required this.onOpenDetails,
+    required this.keySpec,
+    required this.minVariantUsd,
+  });
+
+  final List<JsonMap> products;
+  final String currency;
+  final Set<String> quoteSkus;
+  final TextEditingController searchController;
+  final ValueChanged<String?> onCurrencyChanged;
+  final ValueChanged<String> onToggleQuote;
+  final ValueChanged<String> onOpenDetails;
+  final String Function(JsonMap product, String keyword) keySpec;
+  final double Function(JsonMap product) minVariantUsd;
+
+  @override
+  Widget build(BuildContext context) {
+    return SurfacePanel(
+      padding: const EdgeInsets.all(0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              border: Border(bottom: BorderSide(color: _lineColor)),
+            ),
+            child: Row(
+              children: <Widget>[
+                const Expanded(
+                  child: Text(
+                    'PRODUCT CATALOG',
+                    style: TextStyle(
+                      color: _inkColor,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 13,
+                      letterSpacing: 1.4,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 280,
+                  child: TextField(
+                    controller: searchController,
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      hintText: 'Filter rows…',
+                      prefixIcon: Icon(Icons.filter_list, size: 18),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                _CurrencyDropdown(currency: currency, onChanged: onCurrencyChanged),
+              ],
+            ),
+          ),
+          if (products.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(32),
+              child: Text(
+                'No products match the current filter set.',
+                style: TextStyle(color: _mutedColor, fontSize: 14),
+              ),
+            )
+          else
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minWidth: MediaQuery.of(context).size.width - 360,
+                ),
+                child: DataTable(
+                  columnSpacing: 24,
+                  horizontalMargin: 16,
+                  headingRowColor: WidgetStateProperty.all(_accentWarm),
+                  showCheckboxColumn: false,
+                  dividerThickness: 1,
+                  columns: const <DataColumn>[
+                    DataColumn(label: Text('SKU')),
+                    DataColumn(label: Text('IMAGE')),
+                    DataColumn(label: Text('NAME')),
+                    DataColumn(label: Text('MATERIAL')),
+                    DataColumn(label: Text('HARDNESS')),
+                    DataColumn(label: Text('TEMP RANGE')),
+                    DataColumn(label: Text('PRESSURE')),
+                    DataColumn(label: Text('VARIANTS')),
+                    DataColumn(label: Text('PRICE'), numeric: true),
+                    DataColumn(label: Text('ACTION')),
+                  ],
+                  rows: products.map((p) {
+                    final variants = asJsonMapList(p['variants']);
+                    final firstVariant = variants.isNotEmpty ? variants.first : <String, dynamic>{};
+                    final sku = readString(firstVariant, 'code',
+                        fallback: readString(p, 'slug').toUpperCase());
+                    final inQuote = quoteSkus.contains(sku);
+                    final slug = readString(p, 'slug');
+                    final minUsd = minVariantUsd(p);
+                    return DataRow(
+                      onSelectChanged: (_) => onOpenDetails(slug),
+                      cells: <DataCell>[
+                        DataCell(Text(sku,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w800, color: _inkColor))),
+                        DataCell(InkWell(
+                          onTap: () => onOpenDetails(slug),
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: _accentWarm,
+                              border: Border.all(color: _lineColor),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            alignment: Alignment.center,
+                            child: const Icon(Icons.view_in_ar, size: 18, color: _inkColor),
+                          ),
+                        )),
+                        DataCell(
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 220),
+                            child: InkWell(
+                              onTap: () => onOpenDetails(slug),
+                              child: Text(
+                                readString(p, 'name'),
+                                style: const TextStyle(
+                                    color: _accentDeep,
+                                    fontWeight: FontWeight.w700,
+                                    decoration: TextDecoration.underline),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                        ),
+                        DataCell(Text(readString(p, 'material'))),
+                        DataCell(Text(keySpec(p, 'hardness'))),
+                        DataCell(Text(keySpec(p, 'temp'))),
+                        DataCell(Text(keySpec(p, 'pressure'))),
+                        DataCell(InkWell(
+                          onTap: () => onOpenDetails(slug),
+                          child: Text(
+                            'See Variants [${variants.length}]',
+                            style: const TextStyle(
+                                color: _accentDeep,
+                                fontWeight: FontWeight.w700,
+                                decoration: TextDecoration.underline),
+                          ),
+                        )),
+                        DataCell(Text(
+                          minUsd > 0 ? 'from ${formatFromUsd(minUsd, currency)}' : '—',
+                          style: const TextStyle(
+                              color: _inkColor, fontWeight: FontWeight.w700),
+                        )),
+                        DataCell(_QuoteButton(
+                          inQuote: inQuote,
+                          onPressed: () => onToggleQuote(sku),
+                        )),
+                      ],
+                    );
+                  }).toList(growable: false),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CurrencyDropdown extends StatelessWidget {
+  const _CurrencyDropdown({required this.currency, required this.onChanged});
+  final String currency;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: _surfaceColor,
+        border: Border.all(color: _lineColor),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: DropdownButton<String>(
+        value: currency,
+        underline: const SizedBox.shrink(),
+        onChanged: onChanged,
+        style: const TextStyle(
+            fontFamily: _technicalFontFamily,
+            color: _inkColor,
+            fontSize: 13.5,
+            fontWeight: FontWeight.w700),
+        items: _supportedCurrencies
+            .map((c) => DropdownMenuItem<String>(value: c, child: Text(c)))
+            .toList(growable: false),
+      ),
+    );
+  }
+}
+
+class _QuoteButton extends StatelessWidget {
+  const _QuoteButton({required this.inQuote, required this.onPressed});
+  final bool inQuote;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    if (inQuote) {
+      return OutlinedButton.icon(
+        onPressed: onPressed,
+        icon: const Icon(Icons.check, size: 14, color: _accentGreen),
+        label: const Text('IN QUOTE'),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: _accentGreen,
+          side: const BorderSide(color: _accentGreen),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          textStyle: const TextStyle(
+              fontFamily: _technicalFontFamily,
+              fontWeight: FontWeight.w800,
+              fontSize: 11.5,
+              letterSpacing: 0.6),
+        ),
+      );
+    }
+    return FilledButton(
+      onPressed: onPressed,
+      style: FilledButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        textStyle: const TextStyle(
+            fontFamily: _technicalFontFamily,
+            fontWeight: FontWeight.w800,
+            fontSize: 11.5,
+            letterSpacing: 0.6),
+      ),
+      child: const Text('ADD TO QUOTE'),
+    );
+  }
+}
+
+Map<String, String> _collectDimensionMap(JsonMap variant) {
+  final result = <String, String>{};
+  for (final dim in asJsonMapList(variant['dimensions'])) {
+    final l = readString(dim, 'label');
+    final v = readString(dim, 'value');
+    if (l.isNotEmpty) result[l] = v;
+  }
+  final bag = variant['dimensionsJson'];
+  if (bag is Map) {
+    bag.forEach((k, v) {
+      result[k.toString()] = v.toString();
+    });
+  }
+  return result;
+}
+
 
 class ComparisonTable extends StatelessWidget {
   const ComparisonTable({
@@ -3619,14 +3925,45 @@ class _ProductDetailMain extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        // 3D Model viewer at the very top of the parent product page.
+        // 3D Model viewer at the very top of the parent product page —
+        // parametric-scaling-ready slot. Replace ViewerPlaceholder with a
+        // GLB/GLTF model_viewer when assets are attached.
         ViewerPlaceholder(productName: readString(product, 'name'), viewer: viewer),
-        const SizedBox(height: 18),
+        const SizedBox(height: 12),
         SurfacePanel(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        const Text(
+                          'PARENT PRODUCT',
+                          style: TextStyle(
+                            color: _mutedColor,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 11.5,
+                            letterSpacing: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(readString(product, 'name'),
+                            style: Theme.of(context).textTheme.displaySmall),
+                      ],
+                    ),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () {},
+                    icon: const Icon(Icons.description_outlined, size: 16),
+                    label: const Text('TECHNICAL DATASHEET'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -3636,15 +3973,13 @@ class _ProductDetailMain extends StatelessWidget {
                   PillChip(label: 'Lead time ${readInt(product, 'standardLeadTimeDays')} days'),
                 ],
               ),
-              const SizedBox(height: 14),
-              Text(readString(product, 'name'), style: Theme.of(context).textTheme.displaySmall),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               Text(readString(product, 'description'),
                   style: Theme.of(context).textTheme.bodyLarge),
             ],
           ),
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 16),
         // High-density variant data table with inline text filtering.
         _VariantDataTable(
           variants: variants,
@@ -3676,6 +4011,16 @@ class _VariantDataTable extends StatelessWidget {
   final ValueChanged<String> onFilterChanged;
   final VoidCallback onRfq;
 
+  String _lookup(Map<String, String> bag, List<String> needles) {
+    for (final entry in bag.entries) {
+      final k = entry.key.toLowerCase();
+      for (final needle in needles) {
+        if (k.contains(needle)) return entry.value;
+      }
+    }
+    return '—';
+  }
+
   @override
   Widget build(BuildContext context) {
     final query = filterController.text.trim().toLowerCase();
@@ -3693,85 +4038,114 @@ class _VariantDataTable extends StatelessWidget {
     }).toList(growable: false);
 
     return SurfacePanel(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Row(
-            children: <Widget>[
-              const Expanded(
-                child: SectionHeading(
-                  eyebrow: 'Variants',
-                  title: 'Engineer-grade data table',
-                  description:
-                      'Every child variant for this parent product. Filter by SKU, dimension, or MOQ. Toggle the currency to convert Base_Price_USD live.',
-                ),
-              ),
-              FilledButton(onPressed: onRfq, child: const Text('RFQ this product')),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: TextField(
-                  controller: filterController,
-                  onChanged: onFilterChanged,
-                  decoration: const InputDecoration(
-                    hintText: 'Filter SKU, dimension, MOQ…',
-                    prefixIcon: Icon(Icons.search),
+          // Header strip — flat, bordered, no shadow.
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              border: Border(bottom: BorderSide(color: _lineColor)),
+            ),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const Text(
+                        'VARIANT DIMENSIONS',
+                        style: TextStyle(
+                          color: _inkColor,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 12.5,
+                          letterSpacing: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${filtered.length} of ${variants.length} child variants for this parent part',
+                        style: const TextStyle(color: _mutedColor, fontSize: 12.5),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              _CurrencyToggle(currency: currency, onChanged: onCurrencyChanged),
-            ],
+                FilledButton(onPressed: onRfq, child: const Text('REQUEST FOR QUOTE')),
+              ],
+            ),
           ),
-          const SizedBox(height: 14),
-          Text(
-            '${filtered.length} of ${variants.length} variants',
-            style: const TextStyle(color: _mutedColor, fontWeight: FontWeight.w600),
+          // Toolbar — inline filter + currency.
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              color: _accentWarm,
+              border: Border(bottom: BorderSide(color: _lineColor)),
+            ),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: TextField(
+                    controller: filterController,
+                    onChanged: onFilterChanged,
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      hintText: 'Filter by Part#, ID, OD, Thickness, Hardness…',
+                      prefixIcon: Icon(Icons.filter_list, size: 18),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                _CurrencyToggle(currency: currency, onChanged: onCurrencyChanged),
+              ],
+            ),
           ),
-          const SizedBox(height: 10),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: DataTable(
-              columnSpacing: 28,
-              headingRowColor: WidgetStateProperty.all(_accentWarm.withOpacity(0.4)),
-              dataRowMinHeight: 44,
-              dataRowMaxHeight: 56,
-              border: TableBorder.symmetric(
-                inside: BorderSide(color: _lineColor),
-              ),
+              columnSpacing: 24,
+              horizontalMargin: 16,
+              headingRowColor: WidgetStateProperty.all(_surfaceColor),
+              dividerThickness: 1,
               columns: const <DataColumn>[
-                DataColumn(label: Text('SKU')),
-                DataColumn(label: Text('Description')),
-                DataColumn(label: Text('Dimensions')),
+                DataColumn(label: Text('PART #')),
+                DataColumn(label: Text('INNER ⌀')),
+                DataColumn(label: Text('OUTER ⌀')),
+                DataColumn(label: Text('THICKNESS')),
+                DataColumn(label: Text('HARDNESS')),
                 DataColumn(label: Text('MOQ'), numeric: true),
-                DataColumn(label: Text('Price'), numeric: true),
+                DataColumn(label: Text('PRICE'), numeric: true),
+                DataColumn(label: Text('ACTION')),
               ],
               rows: filtered.map((variant) {
                 final baseUsd = _readVariantBaseUsd(variant);
+                final bag = _collectDimensionMap(variant);
                 return DataRow(
                   cells: <DataCell>[
                     DataCell(Text(
                       readString(variant, 'code'),
                       style: const TextStyle(fontWeight: FontWeight.w800, color: _inkColor),
                     )),
-                    DataCell(ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 240),
-                      child: Text(readString(variant, 'description'),
-                          overflow: TextOverflow.ellipsis, maxLines: 2),
-                    )),
-                    DataCell(ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 300),
-                      child: Text(_flattenDimensions(variant),
-                          overflow: TextOverflow.ellipsis, maxLines: 2),
-                    )),
+                    DataCell(Text(_lookup(bag, ['inner', 'id', 'i.d']))),
+                    DataCell(Text(_lookup(bag, ['outer', 'od', 'o.d']))),
+                    DataCell(Text(_lookup(bag, ['thick', 'cs', 'cross']))),
+                    DataCell(Text(_lookup(bag, ['hardness', 'shore', 'durometer']))),
                     DataCell(Text('${readInt(variant, 'minimumOrderQuantity')}')),
                     DataCell(Text(
                       formatFromUsd(baseUsd, currency),
-                      style: const TextStyle(fontWeight: FontWeight.w700, color: _accentDeep),
+                      style: const TextStyle(fontWeight: FontWeight.w800, color: _inkColor),
+                    )),
+                    DataCell(FilledButton(
+                      onPressed: onRfq,
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        textStyle: const TextStyle(
+                            fontFamily: _technicalFontFamily,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 11,
+                            letterSpacing: 0.6),
+                      ),
+                      child: const Text('ADD TO QUOTE'),
                     )),
                   ],
                 );
@@ -3780,7 +4154,7 @@ class _VariantDataTable extends StatelessWidget {
           ),
           if (filtered.isEmpty)
             const Padding(
-              padding: EdgeInsets.only(top: 16),
+              padding: EdgeInsets.all(24),
               child: Text('No variants match this filter.',
                   style: TextStyle(color: _mutedColor)),
             ),
@@ -4124,6 +4498,7 @@ class _AdminRouteScreenState extends State<AdminRouteScreen> {
           if (error is ApiException && error.statusCode == 401) {
             return PublicShell(
               currentPath: '/owner-access',
+              api: widget.api,
               child: MessageCard(
                 title: 'Owner sign-in required',
                 message: 'The private workspace needs a valid owner session or bearer token before Flutter can read the protected modules.',
@@ -4135,6 +4510,7 @@ class _AdminRouteScreenState extends State<AdminRouteScreen> {
 
           return PublicShell(
             currentPath: '/owner-access',
+            api: widget.api,
             child: MessageCard(
               title: 'Unable to load the owner workspace',
               message: snapshot.error.toString(),
