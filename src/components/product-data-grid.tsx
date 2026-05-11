@@ -34,6 +34,9 @@ const USD_RATES: Record<string, number> = {
 const CURRENCIES = ["AED", "USD", "SAR", "OMR", "QAR"] as const;
 type Currency = (typeof CURRENCIES)[number];
 
+const PAGE_SIZE_OPTIONS = [25, 50, 100] as const;
+type PageSize = (typeof PAGE_SIZE_OPTIONS)[number];
+
 export type ProductGridFilter = {
   material?: string;
   category?: string;
@@ -103,6 +106,8 @@ export function ProductDataGrid({
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
   const [currency, setCurrency] = useState<Currency>("AED");
+  const [pageSize, setPageSize] = useState<PageSize>(25);
+  const [page, setPage] = useState(1);
   const cart = useQuoteCart();
 
   const filtered = useMemo(() => {
@@ -127,6 +132,15 @@ export function ProductDataGrid({
     });
   }, [scoped, deferredSearch]);
 
+  // Pagination — the clamp on `currentPage` keeps the cursor inside the
+  // valid window when the user narrows the filter or shrinks page size.
+  const totalCount = filtered.length;
+  const pageCount = Math.max(1, Math.ceil(totalCount / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalCount);
+  const pageRows = filtered.slice(startIndex, endIndex);
+
   return (
     <div className="border border-slate-200 bg-white">
       {/* Toolbar */}
@@ -134,7 +148,10 @@ export function ProductDataGrid({
         <input
           type="search"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
           placeholder="Filter SKU / dimension / application…"
           className="h-7 flex-1 min-w-48 rounded-sm border border-slate-300 bg-white px-2 text-[12px] focus:border-emerald-600 focus:outline-none"
         />
@@ -187,7 +204,7 @@ export function ProductDataGrid({
                 </td>
               </tr>
             )}
-            {filtered.map((p) => {
+            {pageRows.map((p) => {
               const firstVariant = p.variants[0];
               const sku = firstVariant?.code ?? p.slug.toUpperCase();
               const inQuote = cart.has(sku);
@@ -252,6 +269,55 @@ export function ProductDataGrid({
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination footer */}
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-slate-200 bg-white">
+        <div className="flex items-center gap-2">
+          <label className="font-mono text-xs text-slate-500 uppercase tracking-wider">
+            Rows per page:
+          </label>
+          <select
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value) as PageSize);
+              setPage(1);
+            }}
+            className="border border-slate-200 rounded-sm text-xs font-mono px-2 py-1 bg-white text-slate-700"
+          >
+            {PAGE_SIZE_OPTIONS.map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
+        </div>
+        <p className="font-mono text-xs text-slate-700 uppercase tracking-wider">
+          {totalCount === 0
+            ? "No products match"
+            : `Showing ${startIndex + 1} – ${endIndex} of ${totalCount} products`}
+        </p>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-xs text-slate-500 uppercase tracking-wider">
+            Page {currentPage} / {pageCount}
+          </span>
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage <= 1}
+            className="px-3 py-1 text-xs font-mono uppercase tracking-wider border border-slate-200 rounded-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            ← Prev
+          </button>
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+            disabled={currentPage >= pageCount}
+            className="px-3 py-1 text-xs font-mono uppercase tracking-wider border border-slate-200 rounded-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next →
+          </button>
+        </div>
       </div>
     </div>
   );

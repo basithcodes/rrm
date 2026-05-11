@@ -14,6 +14,7 @@
 import { Bounds, Center, OrbitControls, useGLTF } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
 import { useQuoteCart } from "@/lib/quote-cart";
 import { ProductViewer } from "@/components/product-viewer";
@@ -116,6 +117,7 @@ function GltfMesh({ url, scale }: { url: string; scale: [number, number, number]
 }
 
 export function ParametricProductDetail({ product }: { product: Product }) {
+  const router = useRouter();
   const [selectedVariantId, setSelectedVariantId] = useState<string>(
     product.variants[0]?.code ?? "",
   );
@@ -147,8 +149,47 @@ export function ParametricProductDetail({ product }: { product: Product }) {
 
   const hasModelUrl = Boolean(product.threeDModelUrl);
 
+  // Active SKU drives the breadcrumb tail so it always reflects the
+  // variant the engineer is currently inspecting in the viewer/table.
+  const activeSku =
+    product.variants.find((v) => v.code === selectedVariantId)?.code ??
+    product.variants[0]?.code ??
+    product.slug.toUpperCase();
+
   return (
     <div className="space-y-8">
+      {/* ============================================================
+          NAV RAIL — Back action + breadcrumb trail. Schematic styling,
+          no buttons or shadows; orients the engineer in the catalog
+          hierarchy and gives them a one-click return to the previous
+          filtered view (materials tab, industry accordion, etc.).
+          ============================================================ */}
+      <nav
+        aria-label="Catalog breadcrumb"
+        className="flex items-center gap-4 pb-3 mb-6 border-b border-slate-200"
+      >
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="font-mono text-xs text-slate-500 hover:text-slate-900 uppercase tracking-widest transition-colors"
+        >
+          ← Back
+        </button>
+        <ol className="flex flex-wrap items-center gap-2 font-mono text-xs uppercase tracking-widest">
+          <li>
+            <Link href="/products" className="text-slate-500 hover:text-slate-900 transition-colors">
+              Catalog
+            </Link>
+          </li>
+          <li aria-hidden className="text-slate-300">/</li>
+          <li className="text-slate-500">{product.category}</li>
+          <li aria-hidden className="text-slate-300">/</li>
+          <li className="text-slate-500">{product.material}</li>
+          <li aria-hidden className="text-slate-300">/</li>
+          <li className="font-bold text-slate-900">{activeSku}</li>
+        </ol>
+      </nav>
+
       {/* ============================================================
           TOP SECTION — Visual & Summary (3-col grid).
           Cols 1-2: constrained 3D viewer (h-96 fixed). Col 3:

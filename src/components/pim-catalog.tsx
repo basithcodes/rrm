@@ -57,6 +57,9 @@ function dimensionSummary(product: Product): string {
     .join(" · ");
 }
 
+const PAGE_SIZE_OPTIONS = [25, 50, 100] as const;
+type PageSize = (typeof PAGE_SIZE_OPTIONS)[number];
+
 export function PimCatalog({ products }: { products: Product[] }) {
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
@@ -64,6 +67,8 @@ export function PimCatalog({ products }: { products: Product[] }) {
   const [selectedMaterials, setSelectedMaterials] = useState<Set<string>>(new Set());
   const [selectedApplications, setSelectedApplications] = useState<Set<string>>(new Set());
   const [currency, setCurrency] = useState<Currency>("USD");
+  const [pageSize, setPageSize] = useState<PageSize>(25);
+  const [page, setPage] = useState(1);
   const cart = useQuoteCart();
 
   const facets = useMemo(() => {
@@ -125,7 +130,18 @@ export function PimCatalog({ products }: { products: Product[] }) {
     setSelectedCategory(null);
     setSelectedMaterials(new Set());
     setSelectedApplications(new Set());
+    setPage(1);
   }
+
+  // Pagination — slice the filtered set. Any filter/search change resets
+  // the cursor to page 1 via the `currentPage` clamp below so the user
+  // never lands on an empty page after narrowing the result set.
+  const totalCount = filtered.length;
+  const pageCount = Math.max(1, Math.ceil(totalCount / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalCount);
+  const pageRows = filtered.slice(startIndex, endIndex);
 
   return (
     <div className="flex h-screen w-full bg-[#F7FAFC] text-[#1A202C]">
@@ -202,7 +218,10 @@ export function PimCatalog({ products }: { products: Product[] }) {
           <input
             type="search"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search by Part #, Material, ID/OD, application…"
             className="h-9 flex-1 rounded border border-[#CBD5E0] px-3 text-sm placeholder-[#4A5568] focus:border-[#2F855A] focus:outline-none focus:ring-1 focus:ring-[#2F855A]"
           />
@@ -255,7 +274,7 @@ export function PimCatalog({ products }: { products: Product[] }) {
                   </td>
                 </tr>
               )}
-              {filtered.map((p) => {
+              {pageRows.map((p) => {
                 const firstVariant = p.variants[0];
                 const sku = firstVariant?.code ?? p.slug.toUpperCase();
                 const inQuote = cart.has(sku);
@@ -328,6 +347,64 @@ export function PimCatalog({ products }: { products: Product[] }) {
               })}
             </tbody>
           </table>
+        </div>
+
+        {/* ---------------- Pagination footer ---------------- */}
+        <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200 bg-white">
+          {/* Left — row density */}
+          <div className="flex items-center gap-2">
+            <label
+              htmlFor="pim-page-size"
+              className="font-mono text-xs text-slate-500 uppercase tracking-wider"
+            >
+              Rows per page:
+            </label>
+            <select
+              id="pim-page-size"
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value) as PageSize);
+                setPage(1);
+              }}
+              className="border border-slate-200 rounded-sm text-xs font-mono px-2 py-1 bg-white text-slate-700"
+            >
+              {PAGE_SIZE_OPTIONS.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Center — data state */}
+          <p className="font-mono text-xs text-slate-700 uppercase tracking-wider">
+            {totalCount === 0
+              ? "No products match"
+              : `Showing ${startIndex + 1} – ${endIndex} of ${totalCount} products`}
+          </p>
+
+          {/* Right — nav */}
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs text-slate-500 uppercase tracking-wider">
+              Page {currentPage} / {pageCount}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage <= 1}
+              className="px-3 py-1 text-xs font-mono uppercase tracking-wider border border-slate-200 rounded-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              ← Prev
+            </button>
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+              disabled={currentPage >= pageCount}
+              className="px-3 py-1 text-xs font-mono uppercase tracking-wider border border-slate-200 rounded-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next →
+            </button>
+          </div>
         </div>
       </main>
     </div>

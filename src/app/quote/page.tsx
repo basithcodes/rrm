@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState, useTransition } from "react";
 import { useQuoteCart } from "@/lib/quote-cart";
 import { submitRfq } from "./actions";
 
@@ -15,10 +15,26 @@ const MARKETS = [
 ] as const;
 
 export default function QuotePage() {
+  // useSearchParams() requires a Suspense boundary during static export
+  // (Next.js bails out of CSR otherwise). Wrap the real client form here.
+  return (
+    <Suspense fallback={null}>
+      <QuotePageInner />
+    </Suspense>
+  );
+}
+
+function QuotePageInner() {
   const cart = useQuoteCart();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+
+  // Optional URL prefill — e.g. /quote?note=Custom%20engineering%20drawing
+  // attached. Lets other pages (Capabilities, Materials, etc.) deep-link
+  // into the RFQ flow with operational context already filled in.
+  const prefilledNote = searchParams.get("note") ?? "";
 
   const subtotal = cart.items.reduce(
     (sum, item) => sum + (item.basePriceUsd ?? 0) * item.quantity,
@@ -196,6 +212,7 @@ export default function QuotePage() {
                 <textarea
                   name="notes"
                   rows={3}
+                  defaultValue={prefilledNote}
                   className="rounded border border-[#CBD5E0] px-2 py-1.5 text-sm"
                 />
               </label>
