@@ -122,6 +122,10 @@ export const publicFooterLinks = [
   { href: "/owner-access", label: "Owner workspace" },
 ];
 
+export function formatCountLabel(count: number, singular: string, plural = `${singular}s`) {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
 export function getCatalogAisles(): CatalogAisle[] {
   return Array.from(
     products.reduce(
@@ -244,7 +248,7 @@ export const homeRouteCards: HomeRouteCard[] = [
     title: "Browse by product family",
     detail:
       "Use this page when you already know the kind of part you need and want filters, shortlist tools, and variant cues.",
-    stat: `${products.length} families`,
+    stat: formatCountLabel(products.length, "family", "families"),
   },
   {
     href: "/industries",
@@ -252,7 +256,7 @@ export const homeRouteCards: HomeRouteCard[] = [
     title: "Browse by application environment",
     detail:
       "Use this page when the buyer starts from automotive, equipment, building, or project use rather than a product name.",
-    stat: `${industrySolutions.length} industry lanes`,
+    stat: formatCountLabel(industrySolutions.length, "industry lane", "industry lanes"),
   },
   {
     href: "/materials",
@@ -260,7 +264,7 @@ export const homeRouteCards: HomeRouteCard[] = [
     title: "Compare compounds before SKUs",
     detail:
       "Use this page when teams need to decide between EPDM, NBR, neoprene, silicone, or natural rubber first.",
-    stat: `${getMaterialSummaries().length} material groups`,
+    stat: formatCountLabel(getMaterialSummaries().length, "material group", "material groups"),
   },
   {
     href: "/markets",
@@ -268,7 +272,7 @@ export const homeRouteCards: HomeRouteCard[] = [
     title: "See GCC commercial coverage",
     detail:
       "Use this page for country-specific service context, currency handling, and entry path for UAE, Saudi Arabia, Oman, and Qatar.",
-    stat: `${marketProfiles.length} GCC markets`,
+    stat: formatCountLabel(marketProfiles.length, "GCC market", "GCC markets"),
   },
   {
     href: "/capabilities",
@@ -276,7 +280,7 @@ export const homeRouteCards: HomeRouteCard[] = [
     title: "Understand how the platform works",
     detail:
       "Use this page to see what belongs to the public storefront, what stays owner-only, and how imports and quote handling fit together.",
-    stat: `${qualityPillars.length} operating pillars`,
+    stat: formatCountLabel(qualityPillars.length, "operating pillar", "operating pillars"),
   },
   {
     href: "/rfq",
@@ -284,7 +288,7 @@ export const homeRouteCards: HomeRouteCard[] = [
     title: "Send one structured request",
     detail:
       "Use this page when the family, quantity, market, or application is clear enough to move into a real quote request.",
-    stat: `${customerSegments.length} buyer paths supported`,
+    stat: formatCountLabel(customerSegments.length, "buyer path supported", "buyer paths supported"),
   },
 ];
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { MarketingLayout } from "@/components/marketing-layout";
-import { getMaterialSummaries } from "@/lib/public-site";
+import { formatCountLabel, getMaterialSummaries } from "@/lib/public-site";
 
 const selectionRules = [
   {
@@ -76,14 +76,14 @@ export default function MaterialsPage() {
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-                    {material.productCount} product families
+                    {formatCountLabel(material.productCount, "product family", "product families")}
                   </p>
                   <h2 className="mt-4 display-title text-4xl font-semibold text-foreground">
                     {material.material}
                   </h2>
                 </div>
                 <span className="rounded-full border border-[rgba(214,137,53,0.2)] bg-[rgba(246,213,158,0.32)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-accent-berry">
-                  {material.variantCount} variants
+                  {formatCountLabel(material.variantCount, "variant")}
                 </span>
               </div>
 

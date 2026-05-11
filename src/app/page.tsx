@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { MarketingLayout } from "@/components/marketing-layout";
 import { ProductCard } from "@/components/product-card";
-import { getCatalogAisles, homeRouteCards } from "@/lib/public-site";
+import { formatCountLabel, getCatalogAisles, homeRouteCards } from "@/lib/public-site";
 import { getFeaturedProducts, products } from "@/lib/site-data";
 
 export default function Home() {
@@ -164,7 +164,7 @@ export default function Home() {
               className="panel rounded-[2rem] border border-white/65 p-5 transition-transform hover:-translate-y-1"
             >
               <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-muted">
-                {aisle.productCount} families
+                {formatCountLabel(aisle.productCount, "family", "families")}
               </p>
               <h3 className="mt-4 display-title text-3xl font-semibold text-foreground">
                 {aisle.category}

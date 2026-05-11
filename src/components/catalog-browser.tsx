@@ -4,6 +4,7 @@ import Link from "next/link";
 import { startTransition, useDeferredValue, useEffect, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ProductCard } from "@/components/product-card";
+import { formatCountLabel } from "@/lib/public-site";
 import type { Product } from "@/lib/site-data";
 
 const allCategoriesLabel = "All categories";
@@ -387,7 +388,7 @@ export function CatalogBrowser({ products }: { products: Product[] }) {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-muted">
-                        {summary.productCount} families
+                        {formatCountLabel(summary.productCount, "family", "families")}
                       </p>
                       <h3 className="mt-3 text-2xl font-semibold text-foreground">
                         {summary.category}
@@ -654,7 +655,11 @@ export function CatalogBrowser({ products }: { products: Product[] }) {
               Live catalog results
             </p>
             <p className="mt-2 text-sm leading-7 text-muted">
-              {filteredProducts.length} matching product family{filteredProducts.length === 1 ? "" : "ies"}
+              {formatCountLabel(
+                filteredProducts.length,
+                "matching product family",
+                "matching product families",
+              )}
               {normalizedQuery ? ` for “${deferredSearchQuery.trim()}”` : ""}.
             </p>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-deep">
