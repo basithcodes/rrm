@@ -29,7 +29,7 @@ export default async function AdminLayout({
       <div className="mx-auto grid min-h-screen max-w-[90rem] gap-6 px-4 py-6 lg:grid-cols-[18rem_1fr] lg:px-6">
         <aside className="admin-sidebar rounded-[2.4rem] p-6 backdrop-blur-xl lg:sticky lg:top-6 lg:h-[calc(100vh-3rem)] lg:overflow-y-auto">
           <div className="flex items-center gap-3">
-            <span className="flex h-14 w-14 items-center justify-center rounded-[1.35rem] bg-[linear-gradient(135deg,#d68935_0%,#94452e_100%)] text-lg font-semibold text-white shadow-[0_18px_30px_-18px_rgba(214,137,53,0.75)]">
+            <span className="brand-mark flex h-14 w-14 items-center justify-center rounded-[1.35rem] text-lg font-semibold text-white">
               RRM
             </span>
             <div>
@@ -105,20 +105,20 @@ export default async function AdminLayout({
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/50">
                 Owner operations
               </p>
-              <h2 className="mt-3 display-title text-4xl font-semibold text-white md:text-5xl">
+              <h2 className="mt-3 display-title text-3xl font-semibold text-white sm:text-4xl md:text-5xl">
                 Private modules styled to match the new storefront.
               </h2>
             </div>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link
                 href="/products"
-                className="admin-outline-button inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold"
+                className="admin-outline-button inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-semibold sm:w-auto"
               >
                 View public catalog
               </Link>
               <Link
                 href="/admin/imports"
-                className="admin-highlight-button inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold"
+                className="admin-highlight-button inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-semibold sm:w-auto"
               >
                 Import catalog data
               </Link>

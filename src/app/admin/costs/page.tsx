@@ -20,7 +20,7 @@ export default function AdminCostsPage() {
           </div>
           <div className="admin-deep-card rounded-[1.7rem] px-5 py-4">
             <p className="text-xs uppercase tracking-[0.18em] text-white/45">Monthly total</p>
-            <p className="mt-2 text-2xl font-semibold text-[#f6d59e]">
+            <p className="admin-metric-value mt-2 text-2xl font-semibold">
               {formatCurrency(totalInternalCosts, "USD")}
             </p>
           </div>
@@ -40,7 +40,7 @@ export default function AdminCostsPage() {
                     <h3 className="text-lg font-semibold text-white">{bucket.title}</h3>
                     <p className="mt-2 text-sm leading-7 text-white/65">{bucket.note}</p>
                   </div>
-                  <p className="text-sm font-semibold text-[#f6d59e]">
+                  <p className="admin-metric-value text-sm font-semibold">
                     {formatCurrency(bucket.monthlyUsd, "USD")}
                   </p>
                 </div>
@@ -75,7 +75,7 @@ export default function AdminCostsPage() {
                         <p className="font-semibold text-white">{allocation.label}</p>
                         <p className="mt-1 text-sm leading-6 text-white/65">{allocation.allocationBasis}</p>
                       </div>
-                      <p className="text-sm font-semibold text-[#f6d59e]">
+                      <p className="admin-metric-value text-sm font-semibold">
                         {formatCurrency(allocation.monthlyUsd, "USD")}
                       </p>
                     </div>

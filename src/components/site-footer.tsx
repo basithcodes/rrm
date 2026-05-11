@@ -26,7 +26,7 @@ export function SiteFooter() {
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 href="/products"
-                className="inline-flex rounded-full bg-[linear-gradient(135deg,#2f7d3a_0%,#1c5428_100%)] px-5 py-3 text-sm font-semibold text-ink-inverse"
+                className="brand-button inline-flex rounded-full px-5 py-3 text-sm font-semibold"
               >
                 Browse catalog
               </Link>

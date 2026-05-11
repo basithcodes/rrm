@@ -83,19 +83,19 @@ export default function AdminDashboardPage() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-2">
           <article className="admin-deep-card rounded-[1.8rem] p-5">
             <p className="text-xs uppercase tracking-[0.18em] text-white/55">Open RFQs</p>
-            <p className="mt-3 text-4xl font-semibold text-[#f6d59e]">{ownerDashboard.pendingRfqs}</p>
+            <p className="admin-metric-value mt-3 text-4xl font-semibold">{ownerDashboard.pendingRfqs}</p>
           </article>
           <article className="admin-deep-card rounded-[1.8rem] p-5">
             <p className="text-xs uppercase tracking-[0.18em] text-white/55">Active customers</p>
-            <p className="mt-3 text-4xl font-semibold text-[#f6d59e]">{ownerDashboard.activeCustomers}</p>
+            <p className="admin-metric-value mt-3 text-4xl font-semibold">{ownerDashboard.activeCustomers}</p>
           </article>
           <article className="admin-deep-card rounded-[1.8rem] p-5">
             <p className="text-xs uppercase tracking-[0.18em] text-white/55">Cataloged variants</p>
-            <p className="mt-3 text-4xl font-semibold text-[#f6d59e]">{ownerDashboard.catalogedVariants}</p>
+            <p className="admin-metric-value mt-3 text-4xl font-semibold">{ownerDashboard.catalogedVariants}</p>
           </article>
           <article className="admin-deep-card rounded-[1.8rem] p-5">
             <p className="text-xs uppercase tracking-[0.18em] text-white/55">Protected records</p>
-            <p className="mt-3 text-4xl font-semibold text-[#f6d59e]">
+            <p className="admin-metric-value mt-3 text-4xl font-semibold">
               {ownerDashboard.protectedManufacturingRecords}
             </p>
           </article>

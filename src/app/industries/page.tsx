@@ -69,7 +69,7 @@ export default function IndustriesPage() {
         <div className="mt-8 flex justify-center">
           <Link
             href="/rfq"
-            className="inline-flex rounded-full bg-[linear-gradient(135deg,#2f7d3a_0%,#1c5428_100%)] px-6 py-3 text-sm font-semibold text-ink-inverse"
+            className="brand-button inline-flex rounded-full px-6 py-3 text-sm font-semibold"
           >
             Request application support
           </Link>

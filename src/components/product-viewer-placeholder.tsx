@@ -1,9 +1,9 @@
 export function ProductViewerPlaceholder({ productName }: { productName: string }) {
   return (
-    <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem] border border-white/70 bg-[linear-gradient(160deg,#fffcf7_0%,#e8ddcf_100%)] p-6 shadow-[0_30px_90px_-48px_rgba(20,33,43,0.6)]">
-      <div className="absolute inset-x-10 bottom-7 h-8 rounded-full bg-[#17232d]/15 blur-2xl" />
+    <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem] border border-white/70 bg-[linear-gradient(160deg,#fff9ef_0%,#f1e6bf_48%,#dff0cf_100%)] p-6 shadow-[0_30px_90px_-48px_rgba(23,53,35,0.55)]">
+      <div className="absolute inset-x-10 bottom-7 h-8 rounded-full bg-accent-deep/15 blur-2xl" />
       <div className="absolute inset-x-10 top-12 h-56 [perspective:1200px]">
-        <div className="absolute inset-0 rounded-[2rem] border border-white/70 bg-[linear-gradient(145deg,rgba(23,35,45,0.85),rgba(184,95,45,0.85))] shadow-[0_24px_60px_-30px_rgba(20,33,43,0.8)] [transform:rotateX(63deg)_rotateZ(-28deg)]" />
+        <div className="absolute inset-0 rounded-[2rem] border border-white/70 bg-[linear-gradient(145deg,rgba(23,53,35,0.9),rgba(214,137,53,0.85))] shadow-[0_24px_60px_-30px_rgba(23,53,35,0.7)] [transform:rotateX(63deg)_rotateZ(-28deg)]" />
         <div className="absolute inset-[16%] rounded-[1.5rem] border border-white/45 bg-[linear-gradient(145deg,rgba(255,255,255,0.4),rgba(255,255,255,0.05))] [transform:rotateX(63deg)_rotateZ(-28deg)_translateZ(20px)]" />
         <div className="absolute inset-x-[22%] inset-y-[18%] rounded-[1.25rem] border border-white/35 bg-[linear-gradient(145deg,rgba(255,255,255,0.48),rgba(255,255,255,0.08))] [transform:rotateX(63deg)_rotateZ(-28deg)_translateZ(38px)]" />
       </div>
@@ -13,7 +13,7 @@ export function ProductViewerPlaceholder({ productName }: { productName: string 
           <span className="rounded-full border border-white/70 bg-white/65 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-accent-deep">
             3D asset slot
           </span>
-          <span className="rounded-full bg-[#17232d] px-3 py-1 font-mono text-xs text-white/75">
+          <span className="rounded-full bg-accent-deep px-3 py-1 font-mono text-xs text-white/75">
             GLB / GLTF
           </span>
         </div>

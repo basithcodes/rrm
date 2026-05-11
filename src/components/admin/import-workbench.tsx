@@ -138,7 +138,7 @@ export function ImportWorkbench({ sampleCsvText }: { sampleCsvText: string }) {
                 type="file"
                 accept=".csv,text/csv"
                 onChange={handleFileChange}
-                className="rounded-[1.4rem] border border-white/10 bg-[rgba(7,15,10,0.42)] px-4 py-3 text-sm text-white/75 file:mr-4 file:rounded-full file:border-0 file:bg-accent-warm file:px-4 file:py-2 file:font-semibold file:text-foreground"
+                className="admin-table-surface rounded-[1.4rem] border border-white/10 px-4 py-3 text-sm text-white/75 file:mr-4 file:rounded-full file:border-0 file:bg-accent-warm file:px-4 file:py-2 file:font-semibold file:text-foreground"
               />
             </label>
 
@@ -147,7 +147,7 @@ export function ImportWorkbench({ sampleCsvText }: { sampleCsvText: string }) {
               <textarea
                 value={csvText}
                 onChange={(event) => setCsvText(event.target.value)}
-                className="min-h-72 rounded-[1.6rem] border border-white/10 bg-[rgba(7,15,10,0.42)] px-4 py-4 font-mono text-xs leading-6 text-white/78 outline-none"
+                className="admin-table-surface min-h-72 rounded-[1.6rem] border border-white/10 px-4 py-4 font-mono text-xs leading-6 text-white/78 outline-none"
                 spellCheck={false}
               />
             </label>
@@ -213,15 +213,15 @@ export function ImportWorkbench({ sampleCsvText }: { sampleCsvText: string }) {
         </article>
         <article className="admin-deep-card rounded-[1.8rem] p-5">
           <p className="text-xs uppercase tracking-[0.18em] text-white/45">Rows detected</p>
-          <p className="mt-3 text-3xl font-semibold text-[#f6d59e]">{preview.rowCount}</p>
+          <p className="admin-metric-value mt-3 text-3xl font-semibold">{preview.rowCount}</p>
         </article>
         <article className="admin-deep-card rounded-[1.8rem] p-5">
           <p className="text-xs uppercase tracking-[0.18em] text-white/45">Valid rows</p>
-          <p className="mt-3 text-3xl font-semibold text-[#f6d59e]">{preview.successfulCount}</p>
+          <p className="admin-metric-value mt-3 text-3xl font-semibold">{preview.successfulCount}</p>
         </article>
         <article className="admin-deep-card rounded-[1.8rem] p-5">
           <p className="text-xs uppercase tracking-[0.18em] text-white/45">Issues</p>
-          <p className="mt-3 text-3xl font-semibold text-[#f6d59e]">{preview.failedCount}</p>
+          <p className="admin-metric-value mt-3 text-3xl font-semibold">{preview.failedCount}</p>
         </article>
       </section>
 
@@ -329,13 +329,13 @@ export function ImportWorkbench({ sampleCsvText }: { sampleCsvText: string }) {
               preview.errors.map((error) => (
                 <div
                   key={error}
-                  className="rounded-[1rem] border border-[#e0a883] bg-[#2a1f1a] px-4 py-3 text-sm leading-7 text-[#ffd7c1]"
+                  className="admin-alert-error rounded-[1rem] px-4 py-3 text-sm leading-7"
                 >
                   {error}
                 </div>
               ))
             ) : (
-              <div className="rounded-[1rem] border border-[#2a4d37] bg-[#16261d] px-4 py-3 text-sm leading-7 text-[#cfe9d8]">
+              <div className="admin-alert-success rounded-[1rem] px-4 py-3 text-sm leading-7">
                 No validation issues detected in the current preview.
               </div>
             )}

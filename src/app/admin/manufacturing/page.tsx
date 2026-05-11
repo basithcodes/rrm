@@ -51,7 +51,7 @@ export default function AdminManufacturingPage() {
                 </div>
                 <div className="admin-deep-card rounded-[1.2rem] px-4 py-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-white/45">Allocated overhead</p>
-                  <p className="mt-2 font-semibold text-[#f6d59e]">
+                  <p className="admin-metric-value mt-2 font-semibold">
                     {formatCurrency(
                       record.overheadAllocation.reduce((total, item) => total + item.monthlyUsd, 0),
                       "USD",
@@ -83,7 +83,7 @@ export default function AdminManufacturingPage() {
                             {material.supplier}
                           </p>
                         </div>
-                        <p className="text-sm font-semibold text-[#f6d59e]">{material.percentage}</p>
+                        <p className="admin-metric-value text-sm font-semibold">{material.percentage}</p>
                       </div>
                     ))}
                   </div>

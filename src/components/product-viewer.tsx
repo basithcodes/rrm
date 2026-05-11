@@ -98,7 +98,7 @@ function SheetRollModel({ config }: { config: ProductViewerConfig }) {
       </mesh>
       <mesh position={[0.35, 0.08, 0.02]} rotation={[0, 0, -0.14]}>
         <boxGeometry args={[1.7, 0.04, 1.55]} />
-        <meshStandardMaterial color="#ffd9de" roughness={0.74} metalness={0.03} />
+        <meshStandardMaterial color="#efe2b8" roughness={0.74} metalness={0.03} />
       </mesh>
     </group>
   );
@@ -213,7 +213,7 @@ export function ProductViewer({ product }: { product: Product }) {
         <span className="rounded-full border border-white/70 bg-white/72 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-accent-deep backdrop-blur-sm">
           Rotate to inspect
         </span>
-        <span className="rounded-full border border-white/10 bg-[#21492d] px-3 py-1 font-mono text-xs text-white/82">
+        <span className="rounded-full border border-white/10 bg-accent-deep px-3 py-1 font-mono text-xs text-white/82">
           {product.viewer.label}
         </span>
       </div>

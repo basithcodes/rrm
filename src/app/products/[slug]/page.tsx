@@ -37,10 +37,10 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
   return (
     <MarketingLayout>
-      <section className="section-shell py-10 md:py-12">
+      <section className="section-shell py-8 md:py-12">
         <div className="grid gap-8 lg:grid-cols-[0.96fr_1.04fr] lg:items-start">
           <div className="space-y-6">
-            <div className="panel rounded-[2.7rem] border border-white/65 p-6 md:p-8">
+            <div className="panel rounded-[2.2rem] border border-white/65 p-5 sm:rounded-[2.4rem] md:p-8">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="eyebrow">{product.category}</span>
                 <span className="market-stamp">{product.material}</span>
@@ -92,10 +92,10 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
               </div>
             </div>
 
-            <div className="panel rounded-[2.4rem] border border-white/65 p-6 md:p-8">
+            <div className="panel rounded-[2.2rem] border border-white/65 p-5 sm:rounded-[2.4rem] md:p-8">
               <span className="eyebrow">Applications</span>
               <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <div className="rounded-[1.7rem] border border-line bg-white/70 p-5">
+                <div className="rounded-[1.4rem] border border-line bg-white/70 p-4 sm:rounded-[1.7rem] sm:p-5">
                   <p className="text-sm font-semibold uppercase tracking-[0.18em] text-muted">
                     Typical use cases
                   </p>
@@ -105,7 +105,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                     ))}
                   </ul>
                 </div>
-                <div className="rounded-[1.7rem] border border-line bg-white/70 p-5">
+                <div className="rounded-[1.4rem] border border-line bg-white/70 p-4 sm:rounded-[1.7rem] sm:p-5">
                   <p className="text-sm font-semibold uppercase tracking-[0.18em] text-muted">
                     Industries served
                   </p>
@@ -122,7 +122,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           <div className="grid gap-6">
             <ProductViewer product={product} />
 
-            <div className="market-card-dark rounded-[2.4rem] p-6 md:p-8">
+            <div className="market-card-dark rounded-[2.2rem] p-5 sm:rounded-[2.4rem] md:p-8">
               <span className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">
                 Quote handling
               </span>
@@ -156,10 +156,10 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
       <section className="section-shell pb-10 md:pb-14">
         <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="panel rounded-[2.4rem] border border-white/65 p-6 md:p-8">
+          <div className="panel rounded-[2.2rem] border border-white/65 p-5 sm:rounded-[2.4rem] md:p-8">
             <span className="eyebrow">Technical Profile</span>
-            <div className="mt-6 overflow-hidden rounded-[1.8rem] border border-line bg-white/70">
-              <table className="w-full border-collapse text-left">
+            <div className="mt-6 overflow-x-auto rounded-[1.6rem] border border-line bg-white/70 sm:rounded-[1.8rem]">
+              <table className="min-w-[32rem] w-full border-collapse text-left">
                 <thead className="bg-surface-strong text-xs font-semibold uppercase tracking-[0.18em] text-muted">
                   <tr>
                     <th className="px-4 py-3">Specification</th>
@@ -187,7 +187,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           </div>
 
           <div className="grid gap-6">
-            <div className="panel rounded-[2.4rem] border border-white/65 p-6 md:p-8">
+            <div className="panel rounded-[2.2rem] border border-white/65 p-5 sm:rounded-[2.4rem] md:p-8">
               <span className="eyebrow">Supply Format</span>
               <div className="mt-6 flex flex-wrap gap-2">
                 {product.supplyFormats.map((format) => (
@@ -201,7 +201,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
               </div>
             </div>
 
-            <div className="panel rounded-[2.4rem] border border-white/65 p-6 md:p-8">
+            <div className="panel rounded-[2.2rem] border border-white/65 p-5 sm:rounded-[2.4rem] md:p-8">
               <span className="eyebrow">Quality Checks</span>
               <ul className="mt-6 grid gap-3 text-sm leading-7 text-muted">
                 {product.qualityChecks.map((check) => (
@@ -215,8 +215,8 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
       <section className="section-shell pb-16">
         <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-          <div className="panel rounded-[2.4rem] border border-white/65 p-6 md:p-8">
-            <div className="flex items-center justify-between gap-4">
+          <div className="panel rounded-[2.2rem] border border-white/65 p-5 sm:rounded-[2.4rem] md:p-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <span className="eyebrow">Dimensions and Variants</span>
                 <h2 className="mt-5 display-title text-4xl font-semibold text-foreground">
@@ -225,14 +225,14 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
               </div>
               <Link
                 href="/rfq"
-                className="hidden rounded-full bg-[linear-gradient(135deg,#2f7d3a_0%,#1c5428_100%)] px-5 py-3 text-sm font-semibold text-ink-inverse md:inline-flex"
+                className="brand-button hidden rounded-full px-5 py-3 text-sm font-semibold md:inline-flex"
               >
                 RFQ this product
               </Link>
             </div>
 
-            <div className="mt-8 overflow-hidden rounded-[1.8rem] border border-line bg-white/70">
-              <table className="w-full border-collapse text-left">
+            <div className="mt-8 overflow-x-auto rounded-[1.6rem] border border-line bg-white/70 sm:rounded-[1.8rem]">
+              <table className="min-w-[48rem] w-full border-collapse text-left">
                 <thead className="bg-surface-strong text-xs font-semibold uppercase tracking-[0.18em] text-muted">
                   <tr>
                     <th className="px-4 py-3">Variant</th>
@@ -272,7 +272,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           </div>
 
           <div className="grid gap-6">
-            <div className="panel rounded-[2.4rem] border border-white/65 p-6 md:p-8">
+            <div className="panel rounded-[2.2rem] border border-white/65 p-5 sm:rounded-[2.4rem] md:p-8">
               <span className="eyebrow">Visibility rules</span>
               <ul className="mt-6 grid gap-4 text-sm leading-7 text-muted">
                 <li>Customer-facing pages exclude compound ratios and process notes.</li>

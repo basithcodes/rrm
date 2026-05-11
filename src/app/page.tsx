@@ -42,7 +42,7 @@ export default function Home() {
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="/products"
-                  className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,#2f7d3a_0%,#1c5428_100%)] px-6 py-3 text-sm font-semibold text-ink-inverse transition-transform hover:-translate-y-0.5"
+                  className="brand-button inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition-transform hover:-translate-y-0.5"
                 >
                   Explore the catalog
                 </Link>
@@ -184,7 +184,7 @@ export default function Home() {
             </div>
             <Link
               href="/rfq"
-              className="mt-6 inline-flex rounded-full bg-[linear-gradient(135deg,#2f7d3a_0%,#1c5428_100%)] px-5 py-3 text-sm font-semibold text-ink-inverse"
+              className="brand-button mt-6 inline-flex rounded-full px-5 py-3 text-sm font-semibold"
             >
               Send a structured RFQ
             </Link>

@@ -1,7 +1,13 @@
 import Link from "next/link";
 import type { Product } from "@/lib/site-data";
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({
+  product,
+  footerExtras,
+}: {
+  product: Product;
+  footerExtras?: React.ReactNode;
+}) {
   const firstVariant = product.variants[0];
 
   return (
@@ -83,12 +89,15 @@ export function ProductCard({ product }: { product: Product }) {
               3D demo ready · {product.standardLeadTimeDays}-day lead time
             </p>
           </div>
-          <Link
-            href={`/products/${product.slug}`}
-            className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,#2f7d3a_0%,#1c5428_100%)] px-5 py-3 text-sm font-semibold text-ink-inverse shadow-[0_18px_32px_-20px_rgba(28,84,40,0.8)]"
-          >
-            View details
-          </Link>
+          <div className="flex flex-col gap-2 sm:items-end">
+            {footerExtras ? <div className="flex flex-wrap gap-2 sm:justify-end">{footerExtras}</div> : null}
+            <Link
+              href={`/products/${product.slug}`}
+              className="brand-button inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold"
+            >
+              View details
+            </Link>
+          </div>
         </div>
       </div>
     </article>

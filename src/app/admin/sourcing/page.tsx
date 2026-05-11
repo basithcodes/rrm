@@ -36,7 +36,7 @@ export default function AdminSourcingPage() {
                 </span>
               </div>
 
-              <div className="mt-6 overflow-x-auto rounded-[1.8rem] border border-white/10 bg-[rgba(7,15,10,0.42)]">
+              <div className="admin-table-surface mt-6 overflow-x-auto rounded-[1.8rem] border border-white/10">
                 <table className="min-w-full border-collapse text-left text-sm">
                   <thead className="bg-white/5 text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
                     <tr>

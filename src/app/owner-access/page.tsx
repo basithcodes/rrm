@@ -48,14 +48,14 @@ export default async function OwnerAccessPage({ searchParams }: OwnerAccessPageP
             </label>
 
             {hasError ? (
-              <p className="rounded-2xl border border-[#e9b79a] bg-[#fff3ec] px-4 py-3 text-sm text-accent-deep">
+              <p className="public-alert-error rounded-2xl px-4 py-3 text-sm">
                 Access code was not accepted.
               </p>
             ) : null}
 
             <button
               type="submit"
-              className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,#2f7d3a_0%,#1c5428_100%)] px-5 py-3 text-sm font-semibold text-ink-inverse"
+              className="brand-button inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold"
             >
               Enter owner workspace
             </button>

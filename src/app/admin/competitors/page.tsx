@@ -40,7 +40,7 @@ export default function AdminCompetitorsPage() {
                         <p className="text-xs uppercase tracking-[0.18em] text-white/45">{benchmark.market}</p>
                         <h4 className="mt-2 text-lg font-semibold text-white">{benchmark.competitor}</h4>
                       </div>
-                      <p className="text-sm font-semibold text-[#f6d59e]">
+                      <p className="admin-metric-value text-sm font-semibold">
                         {formatCurrency(benchmark.unitPrice, benchmark.currency)}
                       </p>
                     </div>

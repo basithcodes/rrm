@@ -1,9 +1,35 @@
+import { Suspense } from "react";
+import { CatalogBrowser } from "@/components/catalog-browser";
 import { MarketingLayout } from "@/components/marketing-layout";
-import { ProductCard } from "@/components/product-card";
 import { products } from "@/lib/site-data";
 
+function CatalogBrowserFallback() {
+  return (
+    <div className="grid gap-6 xl:grid-cols-[0.34fr_0.66fr]">
+      <div className="panel rounded-[2.2rem] border border-white/65 p-6">
+        <span className="eyebrow">Loading catalog tools</span>
+        <p className="mt-5 text-sm leading-7 text-muted">
+          Preparing search, filter, sort, and comparison controls.
+        </p>
+      </div>
+      <div className="grid gap-5 lg:grid-cols-2">
+        {products.slice(0, 4).map((product) => (
+          <div key={product.slug} className="panel rounded-[2.25rem] border border-white/65 p-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+              {product.category}
+            </p>
+            <h3 className="mt-3 display-title text-3xl font-semibold text-foreground">
+              {product.name}
+            </h3>
+            <p className="mt-4 text-sm leading-7 text-muted">{product.summary}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function ProductsPage() {
-  const categories = Array.from(new Set(products.map((product) => product.category)));
   const totalVariants = products.reduce((total, product) => total + product.variants.length, 0);
 
   return (
@@ -53,40 +79,9 @@ export default function ProductsPage() {
       </section>
 
       <section className="section-shell pb-16">
-        <div className="grid gap-6 xl:grid-cols-[0.34fr_0.66fr]">
-          <aside className="grid gap-6 self-start xl:sticky xl:top-36">
-            <div className="panel rounded-[2.2rem] border border-white/65 p-6">
-              <span className="eyebrow">Catalog aisles</span>
-              <div className="mt-5 flex flex-wrap gap-2">
-                {categories.map((category) => (
-                  <span
-                    key={category}
-                    className="rounded-full border border-line bg-white/70 px-4 py-2 text-sm font-semibold text-foreground"
-                  >
-                    {category}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="market-card-dark rounded-[2.2rem] p-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">
-                Launch rules
-              </p>
-              <ul className="mt-5 grid gap-3 text-sm leading-7 text-white/78">
-                <li>Public pages show dimensions, applications, and technical fit.</li>
-                <li>Prices stay off the shelf and move through RFQ or owner workflow.</li>
-                <li>Manufacturing chemistry and cost inputs remain owner-only.</li>
-              </ul>
-            </div>
-          </aside>
-
-          <div className="grid gap-5 lg:grid-cols-2">
-            {products.map((product) => (
-              <ProductCard key={product.slug} product={product} />
-            ))}
-          </div>
-        </div>
+        <Suspense fallback={<CatalogBrowserFallback />}>
+          <CatalogBrowser products={products} />
+        </Suspense>
       </section>
     </MarketingLayout>
   );

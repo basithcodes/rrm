@@ -12,55 +12,56 @@ export function SiteHeader() {
   return (
     <header className="section-shell sticky top-0 z-30 py-4">
       <div className="panel overflow-hidden rounded-[2.2rem] border border-white/65 shadow-[0_22px_54px_-38px_rgba(23,53,35,0.55)]">
-        <div className="flex flex-col gap-3 border-b border-line px-5 py-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-3 border-b border-line px-4 py-3 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
           <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-accent-deep">
-            Fresh-market inspiration for a cleaner industrial catalog
+            <span className="sm:hidden">Cleaner industrial catalog</span>
+            <span className="hidden sm:inline">Fresh-market inspiration for a cleaner industrial catalog</span>
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
             {marketTags.map((market) => (
-              <span key={market} className="market-stamp">
+              <span key={market} className="market-stamp shrink-0">
                 {market}
               </span>
             ))}
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
-          <Link href="/" className="flex items-center gap-4">
-            <span className="flex h-14 w-14 items-center justify-center rounded-[1.35rem] bg-[linear-gradient(160deg,#2f7d3a_0%,#1c5428_100%)] text-lg font-semibold text-ink-inverse shadow-[0_18px_34px_-18px_rgba(28,84,40,0.8)]">
+        <div className="flex flex-col gap-4 px-4 py-4 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
+          <Link href="/" className="flex items-start gap-3 sm:items-center sm:gap-4">
+            <span className="brand-mark flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.1rem] text-base font-semibold sm:h-14 sm:w-14 sm:rounded-[1.35rem] sm:text-lg">
               RRM
             </span>
-            <div>
-              <p className="text-lg font-semibold text-foreground">RRM Industrial Rubber</p>
-              <p className="mt-1 max-w-md text-sm leading-6 text-muted">
+            <div className="min-w-0">
+              <p className="text-base font-semibold text-foreground sm:text-lg">RRM Industrial Rubber</p>
+              <p className="mt-1 max-w-md text-sm leading-5 text-muted sm:leading-6">
                 Catalog aisles, dimensional detail, and RFQ-first ordering for GCC buyers.
               </p>
             </div>
           </Link>
 
           <div className="flex flex-col gap-4 lg:items-end">
-            <nav className="flex flex-wrap items-center gap-2 text-sm font-semibold text-foreground">
+            <nav className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 text-sm font-semibold text-foreground sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
               {navigation.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="rounded-full border border-line bg-white/70 px-4 py-2 transition-colors hover:border-accent hover:bg-[rgba(222,240,204,0.7)]"
+                  className="shrink-0 rounded-full border border-line bg-white/70 px-4 py-2 transition-colors hover:border-accent hover:bg-[rgba(222,240,204,0.7)]"
                 >
                   {item.label}
                 </Link>
               ))}
             </nav>
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
               <Link
                 href="/owner-access"
-                className="inline-flex rounded-full border border-line bg-white/75 px-4 py-2 text-sm font-semibold text-foreground"
+                className="inline-flex w-full items-center justify-center rounded-full border border-line bg-white/75 px-4 py-2 text-sm font-semibold text-foreground sm:w-auto"
               >
                 Owner Access
               </Link>
               <Link
                 href="/rfq"
-                className="inline-flex rounded-full bg-[linear-gradient(135deg,#2f7d3a_0%,#1c5428_100%)] px-5 py-2.5 text-sm font-semibold text-ink-inverse shadow-[0_18px_32px_-20px_rgba(28,84,40,0.8)]"
+                className="brand-button inline-flex w-full items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold sm:w-auto"
               >
                 Request Quote
               </Link>

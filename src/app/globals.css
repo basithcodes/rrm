@@ -15,6 +15,19 @@
   --accent-berry: #94452e;
   --ink-inverse: #fff9f0;
   --shadow-soft: 0 30px 80px -48px rgba(23, 53, 35, 0.35);
+  --brand-gradient: linear-gradient(135deg, #2f7d3a 0%, #1c5428 100%);
+  --brand-gradient-mark: linear-gradient(160deg, #2f7d3a 0%, #1c5428 100%);
+  --brand-shadow: 0 18px 32px -20px rgba(28, 84, 40, 0.8);
+  --brand-mark-shadow: 0 18px 34px -18px rgba(28, 84, 40, 0.8);
+  --admin-table-background: rgba(7, 15, 10, 0.42);
+  --admin-alert-error-border: rgba(214, 137, 53, 0.38);
+  --admin-alert-error-background: rgba(60, 28, 17, 0.92);
+  --admin-alert-error-text: #ffd7c1;
+  --admin-alert-success-border: rgba(47, 125, 58, 0.34);
+  --admin-alert-success-background: rgba(17, 42, 25, 0.92);
+  --admin-alert-success-text: #def0cc;
+  --public-alert-error-border: rgba(214, 137, 53, 0.28);
+  --public-alert-error-background: rgba(246, 213, 158, 0.38);
 }
 
 @theme inline {
@@ -143,6 +156,18 @@ body::before {
   color: var(--foreground);
 }
 
+.brand-button {
+  background: var(--brand-gradient);
+  color: var(--ink-inverse);
+  box-shadow: var(--brand-shadow);
+}
+
+.brand-mark {
+  background: var(--brand-gradient-mark);
+  color: var(--ink-inverse);
+  box-shadow: var(--brand-mark-shadow);
+}
+
 .produce-divider {
   height: 1px;
   width: 100%;
@@ -227,9 +252,9 @@ body::before {
 }
 
 .admin-highlight-button {
-  background: linear-gradient(135deg, #d68935 0%, #94452e 100%);
-  color: #fff9f0;
-  box-shadow: 0 20px 34px -22px rgba(214, 137, 53, 0.6);
+  background: var(--brand-gradient);
+  color: var(--ink-inverse);
+  box-shadow: var(--brand-shadow);
 }
 
 .admin-surface-card {
@@ -242,4 +267,30 @@ body::before {
   background:
     radial-gradient(circle at top right, rgba(246, 213, 158, 0.08), transparent 28%),
     rgba(9, 20, 14, 0.62);
+}
+
+.admin-table-surface {
+  background: var(--admin-table-background);
+}
+
+.admin-metric-value {
+  color: var(--accent-warm-soft);
+}
+
+.admin-alert-error {
+  border: 1px solid var(--admin-alert-error-border);
+  background: var(--admin-alert-error-background);
+  color: var(--admin-alert-error-text);
+}
+
+.admin-alert-success {
+  border: 1px solid var(--admin-alert-success-border);
+  background: var(--admin-alert-success-background);
+  color: var(--admin-alert-success-text);
+}
+
+.public-alert-error {
+  border: 1px solid var(--public-alert-error-border);
+  background: var(--public-alert-error-background);
+  color: var(--accent-berry);
 }
