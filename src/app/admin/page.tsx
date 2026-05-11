@@ -1,16 +1,14 @@
 import Link from "next/link";
-import {
-  formatCurrency,
-  getTotalInternalCosts,
-  keyCustomers,
-  ownerDashboard,
-  ownerProductRecords,
-  products,
-  recentRfqs,
-} from "@/lib/site-data";
+import { formatCurrency } from "@/lib/site-data";
+import { getOwnerDashboardPayload } from "@/lib/api-data";
 
-export default function AdminDashboardPage() {
-  const totalInternalCosts = getTotalInternalCosts();
+export default async function AdminDashboardPage() {
+  const payload = await getOwnerDashboardPayload();
+  const { dashboard: ownerDashboard, internalCostBuckets, keyCustomers, ownerProductRecords, products, recentRfqs } = payload;
+  const totalInternalCosts = internalCostBuckets.reduce(
+    (sum, bucket) => sum + Number(bucket.amountUsd),
+    0,
+  );
   const totalVariantCount = products.reduce((total, product) => total + product.variants.length, 0);
   const totalRawMaterials = ownerProductRecords.reduce(
     (total, record) => total + record.rawMaterials.length,

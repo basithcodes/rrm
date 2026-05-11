@@ -240,6 +240,12 @@ class RrmApiClient {
     return payload;
   }
 
+  Future<JsonMap> submitPublicRfq(JsonMap body) async {
+    final payload = await _postJson('/api/public/rfq', body);
+    _ownerWorkspaceCache = null;
+    return payload;
+  }
+
   Future<String> exportCatalogCsv() {
     return _getText('/api/owner/imports/export', ownerAuth: true);
   }

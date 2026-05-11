@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  return jsonResponse(request, getOwnerDashboardPayload(), {
+  return jsonResponse(request, await getOwnerDashboardPayload(), {
     credentials: true,
     methods: ownerDashboardMethods,
   });

@@ -1,4 +1,5 @@
 import { MarketingLayout } from "@/components/marketing-layout";
+import { PublicRfqForm } from "@/components/public-rfq-form";
 
 const rfqFields = [
   "Company name",
@@ -42,6 +43,8 @@ export default function RfqPage() {
                 </div>
               ))}
             </div>
+
+            <PublicRfqForm />
           </div>
 
           <div className="grid gap-6">

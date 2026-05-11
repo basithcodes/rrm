@@ -53,6 +53,21 @@ const _rfqVisibilityRules = <String>[
   'Keep pricing and cost logic in the protected owner workflow.',
 ];
 
+const _shoppingFlow = <Map<String, String>>[
+  <String, String>{
+    'title': 'Enter through a clear aisle',
+    'detail': 'Start by category or market instead of forcing buyers to read every product card.',
+  },
+  <String, String>{
+    'title': 'Shortlist with technical cues',
+    'detail': 'Variant count, lead time, and material show up before the RFQ conversation starts.',
+  },
+  <String, String>{
+    'title': 'Move directly into RFQ',
+    'detail': 'Once buyers find the right family, the page keeps them one step away from a quote request.',
+  },
+];
+
 const _publicNavigation = <_NavItem>[
   _NavItem('/', 'Home', Icons.home_outlined),
   _NavItem('/products', 'Catalog', Icons.storefront_outlined),
@@ -263,6 +278,81 @@ List<JsonMap> _sortCatalogProducts(List<JsonMap> products, String sortValue, Str
   return nextProducts;
 }
 
+List<JsonMap> _buildCatalogAisles(List<JsonMap> products) {
+  final productCounts = <String, int>{};
+  final variantCounts = <String, int>{};
+  final fastestLeadTimes = <String, int>{};
+  final materialSets = <String, Set<String>>{};
+
+  for (final product in products) {
+    final category = readString(product, 'category');
+
+    productCounts[category] = (productCounts[category] ?? 0) + 1;
+    variantCounts[category] = (variantCounts[category] ?? 0) + asJsonMapList(product['variants']).length;
+
+    final currentLeadTime = fastestLeadTimes[category];
+    final nextLeadTime = readInt(product, 'standardLeadTimeDays');
+    fastestLeadTimes[category] = currentLeadTime == null
+        ? nextLeadTime
+        : nextLeadTime < currentLeadTime
+            ? nextLeadTime
+            : currentLeadTime;
+
+    materialSets.putIfAbsent(category, () => <String>{}).add(readString(product, 'material'));
+  }
+
+  final aisles = productCounts.keys
+      .map(
+        (category) => <String, dynamic>{
+          'category': category,
+          'productCount': productCounts[category] ?? 0,
+          'variantCount': variantCounts[category] ?? 0,
+          'fastestLeadTime': fastestLeadTimes[category] ?? 0,
+          'materials': materialSets[category]?.take(2).toList(growable: false) ?? const <String>[],
+        },
+      )
+      .toList(growable: false);
+
+  aisles.sort(
+    (left, right) => readInt(right, 'productCount').compareTo(readInt(left, 'productCount')),
+  );
+
+  return aisles;
+}
+
+Map<String, String> _buildCatalogViewQueryParameters({
+  required String query,
+  required String category,
+  required String material,
+  required String sortValue,
+  required List<String> compareSlugs,
+}) {
+  final params = <String, String>{};
+  final trimmedQuery = query.trim();
+
+  if (trimmedQuery.isNotEmpty) {
+    params['q'] = trimmedQuery;
+  }
+
+  if (category != _allCategoriesLabel) {
+    params['category'] = category;
+  }
+
+  if (material != _allMaterialsLabel) {
+    params['material'] = material;
+  }
+
+  if (sortValue != 'relevance') {
+    params['sort'] = sortValue;
+  }
+
+  if (compareSlugs.isNotEmpty) {
+    params['compare'] = compareSlugs.join(',');
+  }
+
+  return params;
+}
+
 class _NavItem {
   const _NavItem(this.route, this.label, this.icon);
 
@@ -416,7 +506,7 @@ class _RrmFlutterAppState extends State<RrmFlutterApp> {
           settings: settings,
           builder: (context) => PublicShell(
             currentPath: uri.path,
-            child: const RfqScreen(),
+            child: RfqScreen(api: _api),
           ),
         );
       case '/owner-access':
@@ -1235,6 +1325,7 @@ class HomeScreen extends StatelessWidget {
         final qualityPillars = asJsonMapList(bootstrap['qualityPillars']);
         final customerSegments = asJsonMapList(bootstrap['customerSegments']);
         final industries = asJsonMapList(bootstrap['industrySolutions']);
+        final catalogAisles = _buildCatalogAisles(products).take(4).toList(growable: false);
         final totalVariants = products.fold<int>(
           0,
           (sum, product) => sum + asJsonMapList(product['variants']).length,
@@ -1490,6 +1581,163 @@ class HomeScreen extends StatelessWidget {
                     ),
                   )
                   .toList(growable: false),
+            ),
+            const SizedBox(height: 22),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final wide = constraints.maxWidth >= 1000;
+                final left = SurfacePanel(
+                  dark: true,
+                  padding: const EdgeInsets.all(28),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        'HOW LARGE CATALOGS STAY USABLE',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.58),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.8,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'The public storefront now behaves more like an engineered supply counter.',
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: _inkInverse),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'The best industrial catalogs are beautiful because they are legible. They put browse lanes, fast technical cues, and quote actions in front of the buyer before the page turns into a wall of cards.',
+                        style: TextStyle(color: Colors.white.withOpacity(0.76), height: 1.6),
+                      ),
+                      const SizedBox(height: 18),
+                      ..._shoppingFlow.asMap().entries.map(
+                        (entry) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.white.withOpacity(0.08)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  'STEP ${entry.key + 1}',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.58),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.6,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  entry.value['title']!,
+                                  style: const TextStyle(color: _inkInverse, fontWeight: FontWeight.w800),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  entry.value['detail']!,
+                                  style: TextStyle(color: Colors.white.withOpacity(0.74), height: 1.5),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+
+                final right = ResponsiveWrap(
+                  phone: 1,
+                  tablet: 2,
+                  desktop: 2,
+                  wide: 2,
+                  children: catalogAisles
+                      .map(
+                        (aisle) => SurfacePanel(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                '${readInt(aisle, 'productCount')} families',
+                                style: const TextStyle(
+                                  color: _mutedColor,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1.5,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                readString(aisle, 'category'),
+                                style: Theme.of(context).textTheme.headlineSmall,
+                              ),
+                              const SizedBox(height: 14),
+                              ResponsiveWrap(
+                                phone: 2,
+                                tablet: 2,
+                                desktop: 2,
+                                wide: 2,
+                                children: <Widget>[
+                                  MetricCard(
+                                    label: 'Variant sizes',
+                                    value: '${readInt(aisle, 'variantCount')}',
+                                  ),
+                                  MetricCard(
+                                    label: 'Fastest lead time',
+                                    value: '${readInt(aisle, 'fastestLeadTime')} days',
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 14),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: asStringList(aisle['materials'])
+                                    .map((material) => PillChip(label: material, warm: true))
+                                    .toList(growable: false),
+                              ),
+                              const SizedBox(height: 16),
+                              FilledButton(
+                                onPressed: () => _replaceRoute(
+                                  context,
+                                  '/products?category=${Uri.encodeComponent(readString(aisle, 'category'))}',
+                                ),
+                                child: const Text('Open aisle'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                      .toList(growable: false),
+                );
+
+                if (wide) {
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Expanded(flex: 8, child: left),
+                      const SizedBox(width: 18),
+                      Expanded(flex: 11, child: right),
+                    ],
+                  );
+                }
+
+                return Column(
+                  children: <Widget>[
+                    left,
+                    const SizedBox(height: 18),
+                    right,
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 22),
             SurfacePanel(
@@ -1832,7 +2080,9 @@ class IndustriesScreen extends StatelessWidget {
 }
 
 class RfqScreen extends StatefulWidget {
-  const RfqScreen({super.key});
+  const RfqScreen({required this.api, super.key});
+
+  final RrmApiClient api;
 
   @override
   State<RfqScreen> createState() => _RfqScreenState();
@@ -1842,6 +2092,10 @@ class _RfqScreenState extends State<RfqScreen> {
   late final Map<String, TextEditingController> _controllers = <String, TextEditingController>{
     for (final label in _rfqFieldLabels) label: TextEditingController(),
   };
+  bool _isSubmitting = false;
+  String _submissionTone = 'idle';
+  String _submissionMessage = 'Structured submissions land in the owner RFQ queue once the form is sent.';
+  String? _submissionReference;
 
   @override
   void dispose() {
@@ -1851,7 +2105,9 @@ class _RfqScreenState extends State<RfqScreen> {
     super.dispose();
   }
 
-  void _submitRfq() {
+  String _valueFor(String label) => _controllers[label]?.text.trim() ?? '';
+
+  Future<void> _submitRfq() async {
     final hasAnyValue = _controllers.values.any((controller) => controller.text.trim().isNotEmpty);
 
     if (!hasAnyValue) {
@@ -1861,15 +2117,68 @@ class _RfqScreenState extends State<RfqScreen> {
       return;
     }
 
-    for (final controller in _controllers.values) {
-      controller.clear();
+    if (_valueFor('Company name').isEmpty ||
+        _valueFor('Country and delivery city').isEmpty ||
+        _valueFor('Product or variant code').isEmpty ||
+        _valueFor('Requested quantity').isEmpty) {
+      setState(() {
+        _submissionTone = 'error';
+        _submissionReference = null;
+        _submissionMessage = 'Company, delivery location, product code, and quantity are required.';
+      });
+      return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('RFQ sheet prepared. Connect this form to a persistence endpoint when you want live submissions.'),
-      ),
-    );
+    setState(() {
+      _isSubmitting = true;
+      _submissionTone = 'idle';
+      _submissionReference = null;
+      _submissionMessage = 'Submitting RFQ...';
+    });
+
+    try {
+      final payload = await widget.api.submitPublicRfq(<String, dynamic>{
+        'companyName': _valueFor('Company name'),
+        'contactPerson': _valueFor('Contact person'),
+        'emailPhone': _valueFor('Email and phone'),
+        'countryAndDeliveryCity': _valueFor('Country and delivery city'),
+        'productOrVariantCode': _valueFor('Product or variant code'),
+        'requestedQuantity': _valueFor('Requested quantity'),
+        'applicationDetails': _valueFor('Application details'),
+        'drawingOrSampleReference': _valueFor('Drawing or sample reference'),
+        'sourceChannel': 'flutter_public_app',
+      });
+
+      for (final controller in _controllers.values) {
+        controller.clear();
+      }
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isSubmitting = false;
+        _submissionTone = 'success';
+        _submissionReference = readString(payload, 'reference');
+        _submissionMessage = readString(
+          payload,
+          'message',
+          fallback: 'RFQ submitted and added to the owner queue.',
+        );
+      });
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isSubmitting = false;
+        _submissionTone = 'error';
+        _submissionReference = null;
+        _submissionMessage = error.toString();
+      });
+    }
   }
 
   @override
@@ -1907,9 +2216,53 @@ class _RfqScreenState extends State<RfqScreen> {
                         .toList(growable: false),
                   ),
                   const SizedBox(height: 18),
+                  Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: _submissionTone == 'success'
+                          ? _accentWarm.withOpacity(0.16)
+                          : _submissionTone == 'error'
+                              ? _accentWarm.withOpacity(0.28)
+                              : Colors.white.withOpacity(0.72),
+                      borderRadius: BorderRadius.circular(22),
+                      border: Border.all(
+                        color: _submissionTone == 'success'
+                            ? _accentGreen.withOpacity(0.22)
+                            : _submissionTone == 'error'
+                                ? _accentWarm.withOpacity(0.42)
+                                : _lineColor,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          _submissionMessage,
+                          style: TextStyle(
+                            color: _submissionTone == 'error' ? _accentBerry : _inkColor,
+                            fontWeight: FontWeight.w700,
+                            height: 1.5,
+                          ),
+                        ),
+                        if (_submissionReference != null && _submissionReference!.isNotEmpty) ...<Widget>[
+                          const SizedBox(height: 8),
+                          Text(
+                            'Reference ${_submissionReference!}',
+                            style: const TextStyle(
+                              color: _accentDeep,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 18),
                   FilledButton(
-                    onPressed: _submitRfq,
-                    child: const Text('Prepare RFQ sheet'),
+                    onPressed: _isSubmitting ? null : _submitRfq,
+                    child: Text(_isSubmitting ? 'Submitting RFQ...' : 'Submit RFQ to owner queue'),
                   ),
                 ],
               ),
@@ -2007,6 +2360,11 @@ class CatalogProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final variants = asJsonMapList(product['variants']);
+    final firstVariant = variants.isNotEmpty ? variants.first : null;
+    final supplyFormats = asStringList(product['supplyFormats']);
+    final industries = asStringList(product['industries']);
+
     return SurfacePanel(
       padding: const EdgeInsets.all(22),
       child: Column(
@@ -2041,21 +2399,114 @@ class CatalogProductCard extends StatelessWidget {
                 .toList(growable: false),
           ),
           const SizedBox(height: 16),
-          Row(
+          ResponsiveWrap(
+            phone: 1,
+            tablet: 3,
+            desktop: 3,
+            wide: 3,
             children: <Widget>[
-              Expanded(
-                child: MetricCard(
-                  label: 'Variants',
-                  value: '${readInt(product, 'variantCount')}',
-                ),
+              MetricCard(
+                label: 'Variants',
+                value: '${readInt(product, 'variantCount')}',
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: MetricCard(
-                  label: 'MOQ range',
-                  value: readString(product, 'minimumOrderQuantityRange'),
-                ),
+              MetricCard(
+                label: 'Lead time',
+                value: '${readInt(product, 'standardLeadTimeDays')} days',
               ),
+              MetricCard(
+                label: 'Supply format',
+                value: supplyFormats.isNotEmpty ? supplyFormats.first : 'Custom quote',
+              ),
+            ],
+          ),
+          if (firstVariant != null) ...<Widget>[
+            const SizedBox(height: 16),
+            SurfacePanel(
+              dark: true,
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Text(
+                          'QUICK SPEC CHECK',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.58),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.6,
+                          ),
+                        ),
+                      ),
+                      PillChip(
+                        label: 'MOQ ${readInt(firstVariant, 'minimumOrderQuantity')}',
+                        dark: true,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    readString(firstVariant, 'code'),
+                    style: const TextStyle(color: _inkInverse, fontWeight: FontWeight.w800),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    readString(firstVariant, 'description'),
+                    style: TextStyle(color: Colors.white.withOpacity(0.74), height: 1.5),
+                  ),
+                  const SizedBox(height: 14),
+                  ResponsiveWrap(
+                    phone: 1,
+                    tablet: 3,
+                    desktop: 3,
+                    wide: 3,
+                    children: asJsonMapList(firstVariant['dimensions'])
+                        .map(
+                          (dimension) => Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(color: Colors.white.withOpacity(0.08)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  readString(dimension, 'label'),
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.58),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.4,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  readString(dimension, 'value'),
+                                  style: const TextStyle(color: _inkInverse, fontWeight: FontWeight.w800),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                        .toList(growable: false),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: <Widget>[
+              ...asStringList(product['certifications'])
+                  .take(2)
+                  .map((certification) => PillChip(label: certification)),
+              ...industries.take(2).map((industry) => PillChip(label: industry, warm: true)),
             ],
           ),
           const SizedBox(height: 16),
@@ -2101,6 +2552,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
   late String _selectedMaterial;
   late String _sortValue;
   late List<String> _compareSlugs;
+  String _shareMessage = '';
 
   @override
   void initState() {
@@ -2144,6 +2596,29 @@ class _ProductsScreenState extends State<ProductsScreen> {
     });
   }
 
+  Future<void> _copyCurrentView() async {
+    final queryParameters = _buildCatalogViewQueryParameters(
+      query: _searchController.text,
+      category: _selectedCategory,
+      material: _selectedMaterial,
+      sortValue: _sortValue,
+      compareSlugs: _compareSlugs,
+    );
+    final relativeRoute = queryParameters.isEmpty
+        ? '/products'
+        : '/products?${Uri(queryParameters: queryParameters).query}';
+
+    await Clipboard.setData(ClipboardData(text: relativeRoute));
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _shareMessage = 'Current catalog view copied as $relativeRoute';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<JsonMap>>(
@@ -2165,6 +2640,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
         final products = snapshot.requireData;
         final categories = <String>{for (final product in products) readString(product, 'category')}.toList()..sort();
         final materials = <String>{for (final product in products) readString(product, 'material')}.toList()..sort();
+        final categorySummaries = _buildCatalogAisles(products);
         final normalizedQuery = _searchController.text.trim().toLowerCase();
         final filteredProducts = _sortCatalogProducts(
           products.where((product) {
@@ -2189,6 +2665,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
           0,
           (sum, product) => sum + asJsonMapList(product['variants']).length,
         );
+        final visibleVariants = filteredProducts.fold<int>(
+          0,
+          (sum, product) => sum + asJsonMapList(product['variants']).length,
+        );
         final hasActiveFilters = normalizedQuery.isNotEmpty ||
             _selectedCategory != _allCategoriesLabel ||
             _selectedMaterial != _allMaterialsLabel ||
@@ -2197,6 +2677,225 @@ class _ProductsScreenState extends State<ProductsScreen> {
         return ListView(
           padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
           children: <Widget>[
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final wide = constraints.maxWidth >= 1100;
+                final left = SurfacePanel(
+                  padding: const EdgeInsets.all(28),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const SectionHeading(
+                        eyebrow: 'Browse lanes',
+                        title: 'Start with the right shelf before you open product cards.',
+                        description: 'Large industrial catalogs work better when buyers can enter through a clear lane. These category tiles show product depth, variant volume, and the quickest lead time without forcing a full-card scan.',
+                      ),
+                      const SizedBox(height: 18),
+                      ResponsiveWrap(
+                        phone: 1,
+                        tablet: 2,
+                        desktop: 2,
+                        wide: 2,
+                        children: categorySummaries
+                            .map(
+                              (summary) => SurfacePanel(
+                                padding: const EdgeInsets.all(20),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Text(
+                                      '${readInt(summary, 'productCount')} families',
+                                      style: const TextStyle(
+                                        color: _mutedColor,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 1.5,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      readString(summary, 'category'),
+                                      style: Theme.of(context).textTheme.titleLarge,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Wrap(
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      children: asStringList(summary['materials'])
+                                          .map((material) => PillChip(label: material, warm: true))
+                                          .toList(growable: false),
+                                    ),
+                                    const SizedBox(height: 14),
+                                    ResponsiveWrap(
+                                      phone: 2,
+                                      tablet: 2,
+                                      desktop: 2,
+                                      wide: 2,
+                                      children: <Widget>[
+                                        MetricCard(
+                                          label: 'Variant sizes',
+                                          value: '${readInt(summary, 'variantCount')}',
+                                        ),
+                                        MetricCard(
+                                          label: 'Fastest lead time',
+                                          value: '${readInt(summary, 'fastestLeadTime')} days',
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 14),
+                                    OutlinedButton(
+                                      onPressed: () => setState(() {
+                                        _selectedCategory = readString(summary, 'category');
+                                      }),
+                                      child: Text(
+                                        _selectedCategory == readString(summary, 'category')
+                                            ? 'Active lane'
+                                            : 'Open aisle',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                            .toList(growable: false),
+                      ),
+                    ],
+                  ),
+                );
+
+                final right = SurfacePanel(
+                  dark: true,
+                  padding: const EdgeInsets.all(26),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const SectionHeading(
+                        eyebrow: 'Shortlist and share',
+                        title: 'Keep teams aligned while they narrow a large catalog.',
+                        description: 'Keep the current slice visible, shortlist candidates, then move directly into RFQ.',
+                        dark: true,
+                      ),
+                      const SizedBox(height: 18),
+                      ResponsiveWrap(
+                        phone: 1,
+                        tablet: 3,
+                        desktop: 3,
+                        wide: 3,
+                        children: <Widget>[
+                          MetricCard(label: 'Matching families', value: '${filteredProducts.length}', dark: true),
+                          MetricCard(label: 'Visible variants', value: '$visibleVariants', dark: true),
+                          MetricCard(
+                            label: 'Shortlist tray',
+                            value: '${selectedProducts.length}/$_maxComparedProducts',
+                            dark: true,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+                      Container(
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(22),
+                          border: Border.all(color: Colors.white.withOpacity(0.08)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              'CURRENT SHORTLIST',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.58),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 1.6,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            if (selectedProducts.isEmpty)
+                              Text(
+                                'Add products to the compare tray and this board becomes a live shortlist for RFQ preparation.',
+                                style: TextStyle(color: Colors.white.withOpacity(0.74), height: 1.5),
+                              )
+                            else
+                              ...selectedProducts.map(
+                                (product) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 10),
+                                  child: Row(
+                                    children: <Widget>[
+                                      Expanded(
+                                        child: Text(
+                                          readString(product, 'name'),
+                                          style: const TextStyle(color: _inkInverse, fontWeight: FontWeight.w800),
+                                        ),
+                                      ),
+                                      PillChip(label: readString(product, 'category'), dark: true),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      if (_shareMessage.isNotEmpty) ...<Widget>[
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(color: Colors.white.withOpacity(0.08)),
+                          ),
+                          child: Text(
+                            _shareMessage,
+                            style: TextStyle(color: Colors.white.withOpacity(0.82), height: 1.5),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 18),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: <Widget>[
+                          OutlinedButton(
+                            onPressed: _copyCurrentView,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: _inkInverse,
+                              side: BorderSide(color: Colors.white.withOpacity(0.14)),
+                            ),
+                            child: const Text('Copy current view'),
+                          ),
+                          FilledButton(
+                            onPressed: () => _replaceRoute(context, '/rfq'),
+                            child: const Text('Continue to RFQ'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+
+                if (wide) {
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Expanded(flex: 12, child: left),
+                      const SizedBox(width: 18),
+                      Expanded(flex: 8, child: right),
+                    ],
+                  );
+                }
+
+                return Column(
+                  children: <Widget>[
+                    left,
+                    const SizedBox(height: 18),
+                    right,
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 22),
             SurfacePanel(
               padding: const EdgeInsets.all(28),
               child: LayoutBuilder(

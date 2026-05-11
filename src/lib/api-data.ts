@@ -20,6 +20,7 @@ import {
   type Product,
   type ProductVariant,
 } from "@/lib/site-data";
+import { getLiveRfqDashboardData } from "@/lib/rfqs/service";
 
 function formatMinimumOrderRange(product: Product) {
   const quantities = product.variants.map((variant) => variant.minimumOrderQuantity);
@@ -101,8 +102,8 @@ export function getProductDetailPayload(slug: string) {
   };
 }
 
-export function getOwnerDashboardPayload() {
-  return {
+export async function getOwnerDashboardPayload() {
+  const fallbackPayload = {
     dashboard: ownerDashboard,
     recentRfqs,
     keyCustomers,
@@ -110,6 +111,25 @@ export function getOwnerDashboardPayload() {
     products: products.map(serializeProductDetail),
     ownerProductRecords,
   };
+
+  try {
+    const liveRfqData = await getLiveRfqDashboardData(recentRfqs.length);
+
+    if (liveRfqData.pendingRfqs === 0 && liveRfqData.recentRfqs.length === 0) {
+      return fallbackPayload;
+    }
+
+    return {
+      ...fallbackPayload,
+      dashboard: {
+        ...ownerDashboard,
+        pendingRfqs: ownerDashboard.pendingRfqs + liveRfqData.pendingRfqs,
+      },
+      recentRfqs: [...liveRfqData.recentRfqs, ...recentRfqs].slice(0, recentRfqs.length),
+    };
+  } catch {
+    return fallbackPayload;
+  }
 }
 
 export function getImportMetaPayload() {
