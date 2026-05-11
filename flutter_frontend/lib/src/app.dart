@@ -3301,7 +3301,80 @@ class ComparisonTable extends StatelessWidget {
   }
 }
 
-class ProductDetailScreen extends StatelessWidget {
+// Pegged USD reference rates used by the multi-currency utility. Each entry
+// is "how many UNIT currency you get for 1 USD" so converting is a single
+// multiplication. The AED/SAR/OMR/QAR pegs are the authoritative regional
+// pegs published by the GCC central banks; USD returns the input unchanged.
+const Map<String, double> _usdReferenceRates = <String, double>{
+  'USD': 1.0,
+  'AED': 3.6725,
+  'SAR': 3.75,
+  'OMR': 0.3845,
+  'QAR': 3.64,
+};
+
+const List<String> _supportedCurrencies = <String>['USD', 'AED', 'SAR', 'OMR', 'QAR'];
+
+/// Converts a USD amount into one of the supported regional currencies.
+///
+/// Used by the parent product page to render variant pricing dynamically when
+/// the user toggles between USD / AED / SAR / OMR / QAR. Falls back to the
+/// USD value if an unknown currency code is supplied so the UI never blanks.
+double convertFromUsd(double priceUsd, String currency) {
+  final rate = _usdReferenceRates[currency.toUpperCase()];
+  if (rate == null) {
+    return priceUsd;
+  }
+  return priceUsd * rate;
+}
+
+/// Formats a USD base price into the chosen target currency, ready for the
+/// dense variant data table. OMR uses three decimals (smallest unit is the
+/// baisa) while the other currencies use two.
+String formatFromUsd(double priceUsd, String currency) {
+  final converted = convertFromUsd(priceUsd, currency);
+  return _formatCurrency(converted, currency.toUpperCase());
+}
+
+double _readVariantBaseUsd(JsonMap variant) {
+  final priceBook = variant['priceBook'];
+  if (priceBook is Map) {
+    final usd = priceBook['USD'];
+    if (usd is num) return usd.toDouble();
+    if (usd is String) return double.tryParse(usd) ?? 0;
+  }
+
+  // Schema-level Base_Price_USD field on the Variants table.
+  final flat = variant['basePriceUsd'];
+  if (flat is num) return flat.toDouble();
+  if (flat is String) return double.tryParse(flat) ?? 0;
+
+  return 0;
+}
+
+String _flattenDimensions(JsonMap variant) {
+  // Engineers search the table by "12x20" or "shore 70" — flatten every
+  // dimension row plus the JSONB Dimensions bag into one searchable string.
+  final parts = <String>[];
+
+  for (final dimension in asJsonMapList(variant['dimensions'])) {
+    final label = readString(dimension, 'label');
+    final value = readString(dimension, 'value');
+    if (label.isEmpty && value.isEmpty) continue;
+    parts.add('$label $value'.trim());
+  }
+
+  final jsonBag = variant['dimensionsJson'];
+  if (jsonBag is Map) {
+    jsonBag.forEach((key, value) {
+      parts.add('$key $value');
+    });
+  }
+
+  return parts.join(' • ');
+}
+
+class ProductDetailScreen extends StatefulWidget {
   const ProductDetailScreen({
     required this.api,
     required this.slug,
@@ -3312,9 +3385,36 @@ class ProductDetailScreen extends StatelessWidget {
   final String slug;
 
   @override
+  State<ProductDetailScreen> createState() => _ProductDetailScreenState();
+}
+
+class _ProductDetailScreenState extends State<ProductDetailScreen> {
+  final TextEditingController _variantFilter = TextEditingController();
+  String _currency = 'USD';
+
+  @override
+  void dispose() {
+    _variantFilter.dispose();
+    super.dispose();
+  }
+
+  void _onCurrencyChanged(String? next) {
+    if (next == null || next == _currency) return;
+    setState(() => _currency = next);
+  }
+
+  void _goToCatalog(BuildContext context, {String? material, String? application}) {
+    final params = <String, String>{};
+    if (material != null) params['material'] = material;
+    if (application != null) params['application'] = application;
+    final query = params.entries.map((e) => '${e.key}=${Uri.encodeComponent(e.value)}').join('&');
+    _replaceRoute(context, query.isEmpty ? '/products' : '/products?$query');
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder<JsonMap>(
-      future: api.fetchProductDetail(slug),
+      future: widget.api.fetchProductDetail(widget.slug),
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return const LoadingView(message: 'Loading product detail...');
@@ -3333,383 +3433,386 @@ class ProductDetailScreen extends StatelessWidget {
         final variants = asJsonMapList(product['variants']);
         final viewer = asJsonMap(product['viewer']);
 
-        return ListView(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-          children: <Widget>[
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final wide = constraints.maxWidth >= 1080;
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final wide = constraints.maxWidth >= 1080;
+            final sidebar = _FacetedNavigationSidebar(
+              product: product,
+              variants: variants,
+              onMaterialTap: (m) => _goToCatalog(context, material: m),
+              onApplicationTap: (a) => _goToCatalog(context, application: a),
+            );
 
-                final left = Column(
+            final main = _ProductDetailMain(
+              product: product,
+              viewer: viewer,
+              variants: variants,
+              currency: _currency,
+              filterController: _variantFilter,
+              onCurrencyChanged: _onCurrencyChanged,
+              onFilterChanged: (_) => setState(() {}),
+            );
+
+            if (wide) {
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    SurfacePanel(
-                      padding: const EdgeInsets.all(28),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: <Widget>[
-                              PillChip(label: readString(product, 'category')),
-                              PillChip(label: readString(product, 'material'), warm: true),
-                              PillChip(label: 'Lead time ${readInt(product, 'standardLeadTimeDays')} days'),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            readString(product, 'name'),
-                            style: Theme.of(context).textTheme.displaySmall,
-                          ),
-                          const SizedBox(height: 14),
-                          Text(
-                            readString(product, 'description'),
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          ),
-                          const SizedBox(height: 16),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: asStringList(product['features'])
-                                .map((feature) => PillChip(label: feature))
-                                .toList(growable: false),
-                          ),
-                          const SizedBox(height: 18),
-                          ResponsiveWrap(
-                            phone: 1,
-                            tablet: 3,
-                            desktop: 3,
-                            wide: 3,
-                            children: <Widget>[
-                              MetricCard(label: 'Variants', value: '${variants.length}'),
-                              MetricCard(
-                                label: 'Supply formats',
-                                value: '${asStringList(product['supplyFormats']).length}',
-                              ),
-                              MetricCard(
-                                label: 'Certifications',
-                                value: '${asStringList(product['certifications']).length}',
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    SurfacePanel(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          const SectionHeading(
-                            eyebrow: 'Applications',
-                            title: 'Use cases and industry fit at one glance.',
-                          ),
-                          const SizedBox(height: 16),
-                          ResponsiveWrap(
-                            phone: 1,
-                            tablet: 2,
-                            desktop: 2,
-                            wide: 2,
-                            children: <Widget>[
-                              SurfacePanel(
-                                padding: const EdgeInsets.all(20),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text('Typical use cases', style: Theme.of(context).textTheme.titleLarge),
-                                    const SizedBox(height: 12),
-                                    ...asStringList(product['applications']).map(
-                                      (application) => Padding(
-                                        padding: const EdgeInsets.only(bottom: 8),
-                                        child: Text(application, style: Theme.of(context).textTheme.bodyMedium),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SurfacePanel(
-                                padding: const EdgeInsets.all(20),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text('Industries served', style: Theme.of(context).textTheme.titleLarge),
-                                    const SizedBox(height: 12),
-                                    ...asStringList(product['industries']).map(
-                                      (industry) => Padding(
-                                        padding: const EdgeInsets.only(bottom: 8),
-                                        child: Text(industry, style: Theme.of(context).textTheme.bodyMedium),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+                    SizedBox(width: 288, child: sidebar),
+                    const SizedBox(width: 18),
+                    Expanded(child: main),
                   ],
-                );
+                ),
+              );
+            }
 
-                final right = Column(
-                  children: <Widget>[
-                    ViewerPlaceholder(productName: readString(product, 'name'), viewer: viewer),
-                    const SizedBox(height: 18),
-                    SurfacePanel(
-                      dark: true,
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          const SectionHeading(
-                            eyebrow: 'Quote handling',
-                            title: 'Public detail, private pricing.',
-                            description: 'Buyers inspect form, applications, and dimensions from the public side while price books, cost logic, and manufacturing intelligence stay protected.',
-                            dark: true,
-                          ),
-                          const SizedBox(height: 14),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: asStringList(product['certifications'])
-                                .map((certification) => PillChip(label: certification, dark: true))
-                                .toList(growable: false),
-                          ),
-                          const SizedBox(height: 18),
-                          FilledButton(
-                            onPressed: () => _replaceRoute(context, '/rfq'),
-                            child: const Text('RFQ this product'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                );
-
-                if (wide) {
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Expanded(flex: 10, child: left),
-                      const SizedBox(width: 18),
-                      Expanded(flex: 9, child: right),
-                    ],
-                  );
-                }
-
-                return Column(
-                  children: <Widget>[
-                    left,
-                    const SizedBox(height: 18),
-                    right,
-                  ],
-                );
-              },
-            ),
-            const SizedBox(height: 22),
-            ResponsiveWrap(
-              phone: 1,
-              tablet: 2,
-              desktop: 2,
-              wide: 2,
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
               children: <Widget>[
-                SurfacePanel(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const SectionHeading(
-                        eyebrow: 'Technical profile',
-                        title: 'Specifications visible without exposing internal formulation.',
-                      ),
-                      const SizedBox(height: 14),
-                      ...<JsonMap>[
-                        <String, dynamic>{'label': 'Base material', 'value': readString(product, 'material')},
-                        ...asJsonMapList(product['technicalProfile']),
-                      ].map(
-                        (specification) => Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: Container(
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.72),
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(color: _lineColor),
-                            ),
-                            child: Row(
-                              children: <Widget>[
-                                Expanded(
-                                  child: Text(
-                                    readString(specification, 'label'),
-                                    style: Theme.of(context).textTheme.bodyMedium,
-                                  ),
-                                ),
-                                Text(
-                                  readString(specification, 'value'),
-                                  style: const TextStyle(color: _inkColor, fontWeight: FontWeight.w800),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  children: <Widget>[
-                    SurfacePanel(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          const SectionHeading(
-                            eyebrow: 'Supply format',
-                            title: 'Prepared the way buyers actually order.',
-                          ),
-                          const SizedBox(height: 14),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: asStringList(product['supplyFormats'])
-                                .map((format) => PillChip(label: format))
-                                .toList(growable: false),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    SurfacePanel(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          const SectionHeading(
-                            eyebrow: 'Quality checks',
-                            title: 'Public-facing confidence without revealing process secrets.',
-                          ),
-                          const SizedBox(height: 14),
-                          ...asStringList(product['qualityChecks']).map(
-                            (check) => Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: Text(check, style: Theme.of(context).textTheme.bodyMedium),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                sidebar,
+                const SizedBox(height: 18),
+                main,
               ],
-            ),
-            const SizedBox(height: 22),
-            SurfacePanel(
-              padding: const EdgeInsets.all(28),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: const SectionHeading(
-                          eyebrow: 'Dimensions and variants',
-                          title: 'Variant-aware quoting starts from the right shelf label.',
-                          description: 'Each variant stays dimension-first on the public side while tracked currencies remain private to the owner workflow.',
-                        ),
-                      ),
-                      FilledButton(
-                        onPressed: () => _replaceRoute(context, '/rfq'),
-                        child: const Text('RFQ this product'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  ResponsiveWrap(
-                    phone: 1,
-                    tablet: 2,
-                    desktop: 2,
-                    wide: 2,
-                    children: variants
-                        .map(
-                          (variant) => SurfacePanel(
-                            padding: const EdgeInsets.all(20),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Text(
-                                  readString(variant, 'code'),
-                                  style: const TextStyle(color: _inkColor, fontWeight: FontWeight.w800),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  readString(variant, 'description'),
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                                const SizedBox(height: 12),
-                                ...asJsonMapList(variant['dimensions']).map(
-                                  (dimension) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 6),
-                                    child: Row(
-                                      children: <Widget>[
-                                        Expanded(child: Text(readString(dimension, 'label'))),
-                                        Text(
-                                          readString(dimension, 'value'),
-                                          style: const TextStyle(color: _inkColor, fontWeight: FontWeight.w700),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  'MOQ ${readInt(variant, 'minimumOrderQuantity')}',
-                                  style: const TextStyle(color: _inkColor, fontWeight: FontWeight.w700),
-                                ),
-                                const SizedBox(height: 10),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: asStringList(variant['currenciesTracked'])
-                                      .map((currency) => PillChip(label: currency, warm: true))
-                                      .toList(growable: false),
-                                ),
-                                const SizedBox(height: 10),
-                                const Text(
-                                  'Quote only. Owner workspace tracks the full regional matrix privately.',
-                                  style: TextStyle(color: _mutedColor, height: 1.5),
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                        .toList(growable: false),
-                  ),
-                  const SizedBox(height: 18),
-                  SurfacePanel(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const <Widget>[
-                        SectionHeading(
-                          eyebrow: 'Visibility rules',
-                          title: 'Owner-only data stays behind the gate.',
-                        ),
-                        SizedBox(height: 14),
-                        Text('Customer-facing pages exclude compound ratios and process notes.', style: TextStyle(color: _mutedColor, height: 1.5)),
-                        SizedBox(height: 8),
-                        Text('Owner workspace stores internal cost drivers and chemistry records.', style: TextStyle(color: _mutedColor, height: 1.5)),
-                        SizedBox(height: 8),
-                        Text('Competitor pricing stays in a separate private dataset.', style: TextStyle(color: _mutedColor, height: 1.5)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            );
+          },
         );
       },
+    );
+  }
+}
+
+class _FacetedNavigationSidebar extends StatelessWidget {
+  const _FacetedNavigationSidebar({
+    required this.product,
+    required this.variants,
+    required this.onMaterialTap,
+    required this.onApplicationTap,
+  });
+
+  final JsonMap product;
+  final List<JsonMap> variants;
+  final ValueChanged<String> onMaterialTap;
+  final ValueChanged<String> onApplicationTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final material = readString(product, 'material');
+    final applications = asStringList(product['applications']);
+    final industries = asStringList(product['industries']);
+
+    return SurfacePanel(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          const SectionHeading(
+            eyebrow: 'Faceted navigation',
+            title: 'Filter the catalog',
+          ),
+          const SizedBox(height: 16),
+          Text('Material', style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 8),
+          if (material.isNotEmpty)
+            _FacetChip(label: material, selected: true, onTap: () => onMaterialTap(material)),
+          const SizedBox(height: 18),
+          Text('Application', style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: applications
+                .map((a) => _FacetChip(label: a, onTap: () => onApplicationTap(a)))
+                .toList(growable: false),
+          ),
+          if (industries.isNotEmpty) ...<Widget>[
+            const SizedBox(height: 18),
+            Text('Industry', style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: industries
+                  .map((i) => _FacetChip(label: i, onTap: () => onApplicationTap(i)))
+                  .toList(growable: false),
+            ),
+          ],
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.6),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: _lineColor),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text('Family at a glance', style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(height: 8),
+                Text('${variants.length} variants',
+                    style: const TextStyle(color: _mutedColor, height: 1.4)),
+                Text('Lead time ${readInt(product, 'standardLeadTimeDays')} days',
+                    style: const TextStyle(color: _mutedColor, height: 1.4)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FacetChip extends StatelessWidget {
+  const _FacetChip({required this.label, required this.onTap, this.selected = false});
+
+  final String label;
+  final VoidCallback onTap;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(999),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: selected ? _accentGreen : Colors.white.withOpacity(0.75),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: selected ? _accentDeep : _lineColor),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? _inkInverse : _inkColor,
+            fontWeight: FontWeight.w700,
+            fontSize: 12.5,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProductDetailMain extends StatelessWidget {
+  const _ProductDetailMain({
+    required this.product,
+    required this.viewer,
+    required this.variants,
+    required this.currency,
+    required this.filterController,
+    required this.onCurrencyChanged,
+    required this.onFilterChanged,
+  });
+
+  final JsonMap product;
+  final JsonMap viewer;
+  final List<JsonMap> variants;
+  final String currency;
+  final TextEditingController filterController;
+  final ValueChanged<String?> onCurrencyChanged;
+  final ValueChanged<String> onFilterChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        // 3D Model viewer at the very top of the parent product page.
+        ViewerPlaceholder(productName: readString(product, 'name'), viewer: viewer),
+        const SizedBox(height: 18),
+        SurfacePanel(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: <Widget>[
+                  PillChip(label: readString(product, 'category')),
+                  PillChip(label: readString(product, 'material'), warm: true),
+                  PillChip(label: 'Lead time ${readInt(product, 'standardLeadTimeDays')} days'),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(readString(product, 'name'), style: Theme.of(context).textTheme.displaySmall),
+              const SizedBox(height: 10),
+              Text(readString(product, 'description'),
+                  style: Theme.of(context).textTheme.bodyLarge),
+            ],
+          ),
+        ),
+        const SizedBox(height: 18),
+        // High-density variant data table with inline text filtering.
+        _VariantDataTable(
+          variants: variants,
+          currency: currency,
+          filterController: filterController,
+          onCurrencyChanged: onCurrencyChanged,
+          onFilterChanged: onFilterChanged,
+          onRfq: () => _replaceRoute(context, '/rfq'),
+        ),
+      ],
+    );
+  }
+}
+
+class _VariantDataTable extends StatelessWidget {
+  const _VariantDataTable({
+    required this.variants,
+    required this.currency,
+    required this.filterController,
+    required this.onCurrencyChanged,
+    required this.onFilterChanged,
+    required this.onRfq,
+  });
+
+  final List<JsonMap> variants;
+  final String currency;
+  final TextEditingController filterController;
+  final ValueChanged<String?> onCurrencyChanged;
+  final ValueChanged<String> onFilterChanged;
+  final VoidCallback onRfq;
+
+  @override
+  Widget build(BuildContext context) {
+    final query = filterController.text.trim().toLowerCase();
+
+    final filtered = variants.where((variant) {
+      if (query.isEmpty) return true;
+      final haystack = <String>[
+        readString(variant, 'code'),
+        readString(variant, 'description'),
+        _flattenDimensions(variant),
+        '${readInt(variant, 'minimumOrderQuantity')}',
+        formatFromUsd(_readVariantBaseUsd(variant), currency),
+      ].join(' ').toLowerCase();
+      return haystack.contains(query);
+    }).toList(growable: false);
+
+    return SurfacePanel(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              const Expanded(
+                child: SectionHeading(
+                  eyebrow: 'Variants',
+                  title: 'Engineer-grade data table',
+                  description:
+                      'Every child variant for this parent product. Filter by SKU, dimension, or MOQ. Toggle the currency to convert Base_Price_USD live.',
+                ),
+              ),
+              FilledButton(onPressed: onRfq, child: const Text('RFQ this product')),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: TextField(
+                  controller: filterController,
+                  onChanged: onFilterChanged,
+                  decoration: const InputDecoration(
+                    hintText: 'Filter SKU, dimension, MOQ…',
+                    prefixIcon: Icon(Icons.search),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              _CurrencyToggle(currency: currency, onChanged: onCurrencyChanged),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            '${filtered.length} of ${variants.length} variants',
+            style: const TextStyle(color: _mutedColor, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 10),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: DataTable(
+              columnSpacing: 28,
+              headingRowColor: WidgetStateProperty.all(_accentWarm.withOpacity(0.4)),
+              dataRowMinHeight: 44,
+              dataRowMaxHeight: 56,
+              border: TableBorder.symmetric(
+                inside: BorderSide(color: _lineColor),
+              ),
+              columns: const <DataColumn>[
+                DataColumn(label: Text('SKU')),
+                DataColumn(label: Text('Description')),
+                DataColumn(label: Text('Dimensions')),
+                DataColumn(label: Text('MOQ'), numeric: true),
+                DataColumn(label: Text('Price'), numeric: true),
+              ],
+              rows: filtered.map((variant) {
+                final baseUsd = _readVariantBaseUsd(variant);
+                return DataRow(
+                  cells: <DataCell>[
+                    DataCell(Text(
+                      readString(variant, 'code'),
+                      style: const TextStyle(fontWeight: FontWeight.w800, color: _inkColor),
+                    )),
+                    DataCell(ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 240),
+                      child: Text(readString(variant, 'description'),
+                          overflow: TextOverflow.ellipsis, maxLines: 2),
+                    )),
+                    DataCell(ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 300),
+                      child: Text(_flattenDimensions(variant),
+                          overflow: TextOverflow.ellipsis, maxLines: 2),
+                    )),
+                    DataCell(Text('${readInt(variant, 'minimumOrderQuantity')}')),
+                    DataCell(Text(
+                      formatFromUsd(baseUsd, currency),
+                      style: const TextStyle(fontWeight: FontWeight.w700, color: _accentDeep),
+                    )),
+                  ],
+                );
+              }).toList(growable: false),
+            ),
+          ),
+          if (filtered.isEmpty)
+            const Padding(
+              padding: EdgeInsets.only(top: 16),
+              child: Text('No variants match this filter.',
+                  style: TextStyle(color: _mutedColor)),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CurrencyToggle extends StatelessWidget {
+  const _CurrencyToggle({required this.currency, required this.onChanged});
+
+  final String currency;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: _lineColor),
+      ),
+      child: DropdownButton<String>(
+        value: currency,
+        underline: const SizedBox.shrink(),
+        onChanged: onChanged,
+        items: _supportedCurrencies
+            .map((c) => DropdownMenuItem<String>(value: c, child: Text(c)))
+            .toList(growable: false),
+      ),
     );
   }
 }

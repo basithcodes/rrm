@@ -31,13 +31,24 @@ function formatMinimumOrderRange(product: Product) {
 }
 
 function serializeVariant(variant: ProductVariant) {
+  const basePriceUsd = variant.priceBook?.USD ?? null;
   return {
     code: variant.code,
+    // `code` is treated as the public SKU for the strict Parent-Child
+    // variant model. Expose both keys so older Flutter builds keep working.
+    sku: variant.code,
     description: variant.description,
     minimumOrderQuantity: variant.minimumOrderQuantity,
     currenciesTracked: variant.currenciesTracked,
     dimensions: variant.dimensions,
+    // Engineer-facing JSONB-style flat bag. The strict B2B detail page reads
+    // this for its high-density variant data table.
+    dimensionsJson: Object.fromEntries(
+      variant.dimensions.map((dimension) => [dimension.label, dimension.value]),
+    ),
     priceBook: variant.priceBook,
+    // Canonical USD price; clients convert dynamically based on a state toggle.
+    basePriceUsd,
   };
 }
 

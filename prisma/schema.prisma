@@ -148,20 +148,33 @@ model Product {
   status                   ProductStatus       @default(DRAFT)
   isFeatured               Boolean             @default(false)
   ownerOnlyManufacturing   Boolean             @default(true)
+  // Public-facing 3D model URL surfaced on the parent product page.
+  threeDModelUrl           String?
   createdAt                DateTime            @default(now())
   updatedAt                DateTime            @updatedAt
   variants                 ProductVariant[]
   assets                   ProductAsset[]
   manufacturingRecord      ManufacturingRecord?
   competitorProducts       CompetitorProduct[]
+  // One-to-one isolated trade-secret payload. Only readable through the
+  // admin trade-secrets API endpoint (never serialized to public payloads).
+  tradeSecret              TradeSecret?
 }
 
 model ProductVariant {
   id                   String             @id @default(cuid())
   productId            String
+  // `code` is the public-facing SKU for this child variant.
   code                 String             @unique
   description          String
   minimumOrderQuantity Int
+  // JSONB bag of free-form engineer-facing dimensions (length, ID/OD,
+  // durometer, hardness, etc.). Lives alongside the normalised
+  // VariantDimension rows so existing import/export flows keep working.
+  dimensionsJson       Json?
+  // Canonical USD list price for this variant. Multi-currency conversion
+  // is performed dynamically on the client based on a state toggle.
+  basePriceUsd         Decimal?           @db.Decimal(12, 3)
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
   product              Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -334,6 +347,23 @@ model CompetitorPrice {
   amount              Decimal           @db.Decimal(12, 3)
   minimumOrderQuantity Int?
   competitorProduct   CompetitorProduct @relation(fields: [competitorProductId], references: [id], onDelete: Cascade)
+}
+
+// Trade secrets are deliberately isolated in their own table so they can be
+// gated at the database/API boundary. Only the admin trade-secrets endpoint
+// is allowed to read these rows; no public, catalog, or RFQ code path joins
+// against this table.
+model TradeSecret {
+  id                   String   @id @default(cuid())
+  productId            String   @unique
+  chemicalFormula      String
+  manufacturingCostUsd Decimal  @db.Decimal(14, 4)
+  notes                String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  product              Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
 }
 
 model ImportBatch {
