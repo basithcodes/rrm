@@ -19,6 +19,7 @@ ENV_PATH = ROOT / ".env"
 ENV_EXAMPLE_PATH = ROOT / ".env.example"
 COMPOSE_PATH = ROOT / "compose.yaml"
 DEFAULT_DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/rrm?schema=public"
+DEFAULT_OWNER_ACCESS_CODE = "rrm-owner-demo"
 PLACEHOLDER_PREFIX = "replace-with-"
 PRISMA_DEV_NAME = "rrm"
 
@@ -77,7 +78,7 @@ def ensure_env_file() -> dict[str, str]:
 
     desired_values = {
         "DATABASE_URL": os.environ.get("DATABASE_URL") or env_values.get("DATABASE_URL") or DEFAULT_DATABASE_URL,
-        "OWNER_ACCESS_CODE": os.environ.get("OWNER_ACCESS_CODE") or env_values.get("OWNER_ACCESS_CODE") or secrets.token_hex(12),
+        "OWNER_ACCESS_CODE": os.environ.get("OWNER_ACCESS_CODE") or env_values.get("OWNER_ACCESS_CODE") or DEFAULT_OWNER_ACCESS_CODE,
         "SESSION_SECRET": os.environ.get("SESSION_SECRET") or env_values.get("SESSION_SECRET") or secrets.token_hex(32),
     }
 

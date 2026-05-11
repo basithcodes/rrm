@@ -47,6 +47,8 @@ Fastest local entrypoint:
 python start.py
 ```
 
+To stop the local website, press `Ctrl+C` in the same terminal where `python start.py` or `npm run dev` is running.
+
 `start.py` will:
 
 - create `.env` if it is missing
@@ -72,6 +74,49 @@ npm run dev
 If you are using the included local PostgreSQL container, wait for it to become healthy before running `npx prisma db push`.
 
 Open `http://localhost:3000`.
+
+## Flutter Frontend
+
+The current `src/app` tree is still a Next.js frontend, but the repository now also exposes JSON endpoints that a Flutter frontend can consume:
+
+- `/api/public/bootstrap`
+- `/api/catalog`
+- `/api/catalog/[slug]`
+- `/api/owner/session`
+- `/api/owner/dashboard`
+
+A Flutter starter app lives in `flutter_frontend/` and is intended to treat this Next app as the backend.
+
+Typical local workflow:
+
+```bash
+python start.py
+cd flutter_frontend
+flutter pub get
+flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:3000
+```
+
+Note: Flutter was not installed in this environment, so the starter app was added without running `flutter create` or validating the Flutter build here.
+
+## Stopping The Local Stack
+
+If you started the app with the bootstrap script, stop it from that same terminal:
+
+```bash
+Ctrl+C
+```
+
+If you started the dev server manually, stop it the same way:
+
+```bash
+Ctrl+C
+```
+
+If you need to stop it from another terminal, run:
+
+```bash
+pkill -f "/home/abdulb/coding/rrm/node_modules/.bin/next dev"
+```
 
 ## Validation Commands
 
