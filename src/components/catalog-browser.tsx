@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { startTransition, useDeferredValue, useEffect, useState } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useDeferredValue, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { ProductCard } from "@/components/product-card";
 import { formatCountLabel, publicNavigation } from "@/lib/public-site";
 import type { Product } from "@/lib/site-data";
@@ -20,6 +20,7 @@ const sortOptions = [
 
 type CatalogSort = (typeof sortOptions)[number]["value"];
 type SearchParamReader = Pick<URLSearchParams, "get" | "has" | "toString">;
+type CatalogSearchParams = Record<string, string | string[] | undefined>;
 
 function isSortValue(value: string | null): value is CatalogSort {
   return sortOptions.some((option) => option.value === value);
@@ -186,6 +187,23 @@ function buildCatalogQueryString(state: {
   return nextParams.toString();
 }
 
+function createSearchParamReader(searchParams: CatalogSearchParams): SearchParamReader {
+  const params = new URLSearchParams();
+
+  Object.entries(searchParams).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach((entry) => params.append(key, entry));
+      return;
+    }
+
+    if (typeof value === "string") {
+      params.set(key, value);
+    }
+  });
+
+  return params;
+}
+
 function matchesSearch(product: Product, query: string) {
   if (!query) {
     return true;
@@ -214,15 +232,23 @@ function matchesSearch(product: Product, query: string) {
   return haystack.includes(query);
 }
 
-export function CatalogBrowser({ products }: { products: Product[] }) {
+export function CatalogBrowser({
+  products,
+  initialSearchParams,
+}: {
+  products: Product[];
+  initialSearchParams: CatalogSearchParams;
+}) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const resolvedState = resolveInitialState(products, searchParams);
-  const [searchQuery, setSearchQuery] = useState(resolvedState.query);
-  const [selectedCategory, setSelectedCategory] = useState(resolvedState.category);
-  const [selectedMaterial, setSelectedMaterial] = useState(resolvedState.material);
-  const [sortValue, setSortValue] = useState<CatalogSort>(resolvedState.sort);
-  const [compareSlugs, setCompareSlugs] = useState<string[]>(resolvedState.compareSlugs);
+  const resolvedInitialState = resolveInitialState(
+    products,
+    createSearchParamReader(initialSearchParams),
+  );
+  const [searchQuery, setSearchQuery] = useState(resolvedInitialState.query);
+  const [selectedCategory, setSelectedCategory] = useState(resolvedInitialState.category);
+  const [selectedMaterial, setSelectedMaterial] = useState(resolvedInitialState.material);
+  const [sortValue, setSortValue] = useState<CatalogSort>(resolvedInitialState.sort);
+  const [compareSlugs, setCompareSlugs] = useState<string[]>(resolvedInitialState.compareSlugs);
   const [shareMessage, setShareMessage] = useState<string>("");
   const deferredSearchQuery = useDeferredValue(searchQuery);
 
@@ -253,25 +279,21 @@ export function CatalogBrowser({ products }: { products: Product[] }) {
   const supportRoutes = publicNavigation.filter((route) => route.href !== "/products").slice(0, 3);
 
   useEffect(() => {
-    const nextState = resolveInitialState(products, searchParams);
-
-    setSearchQuery(nextState.query);
-    setSelectedCategory(nextState.category);
-    setSelectedMaterial(nextState.material);
-    setSortValue(nextState.sort);
-    setCompareSlugs(nextState.compareSlugs);
-  }, [products, searchParams]);
-
-  useEffect(() => {
-    if (catalogQueryString === searchParams.toString()) {
+    if (typeof window === "undefined") {
       return;
     }
 
-    startTransition(() => {
-      const nextUrl = catalogQueryString ? `${pathname}?${catalogQueryString}` : pathname;
-      window.history.replaceState(null, "", nextUrl);
-    });
-  }, [catalogQueryString, pathname, searchParams]);
+    const currentQueryString = window.location.search.startsWith("?")
+      ? window.location.search.slice(1)
+      : window.location.search;
+
+    if (catalogQueryString === currentQueryString) {
+      return;
+    }
+
+    const nextUrl = catalogQueryString ? `${pathname}?${catalogQueryString}` : pathname;
+    window.history.replaceState(null, "", nextUrl);
+  }, [catalogQueryString, pathname]);
 
   const filteredProducts = sortCatalogProducts(
     products.filter((product) => {

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MarketingLayout } from "@/components/marketing-layout";
+import { PublicRouteSupport } from "@/components/public-route-support";
 import { ProductViewer } from "@/components/product-viewer";
 import { getProductBySlug, products } from "@/lib/site-data";
 
@@ -90,6 +91,17 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                   </p>
                 </div>
               </div>
+
+              <PublicRouteSupport
+                currentHref={`/products/${product.slug}`}
+                title="Use the next route deliberately"
+                description="Once the product family is clear, move to the route that answers the next question: material choice, market context, platform rules, or the RFQ handoff."
+                maxItems={4}
+                actions={[
+                  { href: "/products", label: "Back to catalog" },
+                  { href: "/rfq", label: "RFQ this product", variant: "primary" },
+                ]}
+              />
             </div>
 
             <div className="panel rounded-[2.2rem] border border-white/65 p-5 sm:rounded-[2.4rem] md:p-8">
@@ -143,12 +155,6 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
                   </span>
                 ))}
               </div>
-              <Link
-                href="/rfq"
-                className="mt-6 inline-flex rounded-full border border-white/10 bg-white/10 px-5 py-3 text-sm font-semibold text-white"
-              >
-                RFQ this product
-              </Link>
             </div>
           </div>
         </div>

@@ -1,13 +1,22 @@
+"use client";
+
 import Link from "next/link";
-import { getCatalogAisles, publicNavigation } from "@/lib/public-site";
+import { usePathname } from "next/navigation";
+import { getCatalogAisles, getPublicNavigationGroups } from "@/lib/public-site";
 
 const marketTags = ["UAE", "Saudi", "Oman", "Qatar"];
 const browseLanes = getCatalogAisles()
   .slice(0, 5)
   .map((lane) => lane.category);
-const featuredRoutes = publicNavigation.slice(0, 5);
+
+function isRouteActive(pathname: string, href: string) {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 export function SiteHeader() {
+  const pathname = usePathname();
+  const navigationGroups = getPublicNavigationGroups();
+
   return (
     <header className="section-shell sticky top-0 z-30 py-4">
       <div className="panel overflow-hidden rounded-[2.2rem] border border-white/65 shadow-[0_22px_54px_-38px_rgba(23,53,35,0.55)]">
@@ -38,19 +47,7 @@ export function SiteHeader() {
             </div>
           </Link>
 
-          <div className="flex flex-col gap-4 lg:items-end">
-            <nav className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 text-sm font-semibold text-foreground sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
-              {publicNavigation.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="shrink-0 rounded-full border border-line bg-white/70 px-4 py-2 transition-colors hover:border-accent hover:bg-[rgba(222,240,204,0.7)]"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-
+          <div className="flex flex-col gap-3 lg:max-w-md lg:items-end">
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
               <Link
                 href="/owner-access"
@@ -65,6 +62,10 @@ export function SiteHeader() {
                 Request Quote
               </Link>
             </div>
+
+            <p className="max-w-md text-sm leading-6 text-muted lg:text-right">
+              The site is grouped by decision type so buyers can move from route selection into the right working page without scanning every link.
+            </p>
           </div>
         </div>
 
@@ -72,10 +73,10 @@ export function SiteHeader() {
           <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-accent-deep">
-                Route board
+                Site directory
               </p>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-                Use the same wp-style rule here: each page should do one job clearly before the RFQ handoff.
+                Routes are grouped by the decision they solve first: browse the part family, compare compounds, review market context, understand platform scope, then hand off through RFQ.
               </p>
             </div>
             <Link href="/rfq" className="text-sm font-semibold text-accent-deep">
@@ -83,24 +84,41 @@ export function SiteHeader() {
             </Link>
           </div>
 
-          <div className="-mx-1 mt-4 flex gap-3 overflow-x-auto px-1 pb-1">
-            {featuredRoutes.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="min-w-[15rem] shrink-0 rounded-[1.6rem] border border-line bg-white/78 px-4 py-4 transition-transform hover:-translate-y-0.5 md:min-w-[16rem]"
+          <div className="mt-4 grid gap-3 lg:grid-cols-4">
+            {navigationGroups.map((group) => (
+              <section
+                key={group.section}
+                className="rounded-[1.6rem] border border-line bg-white/76 px-4 py-4"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
-                      {item.section}
-                    </p>
-                    <h2 className="mt-2 text-lg font-semibold text-foreground">{item.label}</h2>
-                  </div>
-                  <span className="market-stamp">{item.badge}</span>
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
+                  {group.section}
+                </p>
+                <div className="mt-3 grid gap-2">
+                  {group.items.map((item) => {
+                    const active = isRouteActive(pathname, item.href);
+
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`rounded-[1.2rem] border px-3 py-3 transition-colors ${
+                          active
+                            ? "border-accent bg-[rgba(222,240,204,0.74)]"
+                            : "border-line bg-white/80 hover:border-accent hover:bg-[rgba(222,240,204,0.7)]"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                            <p className="mt-1 text-xs leading-5 text-muted">{item.description}</p>
+                          </div>
+                          <span className="market-stamp">{item.badge}</span>
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
-                <p className="mt-3 text-sm leading-6 text-muted">{item.description}</p>
-              </Link>
+              </section>
             ))}
           </div>
         </div>

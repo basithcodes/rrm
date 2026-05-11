@@ -47,7 +47,7 @@ Fastest local entrypoint:
 python start.py
 ```
 
-To stop the local website, press `Ctrl+C` in the same terminal where `python start.py` or `npm run dev` is running.
+To stop the local website, press `Ctrl+C` in the same terminal where `python start.py` or `npm run dev` is running. When you use `python start.py`, it now tears down the spawned Next.js dev-server process tree as part of shutdown.
 
 `start.py` will:
 

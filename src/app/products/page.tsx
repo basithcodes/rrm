@@ -1,37 +1,15 @@
 import Link from "next/link";
-import { Suspense } from "react";
 import { CatalogBrowser } from "@/components/catalog-browser";
 import { MarketingLayout } from "@/components/marketing-layout";
 import { getCatalogAisles, publicNavigation } from "@/lib/public-site";
 import { products } from "@/lib/site-data";
 
-function CatalogBrowserFallback() {
-  return (
-    <div className="grid gap-6 xl:grid-cols-[0.34fr_0.66fr]">
-      <div className="panel rounded-[2.2rem] border border-white/65 p-6">
-        <span className="eyebrow">Loading catalog tools</span>
-        <p className="mt-5 text-sm leading-7 text-muted">
-          Preparing search, filter, sort, and comparison controls.
-        </p>
-      </div>
-      <div className="grid gap-5 lg:grid-cols-2">
-        {products.slice(0, 4).map((product) => (
-          <div key={product.slug} className="panel rounded-[2.25rem] border border-white/65 p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-              {product.category}
-            </p>
-            <h3 className="mt-3 display-title text-3xl font-semibold text-foreground">
-              {product.name}
-            </h3>
-            <p className="mt-4 text-sm leading-7 text-muted">{product.summary}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+type ProductsPageProps = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
-export default function ProductsPage() {
+export default async function ProductsPage({ searchParams }: ProductsPageProps) {
+  const initialSearchParams = await searchParams;
   const totalVariants = products.reduce((total, product) => total + product.variants.length, 0);
   const catalogAisles = getCatalogAisles().slice(0, 3);
   const supportRoutes = publicNavigation.filter((item) => item.href !== "/products").slice(0, 4);
@@ -121,9 +99,7 @@ export default function ProductsPage() {
       </section>
 
       <section className="section-shell pb-16">
-        <Suspense fallback={<CatalogBrowserFallback />}>
-          <CatalogBrowser products={products} />
-        </Suspense>
+        <CatalogBrowser products={products} initialSearchParams={initialSearchParams} />
       </section>
     </MarketingLayout>
   );

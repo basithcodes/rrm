@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import re
 import secrets
+import signal
 import shutil
 import socket
 import subprocess
@@ -295,10 +296,67 @@ def sync_database(env: dict[str, str]) -> None:
     run_command(["npx", "prisma", "db", "push"], env=env)
 
 
+def stop_process_tree(process: subprocess.Popen[object]) -> None:
+    if process.poll() is not None:
+        return
+
+    if os.name == "nt":
+        process.send_signal(signal.CTRL_BREAK_EVENT)
+
+        try:
+            process.wait(timeout=10)
+            return
+        except subprocess.TimeoutExpired:
+            process.terminate()
+
+        try:
+            process.wait(timeout=5)
+            return
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait(timeout=5)
+            return
+
+    os.killpg(process.pid, signal.SIGINT)
+
+    try:
+        process.wait(timeout=10)
+        return
+    except subprocess.TimeoutExpired:
+        print_status("The dev server is still running after SIGINT; sending SIGTERM.")
+
+    os.killpg(process.pid, signal.SIGTERM)
+
+    try:
+        process.wait(timeout=5)
+        return
+    except subprocess.TimeoutExpired:
+        print_status("The dev server is still running after SIGTERM; sending SIGKILL.")
+
+    os.killpg(process.pid, signal.SIGKILL)
+    process.wait(timeout=5)
+
+
 def start_dev_server(env: dict[str, str]) -> int:
     print_status("Starting the Next.js development server.")
-    result = run_command(["npm", "run", "dev"], env=env, check=False)
-    return result.returncode
+    popen_kwargs: dict[str, object] = {
+        "cwd": ROOT,
+        "env": env,
+    }
+
+    if os.name == "nt":
+        popen_kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+    else:
+        popen_kwargs["start_new_session"] = True
+
+    process = subprocess.Popen(["npm", "run", "dev"], **popen_kwargs)
+
+    try:
+        return process.wait()
+    except KeyboardInterrupt:
+        print_status("Ctrl+C received; stopping the Next.js dev server and its child processes.")
+        stop_process_tree(process)
+        return 130
 
 
 def parse_args() -> argparse.Namespace:

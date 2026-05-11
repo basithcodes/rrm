@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MarketingLayout } from "@/components/marketing-layout";
+import { PublicRouteSupport } from "@/components/public-route-support";
 import { PublicRfqForm } from "@/components/public-rfq-form";
 
 const rfqFields = [
@@ -19,12 +20,6 @@ const rfqSteps = [
   "Private pricing and cost logic stay inside the owner workspace before the quote is sent.",
 ];
 
-const rfqPrepRoutes = [
-  { href: "/products", label: "Catalog", detail: "Use this first when you know the product family." },
-  { href: "/materials", label: "Materials", detail: "Use this first when the compound choice is still open." },
-  { href: "/markets", label: "Markets", detail: "Use this first when country context drives the request." },
-];
-
 export default function RfqPage() {
   return (
     <MarketingLayout>
@@ -40,17 +35,12 @@ export default function RfqPage() {
               Use it after you have identified the right product family, material direction, or
               market context and want the sales team to work from a clean brief.
             </p>
-            <div className="mt-5 flex flex-wrap gap-2 text-sm font-semibold text-accent-deep">
-              <Link href="/products" className="rounded-full border border-line bg-white/75 px-4 py-2">
-                Open catalog
-              </Link>
-              <Link href="/materials" className="rounded-full border border-line bg-white/75 px-4 py-2">
-                Compare materials
-              </Link>
-              <Link href="/markets" className="rounded-full border border-line bg-white/75 px-4 py-2">
-                Review markets
-              </Link>
-            </div>
+            <PublicRouteSupport
+              currentHref="/rfq"
+              title="Before you submit"
+              description="If the brief still needs technical narrowing, take the route that resolves that question first and come back once the request is clean."
+              maxItems={3}
+            />
 
             <div className="mt-8 grid gap-4 sm:grid-cols-2">
               {rfqFields.map((field, index) => (
@@ -83,20 +73,7 @@ export default function RfqPage() {
 
             <div className="panel rounded-[2.4rem] border border-white/65 p-6 md:p-8">
               <span className="eyebrow">Helpful before sending</span>
-              <div className="mt-6 grid gap-4">
-                {rfqPrepRoutes.map((route) => (
-                  <Link
-                    key={route.href}
-                    href={route.href}
-                    className="rounded-[1.45rem] border border-line bg-white/72 px-4 py-4 transition-transform hover:-translate-y-0.5"
-                  >
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-                      {route.label}
-                    </p>
-                    <p className="mt-2 text-sm leading-7 text-muted">{route.detail}</p>
-                  </Link>
-                ))}
-              </div>
+              <PublicRouteSupport currentHref="/rfq" maxItems={3} />
             </div>
           </div>
         </div>

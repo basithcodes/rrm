@@ -51,6 +51,11 @@ export type PublicNavigationItem = {
   badge: string;
 };
 
+export type PublicNavigationGroup = {
+  section: string;
+  items: PublicNavigationItem[];
+};
+
 export type CapabilityTrack = {
   eyebrow: string;
   title: string;
@@ -154,11 +159,47 @@ export const publicNavigation: PublicNavigationItem[] = [
   },
 ];
 
+export const publicActionLinks: PublicNavigationItem[] = [
+  {
+    href: "/rfq",
+    label: "RFQ",
+    section: "Action",
+    description: "Structured quote handoff once the route and part brief are clear.",
+    badge: "RQ",
+  },
+  {
+    href: "/owner-access",
+    label: "Owner workspace",
+    section: "Action",
+    description: "Protected pricing, imports, RFQ queue, and operating controls.",
+    badge: "OW",
+  },
+];
+
 export const publicFooterLinks = [
   ...publicNavigation,
-  { href: "/rfq", label: "RFQ" },
-  { href: "/owner-access", label: "Owner workspace" },
+  ...publicActionLinks.map((item) => ({ href: item.href, label: item.label })),
 ];
+
+export function getPublicNavigationGroups(options?: { includeActions?: boolean }): PublicNavigationGroup[] {
+  const items = options?.includeActions
+    ? [...publicNavigation, ...publicActionLinks]
+    : publicNavigation;
+
+  return Array.from(
+    items.reduce((groups, item) => {
+      const current = groups.get(item.section) ?? {
+        section: item.section,
+        items: [] as PublicNavigationItem[],
+      };
+
+      current.items.push(item);
+      groups.set(item.section, current);
+
+      return groups;
+    }, new Map<string, PublicNavigationGroup>()),
+  ).map(([, group]) => group);
+}
 
 export function formatCountLabel(count: number, singular: string, plural = `${singular}s`) {
   return `${count} ${count === 1 ? singular : plural}`;

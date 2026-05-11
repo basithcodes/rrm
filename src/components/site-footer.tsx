@@ -1,7 +1,10 @@
 import Link from "next/link";
-import { marketProfiles, publicFooterLinks } from "@/lib/public-site";
+import { getPublicNavigationGroups, marketProfiles, publicNavigation } from "@/lib/public-site";
 
 export function SiteFooter() {
+  const footerRoutes = publicNavigation.slice(0, 4);
+  const navigationGroups = getPublicNavigationGroups({ includeActions: true });
+
   return (
     <footer className="section-shell py-12 md:py-16">
       <div className="panel overflow-hidden rounded-[2.75rem] border border-white/65">
@@ -15,19 +18,25 @@ export function SiteFooter() {
               Each page now does one job: catalog discovery, industry fit, material guidance,
               market context, platform capabilities, or RFQ handoff.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                href="/products"
-                className="brand-button inline-flex rounded-full px-5 py-3 text-sm font-semibold"
-              >
-                Browse catalog
-              </Link>
-              <Link
-                href="/materials"
-                className="inline-flex rounded-full border border-line bg-white/80 px-5 py-3 text-sm font-semibold text-foreground"
-              >
-                Compare materials
-              </Link>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              {footerRoutes.map((route) => (
+                <Link
+                  key={route.href}
+                  href={route.href}
+                  className="rounded-[1.55rem] border border-line bg-white/76 px-4 py-4 transition-transform hover:-translate-y-0.5"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
+                        {route.section}
+                      </p>
+                      <h3 className="mt-2 text-lg font-semibold text-foreground">{route.label}</h3>
+                    </div>
+                    <span className="market-stamp">{route.badge}</span>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-muted">{route.description}</p>
+                </Link>
+              ))}
             </div>
           </div>
 
@@ -52,11 +61,33 @@ export function SiteFooter() {
               </p>
             </div>
 
-            <div className="grid gap-3 rounded-[2rem] border border-line bg-white/55 p-6 text-sm text-muted sm:grid-cols-2 lg:grid-cols-3">
-              {publicFooterLinks.map((item) => (
-                <Link key={item.href} href={item.href} className="font-medium hover:text-foreground">
-                  {item.label}
-                </Link>
+            <div className="grid gap-3 rounded-[2rem] border border-line bg-white/55 p-6 sm:grid-cols-2 lg:grid-cols-3">
+              {navigationGroups.map((group) => (
+                <section
+                  key={group.section}
+                  className="rounded-[1.5rem] border border-line bg-white/72 p-4"
+                >
+                  <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
+                    {group.section}
+                  </p>
+                  <div className="mt-3 grid gap-2">
+                    {group.items.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className="rounded-[1rem] border border-transparent px-3 py-2 text-sm transition-colors hover:border-line hover:bg-white/85"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="font-semibold text-foreground">{item.label}</p>
+                            <p className="mt-1 text-xs leading-5 text-muted">{item.description}</p>
+                          </div>
+                          <span className="market-stamp">{item.badge}</span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
               ))}
             </div>
           </div>
