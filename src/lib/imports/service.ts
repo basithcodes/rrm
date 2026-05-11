@@ -16,7 +16,59 @@ export type ImportCommitInput = {
   rows: NormalizedExtendedProductImport[];
 };
 
+const databaseUnavailableMessage =
+  "Database is configured but not reachable. Start PostgreSQL on localhost:5432 or update DATABASE_URL to a live server.";
+
+function isDatabaseUnavailableError(error: unknown) {
+  const queue: unknown[] = [error];
+  const seen = new Set<unknown>();
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+
+    if (!current || seen.has(current)) {
+      continue;
+    }
+
+    seen.add(current);
+
+    if (typeof current === "object") {
+      const currentRecord = current as {
+        code?: unknown;
+        message?: unknown;
+        cause?: unknown;
+      };
+
+      if (currentRecord.code === "ECONNREFUSED" || currentRecord.code === "P1001") {
+        return true;
+      }
+
+      if (typeof currentRecord.message === "string") {
+        const message = currentRecord.message;
+
+        if (
+          message.includes("Can't reach database server") ||
+          message.includes("ECONNREFUSED") ||
+          message.includes("Connection refused")
+        ) {
+          return true;
+        }
+      }
+
+      if (currentRecord.cause) {
+        queue.push(currentRecord.cause);
+      }
+    }
+  }
+
+  return false;
+}
+
 export function formatImportError(error: unknown) {
+  if (isDatabaseUnavailableError(error)) {
+    return databaseUnavailableMessage;
+  }
+
   const message = error instanceof Error ? error.message : "Unable to import CSV rows.";
 
   if (
@@ -24,7 +76,7 @@ export function formatImportError(error: unknown) {
     message.includes("ECONNREFUSED") ||
     message.includes("Connection refused")
   ) {
-    return "Database is configured but not reachable. Start PostgreSQL on localhost:5432 or update DATABASE_URL to a live server.";
+    return databaseUnavailableMessage;
   }
 
   return message;
@@ -317,8 +369,16 @@ export async function importValidatedRows(input: ImportCommitInput): Promise<Imp
       message: `Imported ${input.rows.length} valid row(s) from ${fileName} into Prisma across ${groupedRows.size} product group(s).`,
     };
   } catch (error) {
-    const prisma = getPrismaClient();
     const message = formatImportError(error);
+
+    if (isDatabaseUnavailableError(error)) {
+      return {
+        status: "unavailable",
+        message,
+      };
+    }
+
+    const prisma = getPrismaClient();
 
     try {
       if (batchId) {

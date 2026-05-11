@@ -41,6 +41,8 @@ type LiveRfqDashboardData = {
 };
 
 const requestedQuantityPrefix = "Requested quantity text:";
+const databaseUnavailableMessage =
+  "RFQ persistence is configured but the database is not reachable. Start PostgreSQL on localhost:5432 or update DATABASE_URL to a live server.";
 
 function normalizeText(value: string, maxLength = 500) {
   return value.trim().replace(/\s+/g, " ").slice(0, maxLength);
@@ -188,6 +190,10 @@ function extractRequestedQuantityText(notes: string | null) {
 }
 
 function formatRfqError(error: unknown) {
+  if (isDatabaseUnavailableError(error)) {
+    return databaseUnavailableMessage;
+  }
+
   const message = error instanceof Error ? error.message : "Unable to submit the RFQ.";
 
   if (
@@ -201,6 +207,51 @@ function formatRfqError(error: unknown) {
   return message;
 }
 
+function isDatabaseUnavailableError(error: unknown) {
+  const queue: unknown[] = [error];
+  const seen = new Set<unknown>();
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+
+    if (!current || seen.has(current)) {
+      continue;
+    }
+
+    seen.add(current);
+
+    if (typeof current === "object") {
+      const currentRecord = current as {
+        code?: unknown;
+        message?: unknown;
+        cause?: unknown;
+      };
+
+      if (currentRecord.code === "ECONNREFUSED" || currentRecord.code === "P1001") {
+        return true;
+      }
+
+      if (typeof currentRecord.message === "string") {
+        const message = currentRecord.message;
+
+        if (
+          message.includes("Can't reach database server") ||
+          message.includes("ECONNREFUSED") ||
+          message.includes("Connection refused")
+        ) {
+          return true;
+        }
+      }
+
+      if (currentRecord.cause) {
+        queue.push(currentRecord.cause);
+      }
+    }
+  }
+
+  return false;
+}
+
 async function findExistingCustomer(
   companyName: string,
   market: MarketCode,
@@ -212,14 +263,8 @@ async function findExistingCustomer(
   if (contact.email) {
     const customer = await prisma.customer.findFirst({
       where: {
-        companyName: {
-          equals: companyName,
-          mode: "insensitive",
-        },
-        email: {
-          equals: contact.email,
-          mode: "insensitive",
-        },
+        companyName,
+        email: contact.email,
       },
     });
 
@@ -231,13 +276,8 @@ async function findExistingCustomer(
   if (contact.phone) {
     const customer = await prisma.customer.findFirst({
       where: {
-        companyName: {
-          equals: companyName,
-          mode: "insensitive",
-        },
-        phone: {
-          equals: contact.phone,
-        },
+        companyName,
+        phone: contact.phone,
       },
     });
 
@@ -247,19 +287,16 @@ async function findExistingCustomer(
   }
 
   return prisma.customer.findFirst({
-    where: {
-      companyName: {
-        equals: companyName,
-        mode: "insensitive",
-      },
-      market,
-      city: city
-        ? {
-            equals: city,
-            mode: "insensitive",
-          }
-        : undefined,
-    },
+    where: city
+      ? {
+          companyName,
+          market,
+          city,
+        }
+      : {
+          companyName,
+          market,
+        },
   });
 }
 
@@ -369,6 +406,13 @@ export async function createPublicRfqSubmission(
       reference: buildRfqReference(rfq.id, rfq.createdAt),
     };
   } catch (error) {
+    if (isDatabaseUnavailableError(error)) {
+      return {
+        status: "unavailable",
+        message: databaseUnavailableMessage,
+      };
+    }
+
     throw new Error(formatRfqError(error));
   }
 }

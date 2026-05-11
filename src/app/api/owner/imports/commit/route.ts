@@ -77,6 +77,12 @@ export async function POST(request: NextRequest) {
     });
 
     return jsonResponse(request, result, {
+      status:
+        result.status === "unavailable"
+          ? 503
+          : result.status === "error"
+            ? 400
+            : 200,
       credentials: true,
       methods: ownerImportCommitMethods,
     });
