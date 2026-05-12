@@ -132,8 +132,16 @@ a {
   text-decoration: none;
 }
 
+/* Text selection: solid emerald with explicit foreground so the
+   selected text never disappears (white-on-white in dark mode, or
+   light-on-pale in light mode). */
 ::selection {
-  background: rgba(4, 120, 87, 0.18);
+  background-color: #047857; /* emerald-700 */
+  color: #ffffff;
+}
+.dark ::selection {
+  background-color: #10b981; /* emerald-500 */
+  color: #020617;            /* slate-950 */
 }
 
 /* ---------------------------------------------------------------------
@@ -202,21 +210,30 @@ a {
    ---------------------------------------------------------------------
    Pages built before the industrial overhaul still emit classes such as
    `.panel rounded-[2.4rem] shadow-[...]`. The rules below override the
-   Tailwind utilities (with `!important`) so every legacy card snaps to
-   the same sharp, thin-bordered, shadow-less industrial chrome.
+   Tailwind utilities so every legacy card snaps to the same sharp,
+   thin-bordered, shadow-less industrial chrome — in BOTH themes.
    ===================================================================== */
 .panel,
 .admin-surface-card,
 .admin-deep-card,
 .admin-shortcut-card,
 .admin-rail-note {
-  background-color: var(--color-surface) !important;
-  background-image: none !important;
-  border: 1px solid var(--color-border) !important;
-  border-radius: 0.375rem !important; /* rounded-md */
-  box-shadow: none !important;
-  color: var(--color-fg) !important;
-  backdrop-filter: none !important;
+  background-color: #ffffff;
+  background-image: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  box-shadow: none;
+  color: #0f172a;
+  backdrop-filter: none;
+}
+.dark .panel,
+.dark .admin-surface-card,
+.dark .admin-deep-card,
+.dark .admin-shortcut-card,
+.dark .admin-rail-note {
+  background-color: #0f172a; /* slate-900 */
+  border-color: #1e293b;     /* slate-800 */
+  color: #f8fafc;            /* slate-50 */
 }
 
 /* Dark hero/strip variants kept dark for emphasis but flattened. */
@@ -230,19 +247,29 @@ a {
 }
 
 .admin-root {
-  background-color: var(--color-bg) !important;
-  background-image: none !important;
-  color: var(--color-fg) !important;
+  background-color: #ffffff;
+  background-image: none;
+  color: #0f172a;
+}
+.dark .admin-root {
+  background-color: #020617; /* slate-950 */
+  color: #f8fafc;
 }
 
 .admin-sidebar,
 .admin-main {
-  background-color: var(--color-bg) !important;
-  background-image: none !important;
-  border: 1px solid var(--color-border) !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  color: var(--color-fg) !important;
+  background-color: #ffffff;
+  background-image: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 0;
+  box-shadow: none;
+  color: #0f172a;
+}
+.dark .admin-sidebar,
+.dark .admin-main {
+  background-color: #020617; /* slate-950 */
+  border-color: #1e293b;     /* slate-800 */
+  color: #f8fafc;
 }
 
 .admin-link {
@@ -379,4 +406,95 @@ a {
   height: 1px;
   width: 100%;
   background: var(--color-line);
+}
+
+/* =====================================================================
+   DARK-MODE OVERRIDES FOR HARDCODED TAILWIND UTILITIES
+   ---------------------------------------------------------------------
+   Many page wrappers paint themselves with non-theme-aware utilities
+   (`bg-white`, `bg-slate-50`, `text-slate-900`, etc.). Rather than
+   rewrite every component, the rules below remap those utilities to
+   the dark CSS variables when an ancestor carries `.dark`. Borders,
+   surfaces and text all flip in lock-step with next-themes.
+
+   NOTE: scoped via `:where()` so specificity stays low (0,1,0) — any
+   explicit `dark:` utility a developer writes still wins.
+   ===================================================================== */
+:where(.dark) .bg-white,
+:where(.dark) .bg-slate-50,
+:where(.dark) .bg-slate-100 {
+  background-color: var(--color-surface) !important;
+}
+:where(.dark) .bg-\[\#F7FAFC\],
+:where(.dark) .bg-\[\#EDF2F7\] {
+  background-color: var(--color-surface) !important;
+}
+
+/* Slate text → fg / muted */
+:where(.dark) .text-slate-900,
+:where(.dark) .text-slate-800,
+:where(.dark) .text-\[\#1A202C\] {
+  color: var(--color-fg) !important;
+}
+:where(.dark) .text-slate-700,
+:where(.dark) .text-slate-600,
+:where(.dark) .text-slate-500,
+:where(.dark) .text-\[\#4A5568\] {
+  color: var(--color-text-muted) !important;
+}
+
+/* Slate borders → border var */
+:where(.dark) .border-slate-100,
+:where(.dark) .border-slate-200,
+:where(.dark) .border-slate-300,
+:where(.dark) .border-\[\#CBD5E0\],
+:where(.dark) .border-\[\#EDF2F7\] {
+  border-color: var(--color-border) !important;
+}
+
+/* Hover variants used on the catalog tables */
+:where(.dark) .hover\:bg-slate-50:hover,
+:where(.dark) .hover\:bg-\[\#EDF2F7\]:hover {
+  background-color: var(--color-surface) !important;
+}
+:where(.dark) .hover\:text-slate-900:hover {
+  color: var(--color-fg) !important;
+}
+
+/* Sticky header / translucent surfaces */
+:where(.dark) .bg-white\/95,
+:where(.dark) .bg-white\/90,
+:where(.dark) .bg-white\/80,
+:where(.dark) .bg-white\/72,
+:where(.dark) .bg-white\/70 {
+  background-color: rgb(2 6 23 / 0.92) !important; /* slate-950 */
+}
+
+/* Odd/even/hover variants generated by Tailwind for striped tables.
+   These classes are named differently from `bg-white`, so they need
+   their own dark remap. */
+:where(.dark) .odd\:bg-white:nth-child(odd),
+:where(.dark) .even\:bg-white:nth-child(even) {
+  background-color: var(--color-bg) !important; /* slate-950 */
+}
+:where(.dark) .odd\:bg-slate-50:nth-child(odd),
+:where(.dark) .even\:bg-slate-50:nth-child(even) {
+  background-color: var(--color-surface) !important; /* slate-900 */
+}
+:where(.dark) .hover\:bg-emerald-50:hover {
+  background-color: rgb(6 78 59 / 0.45) !important; /* emerald-900/45 */
+}
+:where(.dark) .hover\:bg-slate-100:hover {
+  background-color: #1e293b !important; /* slate-800 */
+}
+
+/* Arbitrary-hex variants used on the legacy parametric table. The
+   selectors with the `even:`/`hover:` prefix don't match the plain
+   `.bg-[#F7FAFC]` rule above, so they get their own remap. */
+:where(.dark) .even\:bg-\[\#F7FAFC\]:nth-child(even),
+:where(.dark) .odd\:bg-\[\#F7FAFC\]:nth-child(odd) {
+  background-color: var(--color-surface) !important;
+}
+:where(.dark) .hover\:bg-\[\#EDF2F7\]:hover {
+  background-color: #1e293b !important; /* slate-800 */
 }

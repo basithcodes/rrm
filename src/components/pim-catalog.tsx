@@ -214,6 +214,24 @@ export function PimCatalog({ products }: { products: Product[] }) {
 
       {/* ---------------- Main: dense data grid ---------------- */}
       <main className="flex h-full flex-1 flex-col overflow-hidden">
+        {/* Nav strip — Home + breadcrumb so the operator can leave the
+            full-screen workbench (the page renders outside the marketing
+            layout, so the global SiteHeader is not present here). */}
+        <div className="flex items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-1.5">
+          <Link
+            href="/"
+            className="rounded-sm border border-[var(--color-border)] px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest text-[var(--color-fg)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent-deep)]"
+          >
+            ← Home
+          </Link>
+          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--color-text-muted)]">
+            <Link href="/" className="hover:text-[var(--color-accent-deep)]">
+              RRM
+            </Link>{" "}
+            / Catalog
+          </span>
+        </div>
+
         <div className="flex items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-bg)] px-4 py-3">
           <input
             type="search"

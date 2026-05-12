@@ -38,9 +38,9 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${sora.variable} ${fraunces.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
-      {/* `bg-[var(...)]` + `text-[var(...)]` keeps the body in sync with
-          the active theme via the CSS variables defined in globals.css. */}
-      <body className="min-h-full flex flex-col bg-[var(--color-bg)] text-[var(--color-fg)]">
+      {/* Explicit `dark:` variants on the body so theme flips are
+          instant and don't depend on a single CSS variable resolving. */}
+      <body className="min-h-full flex flex-col bg-white text-slate-900 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-50">
         <ThemeProvider>
           <QuoteCartProvider>{children}</QuoteCartProvider>
         </ThemeProvider>

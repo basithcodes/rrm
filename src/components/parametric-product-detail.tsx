@@ -363,8 +363,17 @@ export function ParametricProductDetail({ product }: { product: Product }) {
                     onClick={() => setSelectedVariantId(v.code)}
                     className={
                       selected
-                        ? "cursor-pointer border-b border-[#CBD5E0] bg-[#E6FFFA]"
-                        : "cursor-pointer border-b border-[#CBD5E0] odd:bg-white even:bg-[#F7FAFC] hover:bg-[#EDF2F7]"
+                        ? // Active variant: emerald-tinted row in both
+                          // themes, with explicit text color so the
+                          // monospace cells stay readable. The previous
+                          // `bg-[#E6FFFA]` swallowed the light text in
+                          // dark mode (the global dark remap doesn't
+                          // touch arbitrary hex backgrounds).
+                          "cursor-pointer border-b border-[#CBD5E0] bg-emerald-50 text-slate-900 dark:bg-emerald-900/40 dark:text-slate-50"
+                        : // Use named slate utilities here (not arbitrary
+                          // hex) so the global dark remap can flip the
+                          // odd/even/hover backgrounds in dark mode.
+                          "cursor-pointer border-b border-[#CBD5E0] odd:bg-white even:bg-slate-50 hover:bg-slate-100 dark:hover:bg-slate-800"
                     }
                   >
                     <td className="p-1 font-mono font-bold">

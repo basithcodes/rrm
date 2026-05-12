@@ -2,7 +2,8 @@
 
 import { ContactShadows, OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useTheme } from "next-themes";
 import * as THREE from "three";
 import type { Product, ProductViewerConfig } from "@/lib/site-data";
 
@@ -183,18 +184,66 @@ function SceneModel({ config }: { config: ProductViewerConfig }) {
 }
 
 export function ProductViewer({ product }: { product: Product }) {
+  // Theme-aware viewer surface. We only flip to the dark palette AFTER
+  // hydration to keep the SSR HTML and the first client render byte-for-
+  // byte identical (next-themes returns `undefined` on the server, then
+  // resolves on mount — without the gate the wrapper className would
+  // mismatch and React would log a hydration warning).
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const isDark = mounted && resolvedTheme === "dark";
+  const wrapperBg = isDark
+    ? "bg-slate-950"
+    : "bg-[linear-gradient(160deg,#fff9ef_0%,#f1e6bf_48%,#dff0cf_100%)]";
+  const wrapperBorder = isDark ? "border-slate-800" : "border-white/70";
+  const sceneBg = isDark ? "#020617" : "#fbf6ea";       // slate-950 / cream
+  const groundColor = isDark ? "#0f172a" : "#e0d0b4";   // slate-900 / sand
+
   return (
-    <div className="relative aspect-[4/3] overflow-hidden rounded-[2.4rem] border border-white/70 bg-[linear-gradient(160deg,#fff9ef_0%,#f1e6bf_48%,#dff0cf_100%)] shadow-[0_32px_90px_-48px_rgba(23,53,35,0.55)]">
+    <div
+      className={`relative aspect-[4/3] overflow-hidden rounded-[2.4rem] border ${wrapperBorder} ${wrapperBg} shadow-[0_32px_90px_-48px_rgba(23,53,35,0.55)]`}
+    >
       <Canvas
         className="h-full w-full"
         camera={{ position: product.viewer.cameraPosition, fov: 34 }}
         dpr={[1, 2]}
         shadows
       >
-        <color attach="background" args={["#fbf6ea"]} />
-        <hemisphereLight intensity={1.15} groundColor="#e0d0b4" />
-        <directionalLight position={[6, 7, 6]} intensity={2.2} castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} />
-        <directionalLight position={[-5, 3, -4]} intensity={1.1} color={product.viewer.accentColor} />
+        <color attach="background" args={[sceneBg]} />
+
+        {/* Lighting rig
+            ------------------------------------------------------------
+            Slightly brighter in dark mode so the part doesn't fall into
+            silhouette against the slate-950 backdrop. Order:
+              1. Ambient   — flat baseline, prevents pitch-black faces.
+              2. Hemi      — sky/ground gradient, keeps the part read-
+                             able from any angle.
+              3. Key (top-front-right) — main shape definition + shadow.
+              4. Fill (front-left)     — softens the side opposite the
+                                         key so contours stay legible.
+              5. Rim (back)            — thin emerald rim so the part
+                                         separates from the backdrop.
+            ------------------------------------------------------------ */}
+        <ambientLight intensity={isDark ? 0.55 : 0.35} />
+        <hemisphereLight intensity={1.15} groundColor={groundColor} />
+        <directionalLight
+          position={[6, 7, 6]}
+          intensity={isDark ? 2.6 : 2.2}
+          castShadow
+          shadow-mapSize-width={1024}
+          shadow-mapSize-height={1024}
+        />
+        <directionalLight
+          position={[-5, 3, -4]}
+          intensity={isDark ? 1.4 : 1.1}
+          color={product.viewer.accentColor}
+        />
+        <directionalLight
+          position={[0, 2, -6]}
+          intensity={isDark ? 0.7 : 0.4}
+          color={isDark ? "#10b981" : "#ffffff"}
+        />
         <group position={[0, -0.1, 0]}>
           <SceneModel config={product.viewer} />
         </group>
